@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotelReservation.Application\HotelReservation.Application.csproj" />
+    <ProjectReference Include="..\HotelReservation.Domain\HotelReservation.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
