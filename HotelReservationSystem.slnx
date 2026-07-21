@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="HotelReservation.Api/HotelReservation.Api.csproj" Id="7c884d25-97fa-4179-8cc8-2b9e914aecef" />
+    <Project Path="HotelReservation.Application/HotelReservation.Application.csproj" Id="e6b63957-d37d-4d46-9480-286fa355ab73" />
+    <Project Path="HotelReservation.Domain/HotelReservation.Domain.csproj" Id="c295ea8e-8590-4b52-a9fe-21c043c2aa5b" />
+    <Project Path="HotelReservation.Infrastructure/HotelReservation.Infrastructure.csproj" Id="8d395aba-bfd6-4143-982a-9256e861b3c6" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="HotelReservation.Tests/HotelReservation.Tests.csproj" Id="c15871c9-84a4-4c35-b455-5fe894eaf441" />
+  </Folder>
+</Solution>
