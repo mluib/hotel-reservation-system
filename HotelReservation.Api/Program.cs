@@ -1,5 +1,6 @@
 
 using HotelReservation.Application.Interfaces;
+using HotelReservation.Application.Reservations;
 using HotelReservation.Infrastructure.Persistence;
 using HotelReservation.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,16 @@ namespace HotelReservation.Api
             {
                 builder.Services.AddControllers();
 
+                // OpenAPI
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+                // URL: https://localhost:7290/openapi/v1.json
                 builder.Services.AddOpenApi();
 
+                // Swagger
+                // URL: https://localhost:7290/swagger
+                builder.Services.AddSwaggerGen();
+
+                // Database
                 builder.Services.AddDbContext<HotelDbContext>(options =>
                     options.UseSqlServer(
                         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -34,7 +42,12 @@ namespace HotelReservation.Api
             {
                 if (app.Environment.IsDevelopment())
                 {
+                    // OpenAPI
                     app.MapOpenApi();
+
+                    // Swagger
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
                 }
 
                 app.UseHttpsRedirection();
