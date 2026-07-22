@@ -24,6 +24,8 @@ namespace HotelReservation.Api
                         builder.Configuration.GetConnectionString("DefaultConnection")));
 
                 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+                builder.Services.AddScoped<CreateReservation>();
             }
 
             var app = builder.Build();
