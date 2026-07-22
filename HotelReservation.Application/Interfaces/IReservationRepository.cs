@@ -14,4 +14,8 @@ public interface IReservationRepository
         Guid roomId,
         DateTime checkIn,
         DateTime checkOut);
+
+    Task<bool> RoomExistsAsync(Guid roomId);
+
+    Task<bool> CustomerExistsAsync(Guid customerId);
 }

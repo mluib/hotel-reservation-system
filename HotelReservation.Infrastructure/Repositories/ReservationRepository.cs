@@ -38,4 +38,14 @@ public class ReservationRepository : IReservationRepository
                 r.CheckIn < checkOut &&
                 r.CheckOut > checkIn);
     }
+
+    public async Task<bool> RoomExistsAsync(Guid roomId)
+    {
+        return await _context.Rooms.AnyAsync(r => r.Id == roomId);
+    }
+
+    public async Task<bool> CustomerExistsAsync(Guid customerId)
+    {
+        return await _context.Customers.AnyAsync(c => c.Id == customerId);
+    }
 }
