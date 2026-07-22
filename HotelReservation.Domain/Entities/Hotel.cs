@@ -31,4 +31,13 @@ public class Hotel
     {
         Rooms.Add(room);
     }
+
+    public void Update(string name, string address)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Hotel name is required.");
+
+        Name = name;
+        Address = address;
+    }
 }

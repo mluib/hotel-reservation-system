@@ -18,7 +18,7 @@ public class CreateReservation
         _repository = repository;
     }
 
-    public async Task ExecuteAsync(
+    public async Task<Guid> ExecuteAsync(
         CreateReservationRequest request)
     {
         // Validate dates
@@ -51,5 +51,6 @@ public class CreateReservation
             request.CheckOut);
 
         await _repository.AddAsync(reservation);
+        return reservation.Id;
     }
 }

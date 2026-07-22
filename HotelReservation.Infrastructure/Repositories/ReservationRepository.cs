@@ -48,4 +48,22 @@ public class ReservationRepository : IReservationRepository
     {
         return await _context.Customers.AnyAsync(c => c.Id == customerId);
     }
+
+    public async Task<Reservation?> GetByIdAsync(Guid id)
+    {
+        return await _context.Reservations
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
+    public async Task<IEnumerable<Reservation>> GetAllAsync()
+    {
+        return await _context.Reservations
+            .ToListAsync();
+    }
+
+    public async Task DeleteAsync(Reservation reservation)
+    {
+        _context.Reservations.Remove(reservation);
+        await _context.SaveChangesAsync();
+    }
 }

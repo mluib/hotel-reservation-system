@@ -41,4 +41,18 @@ public class Room
         HotelId = hotelId;
         Reservations = new List<Reservation>();
     }
+
+    public void Update(string number, RoomType type, decimal pricePerNight, Guid hotelId)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            throw new ArgumentException("Room number is required.");
+
+        if (pricePerNight <= 0)
+            throw new ArgumentException("Price must be greater than zero.");
+
+        Number = number;
+        Type = type;
+        PricePerNight = pricePerNight;
+        HotelId = hotelId;
+    }
 }
