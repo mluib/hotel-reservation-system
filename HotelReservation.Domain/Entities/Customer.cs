@@ -31,4 +31,14 @@ public class Customer
         Email = email;
         Reservations = new List<Reservation>();
     }
+
+    public void Update(string firstName, string lastName, string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.");
+
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+    }
 }

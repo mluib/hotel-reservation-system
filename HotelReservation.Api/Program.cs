@@ -1,6 +1,8 @@
 
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Application.Reservations;
+using HotelReservation.Application.Customers;
+using HotelReservation.Application.Interfaces;
 using HotelReservation.Infrastructure.Persistence;
 using HotelReservation.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -32,8 +34,14 @@ namespace HotelReservation.Api
                         builder.Configuration.GetConnectionString("DefaultConnection")));
 
                 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+                builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
                 builder.Services.AddScoped<CreateReservation>();
+                builder.Services.AddScoped<CreateCustomer>();
+                builder.Services.AddScoped<GetCustomerById>();
+                builder.Services.AddScoped<GetCustomers>();
+                builder.Services.AddScoped<UpdateCustomer>();
+                builder.Services.AddScoped<DeleteCustomer>();
             }
 
             var app = builder.Build();
