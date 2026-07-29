@@ -28,7 +28,9 @@ public class AuthService : IAuthService
             throw new InvalidOperationException(string.Join(';', result.Errors.Select(e => e.Description)));
         }
 
-        var role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role;
+        // Always assign the "Customer" role
+        var role = "Customer";
+
         if (!await _roleManager.RoleExistsAsync(role))
             await _roleManager.CreateAsync(new IdentityRole(role));
 
