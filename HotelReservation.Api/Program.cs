@@ -97,7 +97,6 @@ namespace HotelReservation.Api
 
                 // Customer Use-Case
                 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-                builder.Services.AddScoped<CreateCustomer>();
                 builder.Services.AddScoped<GetCustomerById>();
                 builder.Services.AddScoped<GetCustomers>();
                 builder.Services.AddScoped<UpdateCustomer>();

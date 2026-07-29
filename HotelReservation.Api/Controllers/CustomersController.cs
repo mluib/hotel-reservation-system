@@ -10,32 +10,21 @@ namespace HotelReservation.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class CustomersController : ControllerBase
 {
-    private readonly CreateCustomer _createCustomer;
     private readonly GetCustomerById _getCustomerById;
     private readonly GetCustomers _getCustomers;
     private readonly UpdateCustomer _updateCustomer;
     private readonly DeleteCustomer _deleteCustomer;
 
     public CustomersController(
-        CreateCustomer createCustomer,
         GetCustomerById getCustomerById,
         GetCustomers getCustomers,
         UpdateCustomer updateCustomer,
         DeleteCustomer deleteCustomer)
     {
-        _createCustomer = createCustomer;
         _getCustomerById = getCustomerById;
         _getCustomers = getCustomers;
         _updateCustomer = updateCustomer;
         _deleteCustomer = deleteCustomer;
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateCustomerRequest request)
-    {
-        var id = await _createCustomer.ExecuteAsync(request);
-        var dto = await _getCustomerById.ExecuteAsync(id);
-        return CreatedAtAction(nameof(GetById), new { id = id }, dto);
     }
 
     [HttpGet("{id}")]
