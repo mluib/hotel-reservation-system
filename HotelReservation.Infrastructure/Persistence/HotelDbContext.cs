@@ -4,10 +4,12 @@ using System.Text;
 
 using HotelReservation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Infrastructure.Persistence;
 
-public class HotelDbContext : DbContext
+public class HotelDbContext : IdentityDbContext<IdentityUser>
 {
     public HotelDbContext(
         DbContextOptions<HotelDbContext> options)
