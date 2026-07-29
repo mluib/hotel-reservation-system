@@ -36,9 +36,9 @@ public class AccountController : ControllerBase
             var resp = await _auth.LoginAsync(request);
             return Ok(resp);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
-            return Unauthorized();
+            return Unauthorized(new { error = ex.Message });
         }
     }
 }

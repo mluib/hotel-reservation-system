@@ -2,7 +2,7 @@
 using HotelReservation.Application.Customers;
 using HotelReservation.Application.Hotels;
 using HotelReservation.Application.Interfaces;
-// using Microsoft.OpenApi.Models; (removed to avoid dependency issues in this change)
+using Microsoft.OpenApi;
 using HotelReservation.Application.Reservations;
 using HotelReservation.Application.Rooms;
 using HotelReservation.Infrastructure.Persistence;
@@ -28,7 +28,19 @@ namespace HotelReservation.Api
 
                 // Swagger
                 // URL: https://localhost:7290/swagger
-                builder.Services.AddSwaggerGen();
+                builder.Services.AddSwaggerGen(c =>
+                {
+                    // Enable JWT authentication in Swagger 
+                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT"
+                    });
+                });
 
                 // Database
                 builder.Services.AddDbContext<HotelDbContext>(options =>
@@ -40,7 +52,7 @@ namespace HotelReservation.Api
                     .AddEntityFrameworkStores<HotelDbContext>();
 
                 // JWT Authentication
-                var jwtKey = builder.Configuration["Jwt:Key"] ?? "ChangeThisDevKey1234567890";
+                var jwtKey = builder.Configuration["Jwt:Key"] ?? "Q2hhbmdlVGhpc0RldktleTEyMzQ1Njc4OTAxMjM0NTY3ODkw";
                 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "hotel";
                 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "hotel_audience";
 
@@ -59,7 +71,7 @@ namespace HotelReservation.Api
                         ValidAudience = jwtAudience,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtKey))
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(jwtKey))
                     };
                 });
 
@@ -109,6 +121,7 @@ namespace HotelReservation.Api
 
                 app.UseHttpsRedirection();
 
+                app.UseAuthentication();
                 app.UseAuthorization();
 
                 app.MapControllers();

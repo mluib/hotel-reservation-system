@@ -37,7 +37,20 @@ public class JwtTokenService : IJwtTokenService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var keyBytes = Encoding.UTF8.GetBytes(key);
+        // Expect Jwt:Key to be a Base64-encoded symmetric key with at least 256 bits (32 bytes).
+        byte[] keyBytes;
+        try
+        {
+            keyBytes = Convert.FromBase64String(key);
+        }
+        catch (FormatException)
+        {
+            throw new InvalidOperationException("Jwt:Key must be a Base64-encoded key (at least 256 bits / 32 bytes).");
+        }
+
+        if (keyBytes.Length < 32)
+            throw new InvalidOperationException("Jwt:Key must be at least 256 bits (32 bytes) when decoded from Base64.");
+
         var securityKey = new SymmetricSecurityKey(keyBytes);
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
