@@ -27,6 +27,13 @@ public class CustomerRepository : ICustomerRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
+    public async Task<Customer?> GetByIdentityUserIdAsync(string identityUserId)
+    {
+        return await _context.Customers
+            .Include(c => c.Reservations)
+            .FirstOrDefaultAsync(c => c.IdentityUserId == identityUserId);
+    }
+
     public async Task<IEnumerable<Customer>> GetAllAsync()
     {
         return await _context.Customers

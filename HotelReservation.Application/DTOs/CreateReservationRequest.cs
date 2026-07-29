@@ -8,8 +8,6 @@ public class CreateReservationRequest
 {
     public Guid RoomId { get; set; }
 
-    public Guid CustomerId { get; set; }
-
     public DateTime CheckIn { get; set; }
 
     public DateTime CheckOut { get; set; }

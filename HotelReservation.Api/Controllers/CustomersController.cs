@@ -1,11 +1,13 @@
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Customers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelReservation.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class CustomersController : ControllerBase
 {
     private readonly CreateCustomer _createCustomer;

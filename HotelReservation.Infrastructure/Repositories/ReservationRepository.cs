@@ -61,6 +61,13 @@ public class ReservationRepository : IReservationRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Reservation>> GetByCustomerIdAsync(Guid customerId)
+    {
+        return await _context.Reservations
+            .Where(r => r.CustomerId == customerId)
+            .ToListAsync();
+    }
+
     public async Task DeleteAsync(Reservation reservation)
     {
         _context.Reservations.Remove(reservation);

@@ -1,6 +1,7 @@
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Rooms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelReservation.Api.Controllers;
 
@@ -29,6 +30,7 @@ public class RoomsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateRoomRequest request)
     {
         var id = await _createRoom.ExecuteAsync(request);
@@ -52,6 +54,7 @@ public class RoomsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(System.Guid id, UpdateRoomRequest request)
     {
         await _updateRoom.ExecuteAsync(id, request);
@@ -59,6 +62,7 @@ public class RoomsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(System.Guid id)
     {
         await _deleteRoom.ExecuteAsync(id);

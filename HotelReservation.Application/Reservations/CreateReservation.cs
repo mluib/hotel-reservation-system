@@ -11,11 +11,17 @@ namespace HotelReservation.Application.Reservations;
 public class CreateReservation
 {
     private readonly IReservationRepository _repository;
+    private readonly HotelReservation.Application.Interfaces.ICurrentUserService _currentUser;
+    private readonly HotelReservation.Application.Interfaces.ICustomerRepository _customerRepository;
 
     public CreateReservation(
-        IReservationRepository repository)
+        IReservationRepository repository,
+        HotelReservation.Application.Interfaces.ICurrentUserService currentUser,
+        HotelReservation.Application.Interfaces.ICustomerRepository customerRepository)
     {
         _repository = repository;
+        _currentUser = currentUser;
+        _customerRepository = customerRepository;
     }
 
     public async Task<Guid> ExecuteAsync(
@@ -30,10 +36,16 @@ public class CreateReservation
         if (!roomExists)
             throw new InvalidOperationException("Room does not exist.");
 
-        // Ensure customer exists
-        var customerExists = await _repository.CustomerExistsAsync(request.CustomerId);
-        if (!customerExists)
+        // Determine customer id from the authenticated user. Clients must not provide CustomerId.
+        if (string.IsNullOrWhiteSpace(_currentUser.UserId))
+            throw new InvalidOperationException("Unauthenticated user cannot create a reservation.");
+
+        // Look up domain customer by the IdentityUserId (string) rather than parsing the identity id as a GUID.
+        var customer = await _customerRepository.GetByIdentityUserIdAsync(_currentUser.UserId!);
+        if (customer == null)
             throw new InvalidOperationException("Customer does not exist.");
+
+        var customerId = customer.Id;
 
         // Prevent overlapping reservations for the same room
         var overlapping = await _repository.HasOverlappingReservationAsync(
@@ -46,7 +58,7 @@ public class CreateReservation
 
         var reservation = new Reservation(
             request.RoomId,
-            request.CustomerId,
+            customerId,
             request.CheckIn,
             request.CheckOut);
 

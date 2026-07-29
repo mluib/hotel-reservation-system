@@ -64,3 +64,22 @@ Changes made:
 - Removed reflection-based ID assignment.
 - Added a domain method for updating customer data while preserving domain rules.
 - Verified dependency direction and Clean Architecture boundaries.
+
+## Example: JWT Authentication
+
+### Prompt
+
+Add authentication to the hotel reservation API.
+
+Requirements:
+- Use ASP.NET Core Identity for user management.
+- Add JWT Bearer authentication.
+- Add register and login endpoints.
+- Add role-based authorization support.
+
+Follow the existing Clean Architecture structure.
+Keep authentication concerns outside the Domain layer.
+
+After implementation:
+- Add required EF Core migration.
+- Enable Swagger authentication testing.

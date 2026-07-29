@@ -26,6 +26,7 @@ public class HotelController : ControllerBase
     }
 
     [HttpPut]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(UpdateHotelRequest request)
     {
         await _updateHotel.ExecuteAsync(request);

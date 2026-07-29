@@ -8,6 +8,9 @@ public class Customer
 {
     public Guid Id { get; private set; }
 
+    // IdentityUser.Id from ASP.NET Identity (string). Separate from the domain GUID Id.
+    public string? IdentityUserId { get; private set; }
+
     public string FirstName { get; private set; }
 
     public string LastName { get; private set; }
@@ -20,7 +23,8 @@ public class Customer
     public Customer(
         string firstName,
         string lastName,
-        string email)
+        string email,
+        string? identityUserId = null)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required.");
@@ -29,6 +33,7 @@ public class Customer
         FirstName = firstName;
         LastName = lastName;
         Email = email;
+        IdentityUserId = identityUserId;
         Reservations = new List<Reservation>();
     }
 

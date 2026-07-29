@@ -47,60 +47,72 @@ namespace HotelReservation.Api
                     options.UseSqlServer(
                         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-                // Identity
-                builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
+                // Authentication & Authorization
+                {
+                    // Identity
+                    builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
                     .AddEntityFrameworkStores<HotelDbContext>();
 
-                // JWT Authentication
-                var jwtKey = builder.Configuration["Jwt:Key"] ?? "Q2hhbmdlVGhpc0RldktleTEyMzQ1Njc4OTAxMjM0NTY3ODkw";
-                var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "hotel";
-                var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "hotel_audience";
+                    // JWT Authentication
+                    var jwtKey = builder.Configuration["Jwt:Key"] ?? "Q2hhbmdlVGhpc0RldktleTEyMzQ1Njc4OTAxMjM0NTY3ODkw";
+                    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "hotel";
+                    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "hotel_audience";
 
-                builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    builder.Services.AddAuthentication(options =>
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtAudience,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(jwtKey))
-                    };
-                });
+                        options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                    })
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = jwtIssuer,
+                            ValidateAudience = true,
+                            ValidAudience = jwtAudience,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(jwtKey))
+                        };
+                    });
 
-                builder.Services.AddAuthorization();
+                    builder.Services.AddAuthorization();
 
+                    builder.Services.AddScoped<Application.Authentication.IJwtTokenService, Infrastructure.Services.JwtTokenService>();
+                    builder.Services.AddScoped<Application.Authentication.IAuthService, Infrastructure.Services.AuthService>();
+                }
+
+                // Accessor for current user (used by application services to enforce ownership)
+                builder.Services.AddHttpContextAccessor();
+                builder.Services.AddScoped<ICurrentUserService, Services.CurrentUserService>();
+
+                // Reservation Use-Case
                 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
-                builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-                builder.Services.AddScoped<IRoomRepository, RoomRepository>();
-                builder.Services.AddScoped<IHotelRepository, HotelRepository>();
-                builder.Services.AddScoped<HotelReservation.Application.Authentication.IJwtTokenService, HotelReservation.Infrastructure.Services.JwtTokenService>();
-                builder.Services.AddScoped<HotelReservation.Application.Authentication.IAuthService, HotelReservation.Infrastructure.Services.AuthService>();
-
                 builder.Services.AddScoped<CreateReservation>();
                 builder.Services.AddScoped<GetReservations>();
                 builder.Services.AddScoped<GetReservationById>();
+                builder.Services.AddScoped<GetMyReservations>();
                 builder.Services.AddScoped<DeleteReservation>();
 
+                // Customer Use-Case
+                builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
                 builder.Services.AddScoped<CreateCustomer>();
                 builder.Services.AddScoped<GetCustomerById>();
                 builder.Services.AddScoped<GetCustomers>();
                 builder.Services.AddScoped<UpdateCustomer>();
                 builder.Services.AddScoped<DeleteCustomer>();
 
+                // Room Use-Case
+                builder.Services.AddScoped<IRoomRepository, RoomRepository>();
                 builder.Services.AddScoped<CreateRoom>();
                 builder.Services.AddScoped<GetRooms>();
                 builder.Services.AddScoped<GetRoomById>();
                 builder.Services.AddScoped<UpdateRoom>();
                 builder.Services.AddScoped<DeleteRoom>();
 
+                // Hotel Use-Case
+                builder.Services.AddScoped<IHotelRepository, HotelRepository>();
                 builder.Services.AddScoped<GetHotel>();
                 builder.Services.AddScoped<UpdateHotel>();
             }
