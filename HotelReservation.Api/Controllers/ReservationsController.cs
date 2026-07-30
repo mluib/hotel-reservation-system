@@ -31,7 +31,7 @@ public class ReservationsController : ControllerBase
 
 
     [HttpPost]
-    [Microsoft.AspNetCore.Authorization.Authorize("Customer")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer")]
     public async Task<IActionResult> Create(
         CreateReservationRequest request)
     {
@@ -50,7 +50,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpGet("mine")]
-    [Microsoft.AspNetCore.Authorization.Authorize("Customer")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetMine()
     {
         var list = await _getMyReservations.ExecuteAsync();

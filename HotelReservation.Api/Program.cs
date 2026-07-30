@@ -2,7 +2,7 @@
 using HotelReservation.Application.Customers;
 using HotelReservation.Application.Hotels;
 using HotelReservation.Application.Interfaces;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using HotelReservation.Application.Reservations;
 using HotelReservation.Application.Rooms;
 using HotelReservation.Infrastructure.Persistence;
@@ -21,24 +21,43 @@ namespace HotelReservation.Api
             {
                 builder.Services.AddControllers();
 
+                builder.Services.AddEndpointsApiExplorer();
+
                 // OpenAPI
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
                 // URL: https://localhost:7290/openapi/v1.json
-                builder.Services.AddOpenApi();
+                // Attention: needs Microsoft.AspNetCore.OpenApi, which conflicts with Swashbuckle 6.5.0
+                //builder.Services.AddOpenApi();
 
                 // Swagger
                 // URL: https://localhost:7290/swagger
+                // Attention: newest version 10.2.3 of Swashbuckle can't be configured correctly, so use 6.5.0 instead
                 builder.Services.AddSwaggerGen(c =>
                 {
-                    // Enable JWT authentication in Swagger 
+                    // Enable JWT authentication in Swagger
                     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
-                        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+                        Description = "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
                         Name = "Authorization",
                         In = ParameterLocation.Header,
                         Type = SecuritySchemeType.Http,
                         Scheme = "bearer",
                         BearerFormat = "JWT"
+                    });
+
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
                     });
                 });
 
@@ -123,7 +142,7 @@ namespace HotelReservation.Api
                 if (app.Environment.IsDevelopment())
                 {
                     // OpenAPI
-                    app.MapOpenApi();
+                    //app.MapOpenApi();
 
                     // Swagger
                     app.UseSwagger();
