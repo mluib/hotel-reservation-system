@@ -6,6 +6,8 @@
     <Project Path="HotelReservation.Infrastructure/HotelReservation.Infrastructure.csproj" Id="8d395aba-bfd6-4143-982a-9256e861b3c6" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="HotelReservation.Tests/HotelReservation.Tests.csproj" Id="c15871c9-84a4-4c35-b455-5fe894eaf441" />
+    <Project Path="HotelReservation.Tests.Application/HotelReservation.Tests.Application.csproj" />
+    <Project Path="HotelReservation.Tests.Domain/HotelReservation.Tests.Domain.csproj" />
+    <Project Path="HotelReservation.Tests.Integration/HotelReservation.Tests.Integration.csproj" />
   </Folder>
 </Solution>

@@ -83,3 +83,18 @@ Keep authentication concerns outside the Domain layer.
 After implementation:
 - Add required EF Core migration.
 - Enable Swagger authentication testing.
+
+## Esample: Testing
+
+Create a comprehensive test project for this solution following Clean Architecture.
+
+Requirements:
+
+Use xUnit and FluentAssertions.
+Create separate test projects for Domain, Application, and Integration tests.
+Domain tests should verify entity invariants and business rules without any infrastructure.
+Application tests should mock repositories using Moq and test use cases.
+Integration tests should use WebApplicationFactory and an in-memory SQLite database to test the complete HTTP pipeline, including authentication and authorization.
+Do not create controller unit tests.
+Focus on meaningful business scenarios rather than testing every endpoint.
+Organize tests by feature (Reservations, Customers, Rooms, Authentication).
