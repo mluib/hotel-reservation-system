@@ -10,4 +10,4 @@ A portfolio project demonstrating modern software engineering using:
 - GitHub Actions
 - AI-assisted Development
 
-Status: Planning phase
+Status: Backend implemented (Clean Architecture, ASP.NET Core Web API, EF Core, JWT authentication, unit/application/integration tests). Angular frontend, Docker, and CI/CD pipeline in progress.
