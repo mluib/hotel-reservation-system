@@ -14,19 +14,22 @@ public class ReservationsController : ControllerBase
     private readonly GetReservationById _getReservationById;
     private readonly DeleteReservation _deleteReservation;
     private readonly GetMyReservations _getMyReservations;
+    private readonly CancelReservation _cancelReservation;
 
     public ReservationsController(
         CreateReservation createReservation,
         GetReservations getReservations,
         GetReservationById getReservationById,
         DeleteReservation deleteReservation,
-        GetMyReservations getMyReservations)
+        GetMyReservations getMyReservations,
+        CancelReservation cancelReservation)
     {
         _createReservation = createReservation;
         _getReservations = getReservations;
         _getReservationById = getReservationById;
         _deleteReservation = deleteReservation;
         _getMyReservations = getMyReservations;
+        _cancelReservation = cancelReservation;
     }
 
 
@@ -71,6 +74,14 @@ public class ReservationsController : ControllerBase
     public async Task<IActionResult> Delete(System.Guid id)
     {
         await _deleteReservation.ExecuteAsync(id);
+        return Ok();
+    }
+
+    [HttpPost("{id}/cancel")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer,Admin")]
+    public async Task<IActionResult> Cancel(System.Guid id)
+    {
+        await _cancelReservation.ExecuteAsync(id);
         return Ok();
     }
 }

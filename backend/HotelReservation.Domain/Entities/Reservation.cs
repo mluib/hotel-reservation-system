@@ -20,12 +20,15 @@ public class Reservation
 
     public ReservationStatus Status { get; private set; }
 
+    public decimal PricePerNight { get; private set; }
+
 
     public Reservation(
         Guid roomId,
         Guid customerId,
         DateTime checkIn,
-        DateTime checkOut)
+        DateTime checkOut,
+        decimal pricePerNight)
     {
         if (checkOut <= checkIn)
             throw new ArgumentException(
@@ -37,6 +40,7 @@ public class Reservation
         CheckIn = checkIn;
         CheckOut = checkOut;
         Status = ReservationStatus.Confirmed;
+        PricePerNight = pricePerNight;
     }
 
 

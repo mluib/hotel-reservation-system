@@ -1,5 +1,7 @@
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
+using HotelReservation.Domain.Enums;
 using HotelReservation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,11 +29,32 @@ public class RoomRepository : IRoomRepository
             .FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public async Task<IEnumerable<Room>> GetAllAsync()
+    public async Task<IEnumerable<Room>> GetAllAsync(RoomFilterRequest? filter = null)
     {
-        return await _context.Rooms
+        var query = _context.Rooms
             .Include(r => r.Reservations)
-            .ToListAsync();
+            .AsQueryable();
+
+        if (filter?.Type != null)
+            query = query.Where(r => r.Type == filter.Type);
+
+        if (filter?.MinPrice != null)
+            query = query.Where(r => r.PricePerNight >= filter.MinPrice);
+
+        if (filter?.MaxPrice != null)
+            query = query.Where(r => r.PricePerNight <= filter.MaxPrice);
+
+        if (filter?.CheckIn != null && filter?.CheckOut != null)
+        {
+            var checkIn = filter.CheckIn.Value;
+            var checkOut = filter.CheckOut.Value;
+            query = query.Where(r => !r.Reservations.Any(res =>
+                res.Status != ReservationStatus.Cancelled &&
+                res.CheckIn < checkOut &&
+                checkIn < res.CheckOut));
+        }
+
+        return await query.ToListAsync();
     }
 
     public async Task UpdateAsync(Room room)

@@ -25,5 +25,7 @@ public interface IReservationRepository
 
     Task<IEnumerable<Reservation>> GetByCustomerIdAsync(Guid customerId);
 
+    Task UpdateAsync(Reservation reservation);
+
     Task DeleteAsync(Reservation reservation);
 }

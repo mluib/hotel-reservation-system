@@ -113,6 +113,7 @@ namespace HotelReservation.Api
                 builder.Services.AddScoped<GetReservationById>();
                 builder.Services.AddScoped<GetMyReservations>();
                 builder.Services.AddScoped<DeleteReservation>();
+                builder.Services.AddScoped<CancelReservation>();
 
                 // Customer Use-Case
                 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();

@@ -68,6 +68,12 @@ public class ReservationRepository : IReservationRepository
             .ToListAsync();
     }
 
+    public async Task UpdateAsync(Reservation reservation)
+    {
+        _context.Reservations.Update(reservation);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(Reservation reservation)
     {
         _context.Reservations.Remove(reservation);

@@ -39,9 +39,9 @@ public class RoomsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] RoomFilterRequest filter)
     {
-        var list = await _getRooms.ExecuteAsync();
+        var list = await _getRooms.ExecuteAsync(filter);
         return Ok(list);
     }
 

@@ -13,9 +13,9 @@ public class GetRooms
         _repository = repository;
     }
 
-    public async Task<IEnumerable<RoomDto>> ExecuteAsync()
+    public async Task<IEnumerable<RoomDto>> ExecuteAsync(RoomFilterRequest? filter = null)
     {
-        var rooms = await _repository.GetAllAsync();
+        var rooms = await _repository.GetAllAsync(filter);
 
         var list = new List<RoomDto>();
         foreach (var r in rooms)

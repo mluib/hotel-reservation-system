@@ -12,7 +12,7 @@ public class ReservationTests
     {
         var roomId = Guid.NewGuid();
         var customerId = Guid.NewGuid();
-        Action act = () => new Reservation(roomId, customerId, DateTime.UtcNow.AddDays(1), DateTime.UtcNow);
+        Action act = () => new Reservation(roomId, customerId, DateTime.UtcNow.AddDays(1), DateTime.UtcNow, 100m);
         act.Should().Throw<ArgumentException>().WithMessage("Check-out must be after check-in.*");
     }
 
@@ -21,8 +21,17 @@ public class ReservationTests
     {
         var roomId = Guid.NewGuid();
         var customerId = Guid.NewGuid();
-        var r = new Reservation(roomId, customerId, DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
+        var r = new Reservation(roomId, customerId, DateTime.UtcNow, DateTime.UtcNow.AddDays(1), 100m);
         r.Cancel();
         r.Status.Should().Be(HotelReservation.Domain.Enums.ReservationStatus.Cancelled);
+    }
+
+    [Fact]
+    public void Constructor_SetsPricePerNight()
+    {
+        var roomId = Guid.NewGuid();
+        var customerId = Guid.NewGuid();
+        var r = new Reservation(roomId, customerId, DateTime.UtcNow, DateTime.UtcNow.AddDays(1), 150.50m);
+        r.PricePerNight.Should().Be(150.50m);
     }
 }

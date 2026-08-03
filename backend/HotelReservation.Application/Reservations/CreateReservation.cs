@@ -11,15 +11,18 @@ namespace HotelReservation.Application.Reservations;
 public class CreateReservation
 {
     private readonly IReservationRepository _repository;
+    private readonly IRoomRepository _roomRepository;
     private readonly HotelReservation.Application.Interfaces.ICurrentUserService _currentUser;
     private readonly HotelReservation.Application.Interfaces.ICustomerRepository _customerRepository;
 
     public CreateReservation(
         IReservationRepository repository,
+        IRoomRepository roomRepository,
         HotelReservation.Application.Interfaces.ICurrentUserService currentUser,
         HotelReservation.Application.Interfaces.ICustomerRepository customerRepository)
     {
         _repository = repository;
+        _roomRepository = roomRepository;
         _currentUser = currentUser;
         _customerRepository = customerRepository;
     }
@@ -31,9 +34,9 @@ public class CreateReservation
         if (request.CheckOut <= request.CheckIn)
             throw new InvalidOperationException("Check-out must be after check-in.");
 
-        // Ensure room exists
-        var roomExists = await _repository.RoomExistsAsync(request.RoomId);
-        if (!roomExists)
+        // Ensure room exists, and read its current price to snapshot onto the reservation
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        if (room == null)
             throw new InvalidOperationException("Room does not exist.");
 
         // Determine customer id from the authenticated user. Clients must not provide CustomerId.
@@ -60,7 +63,8 @@ public class CreateReservation
             request.RoomId,
             customerId,
             request.CheckIn,
-            request.CheckOut);
+            request.CheckOut,
+            room.PricePerNight);
 
         await _repository.AddAsync(reservation);
         return reservation.Id;

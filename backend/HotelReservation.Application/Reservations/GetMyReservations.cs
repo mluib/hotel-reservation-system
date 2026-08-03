@@ -36,7 +36,8 @@ public class GetMyReservations
                 CustomerId = r.CustomerId,
                 CheckIn = r.CheckIn,
                 CheckOut = r.CheckOut,
-                Status = r.Status
+                Status = r.Status,
+                PricePerNight = r.PricePerNight
             });
         }
 
