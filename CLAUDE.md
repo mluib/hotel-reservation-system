@@ -24,8 +24,10 @@ Which AI tool did what, across the project's history:
 
 **Every session in this repo must proactively keep [`docs/WORKFLOW_LOG.md`](docs/WORKFLOW_LOG.md) up to date** — this is what makes the log complete without the user having to remember to ask for it.
 
-- After any meaningful prompt, decision, correction, or non-trivial piece of work in a session, append a dated entry in the existing format: `[what was asked] -> [what the agent produced] -> [correction/decision made, and why]`.
-- Prefix each entry's date (or date-grouped section) with the actual date the work happened.
+- After any meaningful prompt, decision, correction, or non-trivial piece of work in a session, append a bullet in the format: `[what was asked] -> [what was produced]` — **exactly one `->` per bullet**. A follow-up correction or refinement is its own bullet in the same form, never a clause tacked onto the original one (it's a separate ask, even seconds later).
+- Describe outcomes and reasoning, not specific classes/methods/files — that detail already lives in the diffs and commits; the log needs to stay legible to a reader who won't open the code (e.g. an employer reviewing the CV writeup).
+- Never write "I"/"me"/"mine" for the agent's own actions — name the tool ("Claude Code"/"Copilot") or phrase it passively instead.
+- Prefix each entry's date (or date-grouped section) with the actual date the work happened. If a single day covers more than one topic (e.g. a design pass and a separate backend pass), use separate date-headed sections per topic rather than one mixed list.
 - Keep entries to a few bullet points — headwords/short sentences are fine. The log should have no gaps (every session's notable work should be represented), but it does not need prose detail; save that for the Phase 7 final writeup.
 - Do this without being asked each time — it's a standing expectation for this repo, not a one-off task.
 - `docs/raw-ai-logs/` (the original ChatGPT/Copilot chat exports) is a frozen historical archive — don't edit it; it already fed into `WORKFLOW_LOG.md` once and doesn't need to change again.
