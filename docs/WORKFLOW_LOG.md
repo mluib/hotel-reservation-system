@@ -77,9 +77,33 @@ This is the living version of the log — reconstructed and dated from the raw C
 - Asked Claude Code to lay out the roadmap -> wrote the phase-by-phase plan: UX/design pass before the backend contract pass (so the frontend's real needs drive the API, not the reverse), then Angular, DevOps, application logging, the deferred deep backend review, and a final documentation pass.
 - Visual Studio flagged vulnerable and deprecated packages -> investigated and confirmed two fixable root causes (a deprecated test framework, a high-severity transitive dependency vulnerability), upgraded/pinned both; tests stayed green.
 
+## 2026-08-03 — Phase 1 UX/design pass: wireframe and handoff (Claude Code)
+
+- Asked how to connect claude.ai/design to Claude Code for the UX pass -> clarified they're separate products with no automatic context bridge, so decided to draft wireframes directly in this session as an artifact instead.
+- Asked Claude Code to inventory the real API before sketching wireframes -> surfaced three gaps: no room filtering, no stored reservation price, no customer self-service cancel.
+- Asked for a low-fidelity wireframe of the key screens -> produced a 4-screen artifact (auth, browse rooms, book & manage, admin), explicitly flagging the three gaps above as candidates for the backend contract pass rather than silently designing past them.
+- Reviewed the first wireframe pass -> decided room filtering should be server-side, reservations should snapshot their price at booking time, and customers should get a soft-cancel action distinct from admin's existing hard delete; wireframe updated accordingly.
+- Discussed adding a photo to room cards -> decided on one photo per room with a placeholder default for rooms without one, flagged as a fourth backend candidate rather than blocking the design pass on it.
+- Asked for the wireframe's buttons and forms to actually work instead of being static placeholders -> wired real inline create/edit forms, working delete/cancel actions, and a full browse-to-booking-to-my-reservations click-through, entirely client-side within the artifact.
+- Imported the finished claude.ai/design mockup back into this session -> confirmed it covers all four flows plus supporting dialogs with a consistent visual language; next step is translating it into the real Angular frontend.
+- Noticed the finished mockup also gives the hotel itself a hero photo, not just rooms -> extended the earlier photo decision to the hotel record too (one photo, same placeholder-until-uploaded treatment), rather than treating it as a separate feature.
+- Noticed the mockup's tightened delete flow expects a server-side rejection when a room or customer still has reservations -> flagged as a real backend requirement, not yet confirmed as implemented: deletes need to reject (not cascade or crash) in that case, with the error surfaced to the UI.
+- Considered shipping the Angular frontend with placeholder photos and building the real upload feature afterward -> corrected: that would mean touching the backend again after the frontend build starts, defeating the point of doing the contract pass first; decided to implement photo upload now as a fourth Phase 2 item alongside the other three, and handed a scoped brief to the parallel backend session.
+- Noticed the downloaded claude.ai/design export had been saved under `frontend/`, which is reserved for the real Angular app -> relocated it to `docs/raw-ai-logs/ClaudeDesignMockup/`, alongside the project's other frozen AI-tool exports, since the bundle is an explicitly static reference for implementation (UI files, not a chat transcript), not runnable app code.
+
+## 2026-08-03 — Phase 1 UX/design pass: mockup (Claude Design)
+
+- Answered claude.ai/design's setup questions before it built anything -> specified all four flows at clickable-prototype fidelity, an airy editorial feel throughout except a more neutral/functional admin section, and one admin-uploadable placeholder photo per room.
+- First prototype came back on a serif "Classical" design system with an outline-only gold accent and justified text -> reviewed and asked for something more modern while still natural instead: sans-serif type, tighter non-touching margins (room grid, booking summary), more color (status colors, distinct destructive vs. neutral action colors), price filters, a proper Home page, and admin-only photo editing.
+- Redesign came back -> a modern sans-serif look (warm neutral palette, terracotta accent), a Home page added, "Browse Rooms" renamed to "Rooms", min/max price filters, edge-to-edge room photos instead of double-margined cards, a plain non-card-looking booking summary row, a temporary fading highlight on cross-tab jumps, an unsaved-changes guard on the Hotel admin form (site header only updates after Save), and photo editing restricted to admins.
+- Found the redesign's cross-tab highlight still lingering too long and the photo-upload control still visible to non-admin roles -> fixed both: a short (~1s) fade, and non-admin roles now see a plain placeholder instead of an upload prompt.
+- Asked for reservation Cancel to go through the same confirm dialog as Delete -> done, both actions now share it.
+- Asked for check-in/check-out validation errors to show while typing instead of only after submitting -> fixed, shows live once both dates are entered.
+- Tightened the delete flow so removing a room or customer with existing reservations is blocked with a server-rejection error dialog, instead of silently allowed.
+
 ## 2026-08-03 — Phase 2 backend contract pass: room filtering, reservation price, cancel (Claude Code)
 
-Implemented the three flagged decisions from the wireframe review, alongside a separate Phase 1 design session.
+Implemented the three flagged decisions from the wireframe review, in parallel with the Phase 1 design session above.
 
 - Asked Claude Code to inventory the current rooms/reservations code before implementing anything -> confirmed rooms had no filtering or availability concept, the reservation repository had no update method, and reservation cancellation already existed as a tested domain method that was never wired up to the API.
 - Implemented server-side room filtering -> the rooms listing endpoint now accepts type, price-range, and date-range query parameters, filtered at the database level.

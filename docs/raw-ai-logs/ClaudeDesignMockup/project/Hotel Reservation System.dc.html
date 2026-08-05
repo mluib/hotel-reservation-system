@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Work Sans',sans-serif}
+    a{color:#a6522d;text-decoration:none}
+    a:hover{color:#8c4324;text-decoration:underline}
+    ::selection{background:#f3e6de}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;background:#faf8f4;color:#262420">
+
+  <nav style="position:sticky;top:0;z-index:20;background:#ffffff;border-bottom:1px solid #e6e1d6;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;white-space:nowrap">{{hotel.name}}</span>
+      <a href="#" onClick="{{goHome}}" style="{{homeLinkStyle}}">Home</a>
+      <a href="#" onClick="{{goBrowse}}" style="{{browseLinkStyle}}">Rooms</a>
+      <sc-if value="{{isCustomerRole}}">
+        <a href="#" onClick="{{goReservations}}" style="{{reservationsLinkStyle}}">My Reservations</a>
+      </sc-if>
+      <sc-if value="{{isAdminRole}}">
+        <a href="#" onClick="{{goAdmin}}" style="{{adminLinkStyle}}">Admin</a>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="display:flex;gap:4px;background:#f1efe9;border-radius:8px;padding:3px;font-size:12px">
+        <button type="button" onClick="{{switchToPublic}}" style="{{demoPublicStyle}}">Public</button>
+        <button type="button" onClick="{{switchToCustomer}}" style="{{demoCustomerStyle}}">Customer</button>
+        <button type="button" onClick="{{switchToAdmin}}" style="{{demoAdminStyle}}">Admin</button>
+      </div>
+      <sc-if value="{{isPublicRole}}">
+        <button type="button" onClick="{{goSignIn}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">Sign In</button>
+      </sc-if>
+      <sc-if value="{{isLoggedIn}}">
+        <span style="font-size:13px;color:#736e64">{{currentUserLabel}}</span>
+        <button type="button" onClick="{{doLogout}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:8px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Log out</button>
+      </sc-if>
+    </div>
+  </nav>
+
+  <sc-if value="{{isHomeView}}" hint-placeholder-val="{{true}}">
+    <div style="max-width:1000px;margin:0 auto;padding:56px 32px 72px">
+      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#a6522d;margin-bottom:10px">Welcome</div>
+          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:42px;line-height:1.1;margin:0 0 16px">{{hotel.name}}</h1>
+          <p style="color:#736e64;font-size:16px;line-height:1.6;margin:0 0 8px">{{hotel.address}}</p>
+          <p style="font-size:16px;line-height:1.7;margin:16px 0 28px">A small hotel with six rooms across three types &mdash; Single, Double and Suite. Quiet, easy to find, and a short walk from the center of town.</p>
+          <button type="button" onClick="{{goBrowse}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:13px 24px;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap">View Rooms</button>
+        </div>
+        <sc-if value="{{isAdminPhoto}}" hint-placeholder-val="{{false}}">
+          <image-slot id="hotel-hero-photo" shape="rounded" radius="16" placeholder="Hotel photo" style="width:100%;height:320px"></image-slot>
+        </sc-if>
+        <sc-if value="{{isNotAdminPhoto}}" hint-placeholder-val="{{true}}">
+          <div style="width:100%;height:320px;border-radius:16px;background:#f1efe9;display:flex;align-items:center;justify-content:center;color:#a49f93;font-size:13px">Photo</div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isAuthView}}" hint-placeholder-val="{{false}}">
+    <div style="max-width:420px;margin:64px auto;padding:0 24px">
+      <div style="background:#fff;border:1px solid #e6e1d6;border-radius:14px;padding:36px">
+        <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:26px;margin:0 0 20px">{{authTitle}}</h1>
+        <div style="display:flex;gap:6px;margin-bottom:24px">
+          <button type="button" onClick="{{setAuthSignIn}}" style="{{authSignInTabStyle}}">Sign in</button>
+          <button type="button" onClick="{{setAuthSignUp}}" style="{{authSignUpTabStyle}}">Create account</button>
+        </div>
+        <sc-if value="{{isSignIn}}">
+          <div style="margin-bottom:14px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Email</label><input type="email" value="{{signinEmail}}" onChange="{{setSigninEmail}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <div style="margin-bottom:14px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Password</label><input type="password" value="{{signinPassword}}" onChange="{{setSigninPassword}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <sc-if value="{{authError}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px">{{authError}}</div></sc-if>
+          <button type="button" onClick="{{submitSignIn}}" style="width:100%;background:#a6522d;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Sign in</button>
+          <p style="font-size:12px;color:#736e64;margin-top:12px">Try elena.marsh@example.com with any password.</p>
+        </sc-if>
+        <sc-if value="{{isSignUp}}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">First name</label><input value="{{signupFirst}}" onChange="{{setSignupFirst}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+            <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Last name</label><input value="{{signupLast}}" onChange="{{setSignupLast}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          </div>
+          <div style="margin-bottom:14px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Email</label><input type="email" value="{{signupEmail}}" onChange="{{setSignupEmail}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <div style="margin-bottom:14px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Password</label><input type="password" value="{{signupPassword}}" onChange="{{setSignupPassword}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <sc-if value="{{authError}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px">{{authError}}</div></sc-if>
+          <button type="button" onClick="{{submitSignUp}}" style="width:100%;background:#a6522d;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Create account</button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isBrowseView}}" hint-placeholder-val="{{false}}">
+    <div style="max-width:1120px;margin:0 auto;padding:40px 32px 72px">
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:30px;margin:0 0 24px">Rooms</h1>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+        <div><label style="display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:#736e64">Check-in</label><input type="date" value="{{filterCheckIn}}" onChange="{{setFilterCheckIn}}" style="padding:9px 10px;border:1px solid #d6cfc0;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif"/></div>
+        <div><label style="display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:#736e64">Check-out</label><input type="date" value="{{filterCheckOut}}" onChange="{{setFilterCheckOut}}" style="padding:9px 10px;border:1px solid #d6cfc0;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif"/></div>
+        <div><label style="display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:#736e64">Room type</label>
+          <select value="{{filterType}}" onChange="{{setFilterType}}" style="padding:9px 10px;border:1px solid #d6cfc0;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif">
+            <option value="all">All types</option>
+            <option value="Single">Single</option>
+            <option value="Double">Double</option>
+            <option value="Suite">Suite</option>
+          </select>
+        </div>
+        <div><label style="display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:#736e64">Min price</label><input type="number" value="{{filterMinPrice}}" onChange="{{setFilterMinPrice}}" placeholder="$" style="width:80px;padding:9px 10px;border:1px solid #d6cfc0;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif"/></div>
+        <div><label style="display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:#736e64">Max price</label><input type="number" value="{{filterMaxPrice}}" onChange="{{setFilterMaxPrice}}" placeholder="$" style="width:80px;padding:9px 10px;border:1px solid #d6cfc0;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif"/></div>
+        <button type="button" onClick="{{clearFilters}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Clear filters</button>
+      </div>
+      <sc-if value="{{filterDateError}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:20px;display:inline-block">{{filterDateError}}</div></sc-if>
+      <div style="height:8px"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:28px">
+        <sc-for list="{{filteredRooms}}" as="room" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #e6e1d6;border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+            <sc-if value="{{isAdminPhoto}}" hint-placeholder-val="{{false}}">
+              <image-slot id="{{room.photoSlotId}}" shape="rect" placeholder="Room photo" style="width:100%;height:170px;border-radius:0"></image-slot>
+            </sc-if>
+            <sc-if value="{{isNotAdminPhoto}}" hint-placeholder-val="{{true}}">
+              <div style="width:100%;height:170px;background:#f1efe9;display:flex;align-items:center;justify-content:center;color:#a49f93;font-size:13px">Photo</div>
+            </sc-if>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:10px;flex:1">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px">Room {{room.number}}</span>
+                <span style="background:#f1efe9;color:#57534b;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600">{{room.type}}</span>
+              </div>
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:22px">${{room.price}}<span style="font-size:13px;font-family:'Work Sans',sans-serif;font-weight:400;color:#736e64"> / night</span></div>
+              <div style="flex:1"></div>
+              <button type="button" onClick="{{room.viewAndBook}}" style="width:100%;background:#a6522d;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">View &amp; Book</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{noRoomsFound}}"><p style="color:#736e64;text-align:center;padding:56px 0">No rooms match those filters.</p></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isBookingView}}" hint-placeholder-val="{{false}}">
+    <div style="max-width:560px;margin:0 auto;padding:40px 24px 72px">
+      <a href="#" onClick="{{goBrowse}}" style="font-size:13px">&larr; Back to rooms</a>
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:28px;margin:16px 0 8px">Book Room {{bookingRoom.number}}</h1>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-bottom:1px solid #e6e1d6;margin-bottom:24px">
+        <div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#736e64">{{bookingRoom.type}}</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:20px;margin-top:2px">Room {{bookingRoom.number}}</div>
+        </div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:20px">${{bookingRoom.price}}<span style="font-size:13px;font-family:'Work Sans',sans-serif;font-weight:400;color:#736e64"> /night</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Check-in</label><input type="date" value="{{bookingCheckIn}}" onChange="{{setBookingCheckIn}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Check-out</label><input type="date" value="{{bookingCheckOut}}" onChange="{{setBookingCheckOut}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+      </div>
+      <sc-if value="{{bookingError}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:20px">{{bookingError}}</div></sc-if>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-top:1px solid #e6e1d6;margin-bottom:24px">
+        <span style="color:#736e64;font-size:14px">{{bookingNightsLabel}}</span>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:24px">${{bookingTotal}}</span>
+      </div>
+      <button type="button" onClick="{{confirmBooking}}" style="width:100%;background:#a6522d;color:#fff;border:none;border-radius:8px;padding:13px;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap">Confirm Booking</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isReservationsView}}" hint-placeholder-val="{{false}}">
+    <div style="max-width:900px;margin:0 auto;padding:40px 32px 72px">
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:28px;margin:0 0 20px">My Reservations</h1>
+      <sc-if value="{{bookingSuccess}}"><div style="background:#e6f2ea;color:#2f6b45;border:1px solid #bcdcc7;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:20px;display:inline-block">Booking confirmed</div></sc-if>
+      <sc-if value="{{hasMyReservations}}" hint-placeholder-val="{{true}}">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid #e6e1d6">
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Room</th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Type</th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Check-in</th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Check-out</th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Price</th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em">Status</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+          <sc-for list="{{myReservations}}" as="res" hint-placeholder-count="2">
+            <tr style="border-bottom:1px solid #f1efe9">
+              <td style="padding:12px 8px">{{res.roomNumber}}</td>
+              <td style="padding:12px 8px">{{res.roomType}}</td>
+              <td style="padding:12px 8px">{{res.checkIn}}</td>
+              <td style="padding:12px 8px">{{res.checkOut}}</td>
+              <td style="padding:12px 8px">${{res.price}}</td>
+              <td style="padding:12px 8px"><span style="{{res.statusStyle}}">{{res.status}}</span></td>
+              <td style="padding:12px 8px;text-align:right"><sc-if value="{{res.canCancel}}"><button type="button" onClick="{{res.cancel}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Cancel</button></sc-if></td>
+            </tr>
+          </sc-for>
+          </tbody>
+        </table>
+      </sc-if>
+      <sc-if value="{{noMyReservations}}"><p style="color:#736e64;padding:32px 0">No reservations yet. <a href="#" onClick="{{goBrowse}}">Browse rooms</a> to book one.</p></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isAdminView}}" hint-placeholder-val="{{false}}">
+    <div style="max-width:1200px;margin:0 auto;padding:40px 32px 72px">
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:28px;margin:0 0 20px">Admin</h1>
+      <div style="display:flex;gap:6px;margin-bottom:28px">
+        <button type="button" onClick="{{setRoomsTab}}" style="{{adminTabRoomsStyle}}">Rooms</button>
+        <button type="button" onClick="{{setReservationsTab}}" style="{{adminTabReservationsStyle}}">Reservations</button>
+        <button type="button" onClick="{{setCustomersTab}}" style="{{adminTabCustomersStyle}}">Customers</button>
+        <button type="button" onClick="{{setHotelTab}}" style="{{adminTabHotelStyle}}">Hotel</button>
+      </div>
+
+      <sc-if value="{{isRoomsTab}}">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button type="button" onClick="{{openNewRoom}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Add room</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid #e6e1d6">
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortRoomsByNumber}}" style="color:#736e64">Number {{roomsSortNumberArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortRoomsByType}}" style="color:#736e64">Type {{roomsSortTypeArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortRoomsByPrice}}" style="color:#736e64">Price/night {{roomsSortPriceArrow}}</a></th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+          <sc-for list="{{sortedRooms}}" as="room" hint-placeholder-count="6">
+            <tr style="border-bottom:1px solid #f1efe9;{{room.rowHighlightStyle}}">
+              <td style="padding:12px 8px">{{room.number}}</td><td style="padding:12px 8px">{{room.type}}</td><td style="padding:12px 8px">${{room.price}}</td>
+              <td style="padding:12px 8px;text-align:right"><div style="display:flex;gap:8px;justify-content:flex-end">
+                <button type="button" onClick="{{room.edit}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Edit</button>
+                <button type="button" onClick="{{room.remove}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Delete</button>
+              </div></td>
+            </tr>
+          </sc-for>
+          </tbody>
+        </table>
+      </sc-if>
+
+      <sc-if value="{{isReservationsTab}}">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid #e6e1d6">
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByCustomer}}" style="color:#736e64">Customer {{resSortCustomerArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByRoom}}" style="color:#736e64">Room {{resSortRoomArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByCheckIn}}" style="color:#736e64">Check-in {{resSortCheckInArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByCheckOut}}" style="color:#736e64">Check-out {{resSortCheckOutArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByPrice}}" style="color:#736e64">Price {{resSortPriceArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortResByStatus}}" style="color:#736e64">Status {{resSortStatusArrow}}</a></th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+          <sc-for list="{{sortedReservations}}" as="res" hint-placeholder-count="4">
+            <tr style="border-bottom:1px solid #f1efe9">
+              <td style="padding:12px 8px"><a href="#" onClick="{{res.jumpCustomer}}">{{res.customerName}}</a></td>
+              <td style="padding:12px 8px"><a href="#" onClick="{{res.jumpRoom}}">{{res.roomNumber}}</a></td>
+              <td style="padding:12px 8px">{{res.checkIn}}</td>
+              <td style="padding:12px 8px">{{res.checkOut}}</td>
+              <td style="padding:12px 8px">${{res.price}}</td>
+              <td style="padding:12px 8px"><span style="{{res.statusStyle}}">{{res.status}}</span></td>
+              <td style="padding:12px 8px;text-align:right"><div style="display:flex;gap:8px;justify-content:flex-end">
+                <button type="button" onClick="{{res.edit}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Edit</button>
+                <sc-if value="{{res.canCancel}}"><button type="button" onClick="{{res.cancel}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Cancel</button></sc-if>
+                <button type="button" onClick="{{res.remove}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Delete</button>
+              </div></td>
+            </tr>
+          </sc-for>
+          </tbody>
+        </table>
+      </sc-if>
+
+      <sc-if value="{{isCustomersTab}}">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid #e6e1d6">
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortCustByFirst}}" style="color:#736e64">First name {{custSortFirstArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortCustByLast}}" style="color:#736e64">Last name {{custSortLastArrow}}</a></th>
+            <th style="text-align:left;padding:10px 8px;font-size:12px;font-weight:600;color:#736e64;text-transform:uppercase"><a href="#" onClick="{{sortCustByEmail}}" style="color:#736e64">Email {{custSortEmailArrow}}</a></th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+          <sc-for list="{{sortedCustomers}}" as="cust" hint-placeholder-count="3">
+            <tr style="border-bottom:1px solid #f1efe9;{{cust.rowHighlightStyle}}">
+              <td style="padding:12px 8px">{{cust.firstName}}</td><td style="padding:12px 8px">{{cust.lastName}}</td><td style="padding:12px 8px">{{cust.email}}</td>
+              <td style="padding:12px 8px;text-align:right"><div style="display:flex;gap:8px;justify-content:flex-end">
+                <button type="button" onClick="{{cust.edit}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Edit</button>
+                <button type="button" onClick="{{cust.remove}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap">Delete</button>
+              </div></td>
+            </tr>
+          </sc-for>
+          </tbody>
+        </table>
+      </sc-if>
+
+      <sc-if value="{{isHotelTab}}">
+        <div style="background:#fff;border:1px solid #e6e1d6;border-radius:12px;padding:28px;max-width:480px">
+          <div style="font-size:13px;font-weight:600;color:#736e64;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:16px">Hotel details</div>
+          <div style="margin-bottom:14px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Name</label><input value="{{hotelDraft.name}}" onChange="{{setHotelDraftName}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <div style="margin-bottom:20px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Address</label><input value="{{hotelDraft.address}}" onChange="{{setHotelDraftAddress}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <button type="button" onClick="{{saveHotel}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Save changes</button>
+            <sc-if value="{{hotelSavedFlash}}"><span style="background:#e6f2ea;color:#2f6b45;border:1px solid #bcdcc7;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600">Saved</span></sc-if>
+            <sc-if value="{{hotelHasUnsavedChanges}}"><span style="color:#a6522d;font-size:12px;font-weight:600">Unsaved changes</span></sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{roomDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:420px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:18px">{{roomDialog.title}}</div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Room number</label><input value="{{roomDialog.number}}" onChange="{{setRoomDialogNumber}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Type</label>
+          <select value="{{roomDialog.type}}" onChange="{{setRoomDialogType}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif">
+            <option value="Single">Single</option><option value="Double">Double</option><option value="Suite">Suite</option>
+          </select>
+        </div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Price / night</label><input type="number" value="{{roomDialog.price}}" onChange="{{setRoomDialogPrice}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Photo</label><image-slot id="{{roomDialog.photoSlotId}}" shape="rect" radius="8" placeholder="Drop room photo" style="width:100%;height:140px"></image-slot></div>
+        <sc-if value="{{roomDialog.error}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px">{{roomDialog.error}}</div></sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+          <button type="button" onClick="{{closeRoomDialog}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Cancel</button>
+          <button type="button" onClick="{{saveRoomDialog}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{customerDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:420px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:18px">Edit customer</div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">First name</label><input value="{{customerDialog.firstName}}" onChange="{{setCustomerDialogFirst}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Last name</label><input value="{{customerDialog.lastName}}" onChange="{{setCustomerDialogLast}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Email</label><input type="email" value="{{customerDialog.email}}" onChange="{{setCustomerDialogEmail}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        <sc-if value="{{customerDialog.error}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px">{{customerDialog.error}}</div></sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+          <button type="button" onClick="{{closeCustomerDialog}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Cancel</button>
+          <button type="button" onClick="{{saveCustomerDialog}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{reservationDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:420px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:18px">Edit reservation</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Check-in</label><input type="date" value="{{reservationDialog.checkIn}}" onChange="{{setReservationDialogCheckIn}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+          <div><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Check-out</label><input type="date" value="{{reservationDialog.checkOut}}" onChange="{{setReservationDialogCheckOut}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif"/></div>
+        </div>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px">Status</label>
+          <select value="{{reservationDialog.status}}" onChange="{{setReservationDialogStatus}}" style="width:100%;padding:10px 12px;border:1px solid #d6cfc0;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif">
+            <option value="Confirmed">Confirmed</option><option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <sc-if value="{{reservationDialog.error}}"><div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px">{{reservationDialog.error}}</div></sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+          <button type="button" onClick="{{closeReservationDialog}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Cancel</button>
+          <button type="button" onClick="{{saveReservationDialog}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{confirmDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:380px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">Confirm</div>
+        <div style="font-size:14px;color:#262420;margin-bottom:20px">{{confirmDialog.message}}</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+          <button type="button" onClick="{{closeConfirmDialog}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Cancel</button>
+          <button type="button" onClick="{{runConfirmDialog}}" style="background:#a23a32;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{errorDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:400px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">Can&#39;t delete</div>
+        <div style="background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:12px 14px;font-size:14px;margin-bottom:20px">{{errorDialog.message}}</div>
+        <div style="display:flex;justify-content:flex-end">
+          <button type="button" onClick="{{closeErrorDialog}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">OK</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hotelLeaveDialog}}">
+    <div style="position:fixed;inset:0;background:rgba(38,36,32,0.45);display:flex;align-items:center;justify-content:center;z-index:50">
+      <div style="background:#fff;border-radius:14px;padding:28px;width:400px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">Unsaved changes</div>
+        <div style="font-size:14px;color:#262420;margin-bottom:20px">You have unsaved changes to the hotel details. Save before leaving?</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+          <button type="button" onClick="{{hotelLeaveKeepEditing}}" style="background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Keep editing</button>
+          <button type="button" onClick="{{hotelLeaveDiscard}}" style="background:#fff;color:#a23a32;border:1px solid #f0c4bf;border-radius:8px;padding:9px 16px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap">Discard</button>
+          <button type="button" onClick="{{hotelLeaveSaveAndContinue}}" style="background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">Save &amp; continue</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    role: 'public',
+    view: 'home',
+    authMode: 'signin',
+    authError: '',
+    signinEmail: '', signinPassword: '',
+    signupFirst: '', signupLast: '', signupEmail: '', signupPassword: '',
+    filterCheckIn: '', filterCheckOut: '', filterType: 'all', filterMinPrice: '', filterMaxPrice: '',
+    bookingRoomId: null, bookingCheckIn: '', bookingCheckOut: '', bookingError: '', bookingSuccess: false,
+    currentCustomerId: null,
+    adminTab: 'rooms',
+    roomsSort: { key: 'number', dir: 'asc' },
+    reservationsSort: { key: 'checkIn', dir: 'desc' },
+    customersSort: { key: 'lastName', dir: 'asc' },
+    highlightRoomId: null, highlightCustomerId: null,
+    roomDialog: null, customerDialog: null, reservationDialog: null, confirmDialog: null, hotelLeaveDialog: null, errorDialog: null,
+    hotelSavedFlash: false,
+    hotel: { name: 'The Alderman House', address: '12 Fenwick Lane, Bristol BS1 4ND' },
+    hotelDraft: { name: 'The Alderman House', address: '12 Fenwick Lane, Bristol BS1 4ND' },
+    rooms: [
+      { id: 'rm1', number: '101', type: 'Single', price: 89 },
+      { id: 'rm2', number: '102', type: 'Single', price: 89 },
+      { id: 'rm3', number: '201', type: 'Double', price: 129 },
+      { id: 'rm4', number: '202', type: 'Double', price: 129 },
+      { id: 'rm5', number: '301', type: 'Suite', price: 219 },
+      { id: 'rm6', number: '302', type: 'Suite', price: 249 }
+    ],
+    customers: [
+      { id: 'c1', firstName: 'Elena', lastName: 'Marsh', email: 'elena.marsh@example.com' },
+      { id: 'c2', firstName: 'Thomas', lastName: 'Reid', email: 't.reid@example.com' },
+      { id: 'c3', firstName: 'Priya', lastName: 'Nandan', email: 'priya.n@example.com' }
+    ],
+    reservations: [
+      { id: 'rv1', customerId: 'c1', roomId: 'rm3', checkIn: '2026-08-10', checkOut: '2026-08-13', price: 387, status: 'Confirmed', bookingDate: '2026-07-22' },
+      { id: 'rv2', customerId: 'c2', roomId: 'rm1', checkIn: '2026-08-05', checkOut: '2026-08-07', price: 178, status: 'Confirmed', bookingDate: '2026-07-18' },
+      { id: 'rv3', customerId: 'c1', roomId: 'rm5', checkIn: '2026-07-01', checkOut: '2026-07-04', price: 657, status: 'Cancelled', bookingDate: '2026-06-20' },
+      { id: 'rv4', customerId: 'c3', roomId: 'rm6', checkIn: '2026-08-20', checkOut: '2026-08-22', price: 498, status: 'Confirmed', bookingDate: '2026-07-30' }
+    ]
+  };
+
+  generateId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  nightsBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+  overlaps(aStart, aEnd, bStart, bEnd) { return aStart < bEnd && bStart < aEnd; }
+  hotelDirty() { const h = this.state.hotel, d = this.state.hotelDraft; return h.name !== d.name || h.address !== d.address; }
+  guardedNavigate(fn) {
+    if (this.state.adminTab === 'hotel' && this.hotelDirty()) { this.setState({ hotelLeaveDialog: { action: fn } }); }
+    else { fn(); }
+  }
+
+  sortItems(items, sort) {
+    const { key, dir } = sort;
+    return items.slice().sort((a, b) => {
+      let av = a[key], bv = b[key];
+      if (typeof av !== 'number' || typeof bv !== 'number') { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+      if (av < bv) return dir === 'asc' ? -1 : 1;
+      if (av > bv) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+  sortArrow(sort, field) { return sort.key === field ? (sort.dir === 'asc' ? '\u25B2' : '\u25BC') : ''; }
+  toggleSort(stateKey, field) {
+    this.setState(s => {
+      const cur = s[stateKey];
+      const dir = cur.key === field && cur.dir === 'asc' ? 'desc' : 'asc';
+      return { [stateKey]: { key: field, dir } };
+    });
+  }
+
+  goHome = () => this.guardedNavigate(() => this.setState({ view: 'home' }));
+  goBrowse = () => this.guardedNavigate(() => this.setState({ view: 'browse' }));
+  goAdmin = () => this.guardedNavigate(() => this.setState({ view: 'admin' }));
+  goReservations = () => this.guardedNavigate(() => this.setState({ view: 'reservations', bookingSuccess: false }));
+  goSignIn = () => this.guardedNavigate(() => this.setState({ view: 'auth', authMode: 'signin', authError: '' }));
+  doLogout = () => this.guardedNavigate(() => this.setState({ role: 'public', currentCustomerId: null, view: 'home' }));
+  switchToPublic = () => this.guardedNavigate(() => this.setState({ role: 'public', currentCustomerId: null, view: 'home' }));
+  switchToCustomer = () => this.guardedNavigate(() => this.setState({ role: 'customer', currentCustomerId: 'c1', view: 'home' }));
+  switchToAdmin = () => this.guardedNavigate(() => this.setState({ role: 'admin', view: 'admin', adminTab: 'rooms' }));
+
+  setAuthSignIn = () => this.setState({ authMode: 'signin', authError: '' });
+  setAuthSignUp = () => this.setState({ authMode: 'signup', authError: '' });
+  setSigninEmail = (e) => this.setState({ signinEmail: e.target.value });
+  setSigninPassword = (e) => this.setState({ signinPassword: e.target.value });
+  setSignupFirst = (e) => this.setState({ signupFirst: e.target.value });
+  setSignupLast = (e) => this.setState({ signupLast: e.target.value });
+  setSignupEmail = (e) => this.setState({ signupEmail: e.target.value });
+  setSignupPassword = (e) => this.setState({ signupPassword: e.target.value });
+
+  submitSignIn = () => {
+    const { signinEmail, signinPassword } = this.state;
+    if (!signinEmail || !signinPassword) { this.setState({ authError: 'Enter your email and password.' }); return; }
+    const cust = this.state.customers.find(c => c.email.toLowerCase() === signinEmail.toLowerCase());
+    if (!cust) { this.setState({ authError: 'No account found with that email.' }); return; }
+    this.setState({ role: 'customer', currentCustomerId: cust.id, view: 'browse', authError: '', signinEmail: '', signinPassword: '' });
+  };
+  submitSignUp = () => {
+    const { signupFirst, signupLast, signupEmail, signupPassword } = this.state;
+    if (!signupFirst || !signupLast || !signupEmail || !signupPassword) { this.setState({ authError: 'All fields are required.' }); return; }
+    if (this.state.customers.some(c => c.email.toLowerCase() === signupEmail.toLowerCase())) { this.setState({ authError: 'An account with that email already exists.' }); return; }
+    const id = this.generateId('c');
+    const newCust = { id, firstName: signupFirst, lastName: signupLast, email: signupEmail };
+    this.setState({
+      customers: [...this.state.customers, newCust],
+      role: 'customer', currentCustomerId: id, view: 'browse', authError: '',
+      signupFirst: '', signupLast: '', signupEmail: '', signupPassword: ''
+    });
+  };
+
+  setFilterCheckIn = (e) => this.setState({ filterCheckIn: e.target.value });
+  setFilterCheckOut = (e) => this.setState({ filterCheckOut: e.target.value });
+  setFilterType = (e) => this.setState({ filterType: e.target.value });
+  setFilterMinPrice = (e) => this.setState({ filterMinPrice: e.target.value });
+  setFilterMaxPrice = (e) => this.setState({ filterMaxPrice: e.target.value });
+  clearFilters = () => this.setState({ filterCheckIn: '', filterCheckOut: '', filterType: 'all', filterMinPrice: '', filterMaxPrice: '' });
+
+  startBooking(roomId) { this.setState({ view: 'booking', bookingRoomId: roomId, bookingCheckIn: this.state.filterCheckIn || '', bookingCheckOut: this.state.filterCheckOut || '', bookingError: '' }); }
+  setBookingCheckIn = (e) => this.setState({ bookingCheckIn: e.target.value, bookingError: '' });
+  setBookingCheckOut = (e) => this.setState({ bookingCheckOut: e.target.value, bookingError: '' });
+  confirmBooking = () => {
+    const { bookingRoomId, bookingCheckIn, bookingCheckOut, currentCustomerId } = this.state;
+    if (!bookingCheckIn || !bookingCheckOut) { this.setState({ bookingError: 'Select both check-in and check-out dates.' }); return; }
+    if (bookingCheckOut <= bookingCheckIn) { this.setState({ bookingError: 'Check-out must be after check-in.' }); return; }
+    const overlap = this.state.reservations.some(r => r.roomId === bookingRoomId && r.status === 'Confirmed' && this.overlaps(bookingCheckIn, bookingCheckOut, r.checkIn, r.checkOut));
+    if (overlap) { this.setState({ bookingError: 'This room is already booked for part of that date range.' }); return; }
+    const room = this.state.rooms.find(r => r.id === bookingRoomId);
+    const nights = this.nightsBetween(bookingCheckIn, bookingCheckOut);
+    const price = nights * room.price;
+    const newRes = { id: this.generateId('rv'), customerId: currentCustomerId, roomId: bookingRoomId, checkIn: bookingCheckIn, checkOut: bookingCheckOut, price, status: 'Confirmed', bookingDate: new Date().toISOString().slice(0, 10) };
+    this.setState({ reservations: [...this.state.reservations, newRes], view: 'reservations', bookingSuccess: true, bookingRoomId: null, bookingCheckIn: '', bookingCheckOut: '', bookingError: '' });
+  };
+  cancelMyReservation(id) {
+    this.setState({ confirmDialog: { message: 'Cancel this reservation?', action: () => this.setState({ reservations: this.state.reservations.map(r => r.id === id ? { ...r, status: 'Cancelled' } : r) }) } });
+  }
+  cancelReservationById(id) {
+    this.setState({ confirmDialog: { message: 'Cancel this reservation?', action: () => this.setState({ reservations: this.state.reservations.map(r => r.id === id ? { ...r, status: 'Cancelled' } : r) }) } });
+  }
+
+  setRoomsTab = () => this.guardedNavigate(() => this.setState({ adminTab: 'rooms', highlightRoomId: null }));
+  setReservationsTab = () => this.guardedNavigate(() => this.setState({ adminTab: 'reservations' }));
+  setCustomersTab = () => this.guardedNavigate(() => this.setState({ adminTab: 'customers', highlightCustomerId: null }));
+  setHotelTab = () => this.setState({ adminTab: 'hotel' });
+
+  sortRoomsByNumber = () => this.toggleSort('roomsSort', 'number');
+  sortRoomsByType = () => this.toggleSort('roomsSort', 'type');
+  sortRoomsByPrice = () => this.toggleSort('roomsSort', 'price');
+  sortResByCustomer = () => this.toggleSort('reservationsSort', 'customerName');
+  sortResByRoom = () => this.toggleSort('reservationsSort', 'roomNumber');
+  sortResByCheckIn = () => this.toggleSort('reservationsSort', 'checkIn');
+  sortResByCheckOut = () => this.toggleSort('reservationsSort', 'checkOut');
+  sortResByBookingDate = () => this.toggleSort('reservationsSort', 'bookingDate');
+  sortResByPrice = () => this.toggleSort('reservationsSort', 'price');
+  sortResByStatus = () => this.toggleSort('reservationsSort', 'status');
+  sortCustByFirst = () => this.toggleSort('customersSort', 'firstName');
+  sortCustByLast = () => this.toggleSort('customersSort', 'lastName');
+  sortCustByEmail = () => this.toggleSort('customersSort', 'email');
+
+  openNewRoom = () => this.setState({ roomDialog: { mode: 'new', id: null, title: 'Add room', number: '', type: 'Single', price: '', photoSlotId: this.generateId('room-photo-'), error: '' } });
+  openEditRoomById(id) {
+    const room = this.state.rooms.find(r => r.id === id);
+    this.setState({ roomDialog: { mode: 'edit', id, title: 'Edit room', number: room.number, type: room.type, price: room.price, photoSlotId: 'room-photo-' + id, error: '' } });
+  }
+  closeRoomDialog = () => this.setState({ roomDialog: null });
+  setRoomDialogNumber = (e) => this.setState({ roomDialog: { ...this.state.roomDialog, number: e.target.value } });
+  setRoomDialogType = (e) => this.setState({ roomDialog: { ...this.state.roomDialog, type: e.target.value } });
+  setRoomDialogPrice = (e) => this.setState({ roomDialog: { ...this.state.roomDialog, price: e.target.value } });
+  saveRoomDialog = () => {
+    const d = this.state.roomDialog;
+    const price = Number(d.price);
+    if (!d.number || !d.type || !price || price <= 0) { this.setState({ roomDialog: { ...d, error: 'Enter a room number and a valid price.' } }); return; }
+    if (d.mode === 'new') {
+      const roomId = this.generateId('rm');
+      const newRoom = { id: roomId, number: d.number, type: d.type, price };
+      this.setState({ rooms: [...this.state.rooms, newRoom], roomDialog: null });
+    } else {
+      this.setState({ rooms: this.state.rooms.map(r => r.id === d.id ? { ...r, number: d.number, type: d.type, price } : r), roomDialog: null });
+    }
+  };
+  removeRoomById(id) {
+    const room = this.state.rooms.find(r => r.id === id);
+    const inUse = this.state.reservations.some(r => r.roomId === id);
+    if (inUse) { this.setState({ errorDialog: { message: 'Server rejected the request: room ' + room.number + ' has reservations on file and cannot be deleted.' } }); return; }
+    this.setState({ confirmDialog: { message: 'Delete room ' + room.number + '? This cannot be undone.', action: () => this.setState({ rooms: this.state.rooms.filter(r => r.id !== id) }) } });
+  }
+
+  openEditCustomerById(id) {
+    const cust = this.state.customers.find(c => c.id === id);
+    this.setState({ customerDialog: { id, firstName: cust.firstName, lastName: cust.lastName, email: cust.email, error: '' } });
+  }
+  closeCustomerDialog = () => this.setState({ customerDialog: null });
+  setCustomerDialogFirst = (e) => this.setState({ customerDialog: { ...this.state.customerDialog, firstName: e.target.value } });
+  setCustomerDialogLast = (e) => this.setState({ customerDialog: { ...this.state.customerDialog, lastName: e.target.value } });
+  setCustomerDialogEmail = (e) => this.setState({ customerDialog: { ...this.state.customerDialog, email: e.target.value } });
+  saveCustomerDialog = () => {
+    const d = this.state.customerDialog;
+    if (!d.firstName || !d.lastName || !d.email) { this.setState({ customerDialog: { ...d, error: 'All fields are required.' } }); return; }
+    this.setState({ customers: this.state.customers.map(c => c.id === d.id ? { ...c, firstName: d.firstName, lastName: d.lastName, email: d.email } : c), customerDialog: null });
+  };
+  removeCustomerById(id) {
+    const cust = this.state.customers.find(c => c.id === id);
+    const inUse = this.state.reservations.some(r => r.customerId === id);
+    if (inUse) { this.setState({ errorDialog: { message: 'Server rejected the request: ' + cust.firstName + ' ' + cust.lastName + ' has reservations on file and cannot be deleted.' } }); return; }
+    this.setState({ confirmDialog: { message: 'Delete ' + cust.firstName + ' ' + cust.lastName + '? This cannot be undone.', action: () => this.setState({ customers: this.state.customers.filter(c => c.id !== id) }) } });
+  }
+
+  openEditReservationById(id) {
+    const res = this.state.reservations.find(r => r.id === id);
+    this.setState({ reservationDialog: { id, checkIn: res.checkIn, checkOut: res.checkOut, status: res.status, error: '' } });
+  }
+  closeReservationDialog = () => this.setState({ reservationDialog: null });
+  setReservationDialogCheckIn = (e) => this.setState({ reservationDialog: { ...this.state.reservationDialog, checkIn: e.target.value } });
+  setReservationDialogCheckOut = (e) => this.setState({ reservationDialog: { ...this.state.reservationDialog, checkOut: e.target.value } });
+  setReservationDialogStatus = (e) => this.setState({ reservationDialog: { ...this.state.reservationDialog, status: e.target.value } });
+  saveReservationDialog = () => {
+    const d = this.state.reservationDialog;
+    if (!d.checkIn || !d.checkOut || d.checkOut <= d.checkIn) { this.setState({ reservationDialog: { ...d, error: 'Check-out must be after check-in.' } }); return; }
+    if (d.status === 'Confirmed') {
+      const res = this.state.reservations.find(r => r.id === d.id);
+      const overlap = this.state.reservations.some(r => r.id !== d.id && r.roomId === res.roomId && r.status === 'Confirmed' && this.overlaps(d.checkIn, d.checkOut, r.checkIn, r.checkOut));
+      if (overlap) { this.setState({ reservationDialog: { ...d, error: 'Overlaps another confirmed reservation for that room.' } }); return; }
+    }
+    this.setState({ reservations: this.state.reservations.map(r => r.id === d.id ? { ...r, checkIn: d.checkIn, checkOut: d.checkOut, status: d.status } : r), reservationDialog: null });
+  };
+  removeReservationById(id) {
+    this.setState({ confirmDialog: { message: 'Delete this reservation? This cannot be undone.', action: () => this.setState({ reservations: this.state.reservations.filter(r => r.id !== id) }) } });
+  }
+
+  jumpToRoom(roomId) {
+    this.setState({ adminTab: 'rooms', highlightRoomId: roomId, highlightCustomerId: null });
+    clearTimeout(this._roomHlTimer);
+    this._roomHlTimer = setTimeout(() => this.setState({ highlightRoomId: null }), 450);
+  }
+  jumpToCustomer(customerId) {
+    this.setState({ adminTab: 'customers', highlightCustomerId: customerId, highlightRoomId: null });
+    clearTimeout(this._custHlTimer);
+    this._custHlTimer = setTimeout(() => this.setState({ highlightCustomerId: null }), 450);
+  }
+
+  closeConfirmDialog = () => this.setState({ confirmDialog: null });
+  closeErrorDialog = () => this.setState({ errorDialog: null });
+  runConfirmDialog = () => { const cd = this.state.confirmDialog; if (cd && cd.action) cd.action(); this.setState({ confirmDialog: null }); };
+
+  hotelLeaveKeepEditing = () => this.setState({ hotelLeaveDialog: null });
+  hotelLeaveDiscard = () => {
+    const action = this.state.hotelLeaveDialog.action;
+    this.setState({ hotelDraft: { ...this.state.hotel }, hotelLeaveDialog: null });
+    action();
+  };
+  hotelLeaveSaveAndContinue = () => {
+    const action = this.state.hotelLeaveDialog.action;
+    this.setState({ hotel: { ...this.state.hotelDraft }, hotelLeaveDialog: null, hotelSavedFlash: true });
+    action();
+    setTimeout(() => this.setState({ hotelSavedFlash: false }), 1800);
+  };
+
+  setHotelDraftName = (e) => this.setState({ hotelDraft: { ...this.state.hotelDraft, name: e.target.value } });
+  setHotelDraftAddress = (e) => this.setState({ hotelDraft: { ...this.state.hotelDraft, address: e.target.value } });
+  saveHotel = () => {
+    this.setState({ hotel: { ...this.state.hotelDraft }, hotelSavedFlash: true });
+    setTimeout(() => this.setState({ hotelSavedFlash: false }), 1800);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const linkActive = 'color:#a6522d;font-weight:700';
+    const linkInactive = 'color:#262420;font-weight:500';
+    const tabActive = 'background:#a6522d;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap';
+    const tabInactive = 'background:#fff;color:#262420;border:1px solid #d6cfc0;border-radius:8px;padding:9px 16px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap';
+    const demoActive = 'background:#a6522d;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap';
+    const demoInactive = 'background:transparent;color:#736e64;border:none;border-radius:6px;padding:5px 10px;font-weight:500;font-size:12px;cursor:pointer;white-space:nowrap';
+
+    const filterDateError = (s.filterCheckIn && s.filterCheckOut && s.filterCheckOut <= s.filterCheckIn) ? 'Check-out must be after check-in.' : '';
+    const min = s.filterMinPrice !== '' ? Number(s.filterMinPrice) : null;
+    const max = s.filterMaxPrice !== '' ? Number(s.filterMaxPrice) : null;
+    const filteredRooms = s.rooms.filter(room => {
+      if (s.filterType !== 'all' && room.type !== s.filterType) return false;
+      if (min !== null && room.price < min) return false;
+      if (max !== null && room.price > max) return false;
+      if (s.filterCheckIn && s.filterCheckOut && !filterDateError) {
+        const blocked = s.reservations.some(r => r.roomId === room.id && r.status === 'Confirmed' && this.overlaps(s.filterCheckIn, s.filterCheckOut, r.checkIn, r.checkOut));
+        if (blocked) return false;
+      }
+      return true;
+    }).map(room => ({ ...room, photoSlotId: 'room-photo-' + room.id, viewAndBook: () => this.startBooking(room.id) }));
+
+    const bookingRoom = s.rooms.find(r => r.id === s.bookingRoomId) || { number: '', type: '', price: 0 };
+    const bookingNights = (s.bookingCheckIn && s.bookingCheckOut && s.bookingCheckOut > s.bookingCheckIn) ? this.nightsBetween(s.bookingCheckIn, s.bookingCheckOut) : 0;
+    const bookingTotal = bookingNights * (bookingRoom.price || 0);
+    let bookingDateIssue = '';
+    if (s.bookingCheckIn && s.bookingCheckOut) {
+      if (s.bookingCheckOut <= s.bookingCheckIn) bookingDateIssue = 'Check-out must be after check-in.';
+      else if (s.reservations.some(r => r.roomId === s.bookingRoomId && r.status === 'Confirmed' && this.overlaps(s.bookingCheckIn, s.bookingCheckOut, r.checkIn, r.checkOut))) bookingDateIssue = 'This room is already booked for part of that date range.';
+    }
+    const bookingDisplayError = s.bookingError || bookingDateIssue;
+
+    const statusStyle = (status) => status === 'Confirmed'
+      ? 'background:#e6f2ea;color:#2f6b45;border:1px solid #bcdcc7;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600'
+      : 'background:#fbeceb;color:#a23a32;border:1px solid #f0c4bf;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600';
+
+    const myReservations = s.reservations.filter(r => r.customerId === s.currentCustomerId).map(r => {
+      const room = s.rooms.find(rm => rm.id === r.roomId) || { number: '?', type: '?' };
+      return { ...r, roomNumber: room.number, roomType: room.type, statusStyle: statusStyle(r.status), canCancel: r.status === 'Confirmed', cancel: () => this.cancelMyReservation(r.id) };
+    });
+
+    const roomsSorted = this.sortItems(s.rooms, s.roomsSort).map(room => ({
+      ...room,
+      rowHighlightStyle: 'transition:background-color 0.5s ease;background:' + (s.highlightRoomId === room.id ? '#f3e6de' : 'transparent'),
+      edit: () => this.openEditRoomById(room.id),
+      remove: () => this.removeRoomById(room.id)
+    }));
+
+    const reservationsJoined = s.reservations.map(r => {
+      const cust = s.customers.find(c => c.id === r.customerId) || { firstName: '?', lastName: '' };
+      const room = s.rooms.find(rm => rm.id === r.roomId) || { number: '?' };
+      return { ...r, customerName: cust.firstName + ' ' + cust.lastName, roomNumber: room.number };
+    });
+    const reservationsSorted = this.sortItems(reservationsJoined, s.reservationsSort).map(r => ({
+      ...r,
+      statusStyle: statusStyle(r.status),
+      canCancel: r.status === 'Confirmed',
+      jumpCustomer: () => this.jumpToCustomer(r.customerId),
+      jumpRoom: () => this.jumpToRoom(r.roomId),
+      edit: () => this.openEditReservationById(r.id),
+      cancel: () => this.cancelReservationById(r.id),
+      remove: () => this.removeReservationById(r.id)
+    }));
+
+    const customersSorted = this.sortItems(s.customers, s.customersSort).map(c => ({
+      ...c,
+      rowHighlightStyle: 'transition:background-color 0.5s ease;background:' + (s.highlightCustomerId === c.id ? '#f3e6de' : 'transparent'),
+      edit: () => this.openEditCustomerById(c.id),
+      remove: () => this.removeCustomerById(c.id)
+    }));
+
+    const currentCustomer = s.customers.find(c => c.id === s.currentCustomerId);
+
+    return {
+      hotel: s.hotel, hotelDraft: s.hotelDraft,
+      isPublicRole: s.role === 'public', isCustomerRole: s.role === 'customer', isAdminRole: s.role === 'admin',
+      isLoggedIn: s.role !== 'public',
+      currentUserLabel: s.role === 'admin' ? 'Admin' : (currentCustomer ? currentCustomer.firstName + ' ' + currentCustomer.lastName : ''),
+      photoInteractivity: s.role === 'admin' ? 'auto' : 'none',
+      homeLinkStyle: s.view === 'home' ? linkActive : linkInactive,
+      browseLinkStyle: s.view === 'browse' ? linkActive : linkInactive,
+      reservationsLinkStyle: s.view === 'reservations' ? linkActive : linkInactive,
+      adminLinkStyle: s.view === 'admin' ? linkActive : linkInactive,
+      demoPublicStyle: s.role === 'public' ? demoActive : demoInactive,
+      demoCustomerStyle: s.role === 'customer' ? demoActive : demoInactive,
+      demoAdminStyle: s.role === 'admin' ? demoActive : demoInactive,
+      goHome: this.goHome, goBrowse: this.goBrowse, goAdmin: this.goAdmin, goReservations: this.goReservations, goSignIn: this.goSignIn,
+      doLogout: this.doLogout, switchToPublic: this.switchToPublic, switchToCustomer: this.switchToCustomer, switchToAdmin: this.switchToAdmin,
+
+      isHomeView: s.view === 'home', isAuthView: s.view === 'auth', isBrowseView: s.view === 'browse', isBookingView: s.view === 'booking', isReservationsView: s.view === 'reservations', isAdminView: s.view === 'admin',
+
+      authTitle: s.authMode === 'signin' ? 'Sign in' : 'Create your account',
+      isSignIn: s.authMode === 'signin', isSignUp: s.authMode === 'signup',
+      authSignInTabStyle: s.authMode === 'signin' ? tabActive : tabInactive,
+      authSignUpTabStyle: s.authMode === 'signup' ? tabActive : tabInactive,
+      setAuthSignIn: this.setAuthSignIn, setAuthSignUp: this.setAuthSignUp,
+      authError: s.authError,
+      signinEmail: s.signinEmail, signinPassword: s.signinPassword, setSigninEmail: this.setSigninEmail, setSigninPassword: this.setSigninPassword,
+      signupFirst: s.signupFirst, signupLast: s.signupLast, signupEmail: s.signupEmail, signupPassword: s.signupPassword,
+      setSignupFirst: this.setSignupFirst, setSignupLast: this.setSignupLast, setSignupEmail: this.setSignupEmail, setSignupPassword: this.setSignupPassword,
+      submitSignIn: this.submitSignIn, submitSignUp: this.submitSignUp,
+
+      filterCheckIn: s.filterCheckIn, filterCheckOut: s.filterCheckOut, filterType: s.filterType, filterMinPrice: s.filterMinPrice, filterMaxPrice: s.filterMaxPrice,
+      setFilterCheckIn: this.setFilterCheckIn, setFilterCheckOut: this.setFilterCheckOut, setFilterType: this.setFilterType,
+      setFilterMinPrice: this.setFilterMinPrice, setFilterMaxPrice: this.setFilterMaxPrice, clearFilters: this.clearFilters,
+      filterDateError, filteredRooms, noRoomsFound: filteredRooms.length === 0,
+
+      bookingRoom, bookingCheckIn: s.bookingCheckIn, bookingCheckOut: s.bookingCheckOut, bookingError: bookingDisplayError,
+      setBookingCheckIn: this.setBookingCheckIn, setBookingCheckOut: this.setBookingCheckOut, confirmBooking: this.confirmBooking,
+      bookingNightsLabel: bookingNights + ' night' + (bookingNights === 1 ? '' : 's') + ' \u00d7 $' + (bookingRoom.price || 0) + '/night',
+      bookingTotal,
+
+      bookingSuccess: s.bookingSuccess, myReservations, hasMyReservations: myReservations.length > 0, noMyReservations: myReservations.length === 0,
+
+      adminTab: s.adminTab,
+      isRoomsTab: s.adminTab === 'rooms', isReservationsTab: s.adminTab === 'reservations', isCustomersTab: s.adminTab === 'customers', isHotelTab: s.adminTab === 'hotel',
+      adminTabRoomsStyle: s.adminTab === 'rooms' ? tabActive : tabInactive,
+      adminTabReservationsStyle: s.adminTab === 'reservations' ? tabActive : tabInactive,
+      adminTabCustomersStyle: s.adminTab === 'customers' ? tabActive : tabInactive,
+      adminTabHotelStyle: s.adminTab === 'hotel' ? tabActive : tabInactive,
+      setRoomsTab: this.setRoomsTab, setReservationsTab: this.setReservationsTab, setCustomersTab: this.setCustomersTab, setHotelTab: this.setHotelTab,
+
+      sortedRooms: roomsSorted,
+      roomsSortNumberArrow: this.sortArrow(s.roomsSort, 'number'), roomsSortTypeArrow: this.sortArrow(s.roomsSort, 'type'), roomsSortPriceArrow: this.sortArrow(s.roomsSort, 'price'),
+      sortRoomsByNumber: this.sortRoomsByNumber, sortRoomsByType: this.sortRoomsByType, sortRoomsByPrice: this.sortRoomsByPrice,
+      openNewRoom: this.openNewRoom,
+
+      sortedReservations: reservationsSorted,
+      resSortCustomerArrow: this.sortArrow(s.reservationsSort, 'customerName'), resSortRoomArrow: this.sortArrow(s.reservationsSort, 'roomNumber'),
+      resSortCheckInArrow: this.sortArrow(s.reservationsSort, 'checkIn'), resSortCheckOutArrow: this.sortArrow(s.reservationsSort, 'checkOut'),
+      resSortPriceArrow: this.sortArrow(s.reservationsSort, 'price'), resSortStatusArrow: this.sortArrow(s.reservationsSort, 'status'),
+      resSortBookingDateArrow: this.sortArrow(s.reservationsSort, 'bookingDate'), sortResByBookingDate: this.sortResByBookingDate,
+      sortResByCustomer: this.sortResByCustomer, sortResByRoom: this.sortResByRoom, sortResByCheckIn: this.sortResByCheckIn, sortResByCheckOut: this.sortResByCheckOut, sortResByPrice: this.sortResByPrice, sortResByStatus: this.sortResByStatus,
+
+      sortedCustomers: customersSorted,
+      custSortFirstArrow: this.sortArrow(s.customersSort, 'firstName'), custSortLastArrow: this.sortArrow(s.customersSort, 'lastName'), custSortEmailArrow: this.sortArrow(s.customersSort, 'email'),
+      sortCustByFirst: this.sortCustByFirst, sortCustByLast: this.sortCustByLast, sortCustByEmail: this.sortCustByEmail,
+
+      hotelSavedFlash: s.hotelSavedFlash, hotelHasUnsavedChanges: this.hotelDirty(), setHotelDraftName: this.setHotelDraftName, setHotelDraftAddress: this.setHotelDraftAddress, saveHotel: this.saveHotel,
+
+      roomDialog: s.roomDialog, closeRoomDialog: this.closeRoomDialog, setRoomDialogNumber: this.setRoomDialogNumber, setRoomDialogType: this.setRoomDialogType, setRoomDialogPrice: this.setRoomDialogPrice, saveRoomDialog: this.saveRoomDialog,
+      customerDialog: s.customerDialog, closeCustomerDialog: this.closeCustomerDialog, setCustomerDialogFirst: this.setCustomerDialogFirst, setCustomerDialogLast: this.setCustomerDialogLast, setCustomerDialogEmail: this.setCustomerDialogEmail, saveCustomerDialog: this.saveCustomerDialog,
+      reservationDialog: s.reservationDialog, closeReservationDialog: this.closeReservationDialog, setReservationDialogCheckIn: this.setReservationDialogCheckIn, setReservationDialogCheckOut: this.setReservationDialogCheckOut, setReservationDialogStatus: this.setReservationDialogStatus, saveReservationDialog: this.saveReservationDialog,
+      confirmDialog: s.confirmDialog, closeConfirmDialog: this.closeConfirmDialog, runConfirmDialog: this.runConfirmDialog,
+      errorDialog: s.errorDialog, closeErrorDialog: this.closeErrorDialog,
+      isAdminPhoto: s.role === 'admin', isNotAdminPhoto: s.role !== 'admin',
+      hotelLeaveDialog: s.hotelLeaveDialog, hotelLeaveKeepEditing: this.hotelLeaveKeepEditing, hotelLeaveDiscard: this.hotelLeaveDiscard, hotelLeaveSaveAndContinue: this.hotelLeaveSaveAndContinue
+    };
+  }
+}
+
+</script>
+</body>
+</html>
