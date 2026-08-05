@@ -10,11 +10,13 @@ public class HotelController : ControllerBase
 {
     private readonly GetHotel _getHotel;
     private readonly UpdateHotel _updateHotel;
+    private readonly UploadHotelImage _uploadHotelImage;
 
-    public HotelController(GetHotel getHotel, UpdateHotel updateHotel)
+    public HotelController(GetHotel getHotel, UpdateHotel updateHotel, UploadHotelImage uploadHotelImage)
     {
         _getHotel = getHotel;
         _updateHotel = updateHotel;
+        _uploadHotelImage = uploadHotelImage;
     }
 
     [HttpGet]
@@ -31,5 +33,27 @@ public class HotelController : ControllerBase
     {
         await _updateHotel.ExecuteAsync(request);
         return Ok();
+    }
+
+    [HttpPost("image")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
+    {
+        try
+        {
+            var request = new ImageUploadRequest
+            {
+                Content = file.OpenReadStream(),
+                ContentType = file.ContentType,
+                Length = file.Length
+            };
+
+            var dto = await _uploadHotelImage.ExecuteAsync(request);
+            return Ok(dto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

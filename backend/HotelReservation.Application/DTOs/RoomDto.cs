@@ -13,4 +13,6 @@ public class RoomDto
     public decimal PricePerNight { get; set; }
 
     public Guid HotelId { get; set; }
+
+    public string? ImageUrl { get; set; }
 }

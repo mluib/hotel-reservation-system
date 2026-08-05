@@ -23,7 +23,8 @@ public class GetRoomById
             Number = room.Number,
             Type = room.Type,
             PricePerNight = room.PricePerNight,
-            HotelId = room.HotelId
+            HotelId = room.HotelId,
+            ImageUrl = room.ImageUrl
         };
     }
 }

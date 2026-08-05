@@ -7,6 +7,7 @@ using HotelReservation.Application.Reservations;
 using HotelReservation.Application.Rooms;
 using HotelReservation.Infrastructure.Persistence;
 using HotelReservation.Infrastructure.Repositories;
+using HotelReservation.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Api
@@ -129,11 +130,19 @@ namespace HotelReservation.Api
                 builder.Services.AddScoped<GetRoomById>();
                 builder.Services.AddScoped<UpdateRoom>();
                 builder.Services.AddScoped<DeleteRoom>();
+                builder.Services.AddScoped<UploadRoomImage>();
 
                 // Hotel Use-Case
                 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
                 builder.Services.AddScoped<GetHotel>();
                 builder.Services.AddScoped<UpdateHotel>();
+                builder.Services.AddScoped<UploadHotelImage>();
+
+                // Image storage (local disk, under wwwroot)
+                var webRootPath = builder.Environment.WebRootPath
+                    ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+                builder.Services.AddSingleton<IImageStorageService>(
+                    _ => new ImageStorageService(webRootPath));
             }
 
             var app = builder.Build();
@@ -151,6 +160,7 @@ namespace HotelReservation.Api
                 }
 
                 app.UseHttpsRedirection();
+                app.UseStaticFiles();
 
                 app.UseAuthentication();
                 app.UseAuthorization();

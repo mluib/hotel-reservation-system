@@ -115,3 +115,12 @@ Implemented the three flagged decisions from the wireframe review, in parallel w
 - Asked whether the room date filter could run inside the database query instead of in memory -> moved the date-availability filter into the database query.
 - Asked whether the price-field migration had been applied to the database -> confirmed it hadn't been yet, then applied it after checking with the user first.
 - User pointed out several bullets read as user decisions when they were actually the agent's own unprompted implementation choices, and that entries carried too much code-level detail -> rewrote the whole file to the stricter one-arrow schema, split same-day entries into topic-based sections, and updated the standing instruction and memory to match.
+
+## 2026-08-05 — Phase 2 backend contract pass: room/hotel photo upload (Claude Code)
+
+The fourth flagged item from the wireframe review, handed over as a scoped brief from the parallel design session.
+
+- Asked Claude Code to implement admin-only photo upload for the room and hotel records, one photo each, local disk storage -> implemented across all layers: domain fields settable only through dedicated methods, application-layer validation and use cases, a disk-backed storage service, admin-only upload endpoints, and static file serving so the stored images are reachable.
+- Decided the saved file name and extension should come from the server, not the client -> derived the extension from the validated content type and keyed the file name to the entity's own id, so a re-upload always overwrites the same file rather than accumulating client-supplied names.
+- Considered giving the storage service a direct dependency on ASP.NET Core's hosting abstractions to locate the upload folder -> resolved the folder path in the Api layer instead, keeping the storage service a plain class with no web-framework dependency.
+- Generated the accompanying database migration and added unit test coverage (valid upload, wrong content type, oversized file, entity not found) -> ran the full three-tier test suite afterward, all green.

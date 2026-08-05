@@ -12,6 +12,8 @@ public class Hotel
 
     public string Address { get; private set; }
 
+    public string? ImageUrl { get; private set; }
+
     public List<Room> Rooms { get; private set; }
 
 
@@ -39,5 +41,18 @@ public class Hotel
 
         Name = name;
         Address = address;
+    }
+
+    public void SetImage(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("Image URL is required.");
+
+        ImageUrl = url;
+    }
+
+    public void ClearImage()
+    {
+        ImageUrl = null;
     }
 }

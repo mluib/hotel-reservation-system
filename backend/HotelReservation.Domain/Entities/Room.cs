@@ -19,6 +19,8 @@ public class Room
 
     public Guid HotelId { get; private set; }
 
+    public string? ImageUrl { get; private set; }
+
     public List<Reservation> Reservations { get; private set; }
 
 
@@ -54,5 +56,18 @@ public class Room
         Type = type;
         PricePerNight = pricePerNight;
         HotelId = hotelId;
+    }
+
+    public void SetImage(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("Image URL is required.");
+
+        ImageUrl = url;
+    }
+
+    public void ClearImage()
+    {
+        ImageUrl = null;
     }
 }
