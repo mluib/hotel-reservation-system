@@ -5,16 +5,21 @@ namespace HotelReservation.Application.Rooms;
 public class DeleteRoom
 {
     private readonly IRoomRepository _repository;
+    private readonly IReservationRepository _reservationRepository;
 
-    public DeleteRoom(IRoomRepository repository)
+    public DeleteRoom(IRoomRepository repository, IReservationRepository reservationRepository)
     {
         _repository = repository;
+        _reservationRepository = reservationRepository;
     }
 
     public async Task ExecuteAsync(System.Guid id)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null) throw new InvalidOperationException("Room not found.");
+
+        var hasReservations = await _reservationRepository.ExistsForRoomAsync(id);
+        if (hasReservations) throw new InvalidOperationException("Cannot delete a room that has reservations.");
 
         await _repository.DeleteAsync(existing);
     }

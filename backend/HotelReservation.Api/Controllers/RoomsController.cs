@@ -69,8 +69,15 @@ public class RoomsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(System.Guid id)
     {
-        await _deleteRoom.ExecuteAsync(id);
-        return Ok();
+        try
+        {
+            await _deleteRoom.ExecuteAsync(id);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpPost("{id}/image")]

@@ -52,7 +52,14 @@ public class CustomersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(System.Guid id)
     {
-        await _deleteCustomer.ExecuteAsync(id);
-        return Ok();
+        try
+        {
+            await _deleteCustomer.ExecuteAsync(id);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

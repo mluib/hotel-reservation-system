@@ -99,7 +99,7 @@ This is the living version of the log — reconstructed and dated from the raw C
 - Found the redesign's cross-tab highlight still lingering too long and the photo-upload control still visible to non-admin roles -> fixed both: a short (~1s) fade, and non-admin roles now see a plain placeholder instead of an upload prompt.
 - Asked for reservation Cancel to go through the same confirm dialog as Delete -> done, both actions now share it.
 - Asked for check-in/check-out validation errors to show while typing instead of only after submitting -> fixed, shows live once both dates are entered.
-- Tightened the delete flow so removing a room or customer with existing reservations is blocked with a server-rejection error dialog, instead of silently allowed.
+- Asked for deleting a room or customer to be blocked when it still has reservations, verified server-side rather than just skipping the confirm dialog -> the mockup's delete flow now shows a server-rejection error dialog instead of a silent confirm.
 
 ## 2026-08-03 — Phase 2 backend contract pass: room filtering, reservation price, cancel (Claude Code)
 
@@ -108,8 +108,7 @@ Implemented the three flagged decisions from the wireframe review, in parallel w
 - Asked Claude Code to inventory the current rooms/reservations code before implementing anything -> confirmed rooms had no filtering or availability concept, the reservation repository had no update method, and reservation cancellation already existed as a tested domain method that was never wired up to the API.
 - Implemented server-side room filtering -> the rooms listing endpoint now accepts type, price-range, and date-range query parameters, filtered at the database level.
 - Implemented the reservation price field -> reservations now store the room's price at the time of booking, added the accompanying database migration.
-- Implemented the cancel-reservation endpoint -> added an action that verifies the caller owns the reservation before cancelling it.
-- Ran the full test suite after the change -> all tests passed, added new coverage for the price field and the cancel ownership check.
+- Implemented the cancel-reservation endpoint -> added an action that verifies the caller owns the reservation before cancelling it; ran the full test suite afterward, all green, with added coverage for the price field and the cancel ownership check.
 - Asked whether the ownership check was still needed given admins already have a hard-delete option -> clarified it protects customers from cancelling each other's reservations, independent of admin's separate path.
 - Pointed out hard-deleting now destroys the reservation's price history, and asked whether admins should get the softer cancel action too -> extended the cancel endpoint to admins, bypassing the ownership check for that role.
 - Asked whether the room date filter could run inside the database query instead of in memory -> moved the date-availability filter into the database query.
@@ -122,5 +121,10 @@ The fourth flagged item from the wireframe review, handed over as a scoped brief
 
 - Asked Claude Code to implement admin-only photo upload for the room and hotel records, one photo each, local disk storage -> implemented across all layers: domain fields settable only through dedicated methods, application-layer validation and use cases, a disk-backed storage service, admin-only upload endpoints, and static file serving so the stored images are reachable.
 - Decided the saved file name and extension should come from the server, not the client -> derived the extension from the validated content type and keyed the file name to the entity's own id, so a re-upload always overwrites the same file rather than accumulating client-supplied names.
-- Considered giving the storage service a direct dependency on ASP.NET Core's hosting abstractions to locate the upload folder -> resolved the folder path in the Api layer instead, keeping the storage service a plain class with no web-framework dependency.
-- Generated the accompanying database migration and added unit test coverage (valid upload, wrong content type, oversized file, entity not found) -> ran the full three-tier test suite afterward, all green.
+- Considered giving the storage service a direct dependency on ASP.NET Core's hosting abstractions to locate the upload folder -> resolved the folder path in the Api layer instead, keeping the storage service a plain class with no web-framework dependency; generated the accompanying database migration and added matching unit test coverage, full three-tier suite green afterward.
+
+## 2026-08-05 — Phase 2 backend contract pass: reject deleting rooms/customers with reservations (Claude Code)
+
+A second item flagged from the same mockup review; asked to implement it directly in this session rather than as another brief to the backend session.
+
+- Asked to implement the fix directly in this session -> both delete use cases now check for related reservations first (any status — a cancelled reservation is still a historical record that would be orphaned) and reject with a clear error instead of letting the database cascade or throw a raw exception, with matching unit test coverage added and the full three-tier suite green afterward.
