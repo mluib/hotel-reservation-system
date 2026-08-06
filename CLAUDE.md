@@ -24,11 +24,15 @@ Which AI tool did what, across the project's history:
 
 **Every session in this repo must proactively keep [`docs/WORKFLOW_LOG.md`](docs/WORKFLOW_LOG.md) up to date** — this is what makes the log complete without the user having to remember to ask for it.
 
-- After any meaningful prompt, decision, correction, or non-trivial piece of work in a session, append a bullet in the format: `[what was asked] -> [what was produced]` — **exactly one `->` per bullet**. A follow-up correction or refinement is its own bullet in the same form, never a clause tacked onto the original one (it's a separate ask, even seconds later).
+- After any meaningful prompt, decision, correction, or non-trivial piece of work, append a bullet: `[developer input] -> [what resulted]` — **exactly one `->` per bullet**.
+  - **Before the arrow: developer input only** — something the developer actually said, asked, decided, corrected, or reported in the conversation. Never an agent action, an agent-found event, or an autonomous continuation dressed up as if it were requested. If a stretch of work has no developer input driving it, it doesn't get its own bullet — fold it into the *after* side of the bullet for whichever developer input actually set it in motion, even if that was a few turns earlier.
+  - After the arrow: everything else — what was produced, found, decided, or done, including the agent's own unprompted implementation choices. Never phrase an agent's own choice as if the developer requested or decided it.
+  - A follow-up correction, refinement, or decision *from the developer* is its own bullet, never a clause tacked onto the original one — it's a separate ask, even seconds later. Routine follow-through with no real decision point (running the test suite, adding the test coverage a change obviously needs, following an existing convention) isn't a decision point either — fold it into the bullet for the substantive work it was part of rather than giving it its own line.
 - Describe outcomes and reasoning, not specific classes/methods/files — that detail already lives in the diffs and commits; the log needs to stay legible to a reader who won't open the code (e.g. an employer reviewing the CV writeup).
-- Never write "I"/"me"/"mine" for the agent's own actions — name the tool ("Claude Code"/"Copilot") or phrase it passively instead.
+- Never write "I"/"me"/"mine" for the agent's own actions — name the tool ("Claude Code"/"Copilot") or phrase it passively instead. This applies generally, not just to the log.
 - Prefix each entry's date (or date-grouped section) with the actual date the work happened. If a single day covers more than one topic (e.g. a design pass and a separate backend pass), use separate date-headed sections per topic rather than one mixed list.
 - Keep entries to a few bullet points — headwords/short sentences are fine. The log should have no gaps (every session's notable work should be represented), but it does not need prose detail; save that for the Phase 7 final writeup.
+- Stale entries — including from prior sessions, not just the current one — are fair game to rewrite into this format when spotted, not just flagged.
 - Do this without being asked each time — it's a standing expectation for this repo, not a one-off task.
 - `docs/raw-ai-logs/` (the original ChatGPT/Copilot chat exports) is a frozen historical archive — don't edit it; it already fed into `WORKFLOW_LOG.md` once and doesn't need to change again.
 
