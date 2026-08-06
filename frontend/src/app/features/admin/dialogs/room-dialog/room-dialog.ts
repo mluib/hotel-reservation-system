@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RoomsService } from '../../../../core/services/rooms.service';
 import { HotelService } from '../../../../core/services/hotel.service';
@@ -23,8 +23,17 @@ export class RoomDialog implements OnInit {
   protected readonly roomTypes = ROOM_TYPES;
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
-  protected readonly uploading = signal(false);
-  protected readonly resolveImageUrl = resolveImageUrl;
+
+  // A selected file is only staged/previewed here — the actual upload happens
+  // together with Save, as one action, instead of firing immediately on selection
+  // (which used to close the dialog early and discard any other unsaved edits).
+  protected readonly pendingImageFile = signal<File | null>(null);
+
+  protected readonly previewUrl = computed(() => {
+    const file = this.pendingImageFile();
+    if (file) return URL.createObjectURL(file);
+    return resolveImageUrl(this.room()?.imageUrl, this.roomsService.imageVersion());
+  });
 
   protected readonly form = this.fb.nonNullable.group({
     number: ['', Validators.required],
@@ -49,6 +58,11 @@ export class RoomDialog implements OnInit {
         pricePerNight: String(room.pricePerNight),
       });
     }
+  }
+
+  protected onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) this.pendingImageFile.set(file);
   }
 
   protected save(): void {
@@ -78,28 +92,28 @@ export class RoomDialog implements OnInit {
       this.error.set(extractErrorMessage(err));
     };
 
+    // Room number/type/price are saved first; if a photo was staged, it's uploaded
+    // right after using whichever id now applies (the existing room's, or the one
+    // just returned by create) — both happen as one "Save", not two separate steps.
+    const finishWithId = (id: string) => {
+      const file = this.pendingImageFile();
+      if (!file) {
+        this.saved.emit();
+        return;
+      }
+      this.roomsService.uploadImage(id, file).subscribe({ next: () => this.saved.emit(), error: onError });
+    };
+
     if (room) {
-      this.roomsService.update(room.id, payload).subscribe({ next: () => this.saved.emit(), error: onError });
+      this.roomsService.update(room.id, payload).subscribe({
+        next: () => finishWithId(room.id),
+        error: onError,
+      });
     } else {
-      this.roomsService.create(payload).subscribe({ next: () => this.saved.emit(), error: onError });
+      this.roomsService.create(payload).subscribe({
+        next: (created) => finishWithId(created.id),
+        error: onError,
+      });
     }
-  }
-
-  protected onFileSelected(event: Event): void {
-    const room = this.room();
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!room || !file) return;
-
-    this.uploading.set(true);
-    this.roomsService.uploadImage(room.id, file).subscribe({
-      next: () => {
-        this.uploading.set(false);
-        this.saved.emit(); // let the parent refetch so the new photo shows everywhere
-      },
-      error: (err) => {
-        this.uploading.set(false);
-        this.error.set(extractErrorMessage(err));
-      },
-    });
   }
 }

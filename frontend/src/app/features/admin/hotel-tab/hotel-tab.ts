@@ -19,11 +19,20 @@ export class HotelTab {
   private readonly fb = inject(FormBuilder);
   private readonly hotelService = inject(HotelService);
 
-  protected readonly resolveImageUrl = resolveImageUrl;
-  protected readonly currentImageUrl = computed(() => resolveImageUrl(this.hotelService.hotel()?.imageUrl));
   protected readonly savedFlash = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly uploading = signal(false);
+  protected readonly submitting = signal(false);
+
+  // A selected file is only staged/previewed here — the actual upload happens
+  // together with Save (see performSave below), as one action, not immediately on
+  // selection.
+  protected readonly pendingImageFile = signal<File | null>(null);
+
+  protected readonly previewUrl = computed(() => {
+    const file = this.pendingImageFile();
+    if (file) return URL.createObjectURL(file);
+    return resolveImageUrl(this.hotelService.hotel()?.imageUrl, this.hotelService.imageVersion());
+  });
 
   // Set only while a router navigation away from this tab is waiting on the user's
   // answer in the unsaved-changes dialog below (see unsaved-hotel-changes.guard.ts).
@@ -41,9 +50,13 @@ export class HotelTab {
   });
 
   // Public: unsaved-hotel-changes.guard.ts (outside this class) needs to read it.
+  // A staged-but-not-yet-uploaded photo counts as unsaved too — leaving without
+  // saving would silently drop it.
   readonly hasUnsavedChanges = computed(() => {
     const v = this.formValue();
-    return v.name !== this.savedName() || v.address !== this.savedAddress();
+    return (
+      v.name !== this.savedName() || v.address !== this.savedAddress() || this.pendingImageFile() !== null
+    );
   });
 
   constructor() {
@@ -64,30 +77,16 @@ export class HotelTab {
       });
   }
 
-  protected save(): void {
-    const v = this.form.getRawValue();
-    this.hotelService.update(v).subscribe({
-      next: () => {
-        this.savedName.set(v.name);
-        this.savedAddress.set(v.address);
-        this.flashSaved();
-      },
-      error: (err) => this.error.set(extractErrorMessage(err)),
-    });
-  }
-
   protected onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+    if (file) this.pendingImageFile.set(file);
+  }
 
-    this.uploading.set(true);
-    this.hotelService.uploadImage(file).subscribe({
-      next: () => this.uploading.set(false),
-      error: (err) => {
-        this.uploading.set(false);
-        this.error.set(extractErrorMessage(err));
-      },
-    });
+  protected save(): void {
+    this.performSave(
+      () => this.flashSaved(),
+      (err) => this.error.set(extractErrorMessage(err)),
+    );
   }
 
   /** Called by unsavedHotelChangesGuard; renders the 3-way dialog until resolved. */
@@ -102,24 +101,59 @@ export class HotelTab {
 
   protected discard(): void {
     this.form.setValue({ name: this.savedName(), address: this.savedAddress() });
+    this.pendingImageFile.set(null);
     this.leaveResolver()?.(true);
     this.leaveResolver.set(null);
   }
 
   protected saveAndContinue(): void {
-    const v = this.form.getRawValue();
-    this.hotelService.update(v).subscribe({
-      next: () => {
-        this.savedName.set(v.name);
-        this.savedAddress.set(v.address);
+    this.performSave(
+      () => {
         this.flashSaved();
         this.leaveResolver()?.(true);
         this.leaveResolver.set(null);
       },
-      error: (err) => {
+      (err) => {
         this.error.set(extractErrorMessage(err));
         this.leaveResolver()?.(false); // save failed — stay put rather than navigate away
         this.leaveResolver.set(null);
+      },
+    );
+  }
+
+  // Name/address are saved first; if a photo was staged, it's uploaded right after
+  // — both as one "Save changes" action rather than two separate steps.
+  private performSave(onSuccess: () => void, onError: (err: unknown) => void): void {
+    const v = this.form.getRawValue();
+    this.submitting.set(true);
+
+    this.hotelService.update(v).subscribe({
+      next: () => {
+        this.savedName.set(v.name);
+        this.savedAddress.set(v.address);
+
+        const file = this.pendingImageFile();
+        if (!file) {
+          this.submitting.set(false);
+          onSuccess();
+          return;
+        }
+
+        this.hotelService.uploadImage(file).subscribe({
+          next: () => {
+            this.pendingImageFile.set(null);
+            this.submitting.set(false);
+            onSuccess();
+          },
+          error: (err) => {
+            this.submitting.set(false);
+            onError(err);
+          },
+        });
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        onError(err);
       },
     });
   }

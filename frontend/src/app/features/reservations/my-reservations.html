@@ -13,6 +13,7 @@
           <th>Type</th>
           <th>Check-in</th>
           <th>Check-out</th>
+          <th>Nights</th>
           <th>Price</th>
           <th>Status</th>
           <th></th>
@@ -25,7 +26,8 @@
             <td>{{ row.roomType }}</td>
             <td>{{ row.checkIn | slice: 0 : 10 }}</td>
             <td>{{ row.checkOut | slice: 0 : 10 }}</td>
-            <td>${{ row.total }}</td>
+            <td>{{ row.nights }}</td>
+            <td>{{ row.total }}&euro;</td>
             <td>
               <span class="badge" [class.badge-confirmed]="row.status === 'Confirmed'" [class.badge-cancelled]="row.status === 'Cancelled'">{{
                 row.status

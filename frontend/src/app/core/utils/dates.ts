@@ -1,3 +1,13 @@
+// yyyy-MM-dd for today, in local time — used as the `min` on date inputs so past
+// dates can't be picked in the first place, rather than only rejected after the fact.
+export function todayIsoDate(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function nightsBetween(checkIn: string, checkOut: string): number {
   const ms = new Date(checkOut).getTime() - new Date(checkIn).getTime();
   return Math.round(ms / 86_400_000);

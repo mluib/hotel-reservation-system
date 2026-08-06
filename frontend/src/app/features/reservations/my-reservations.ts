@@ -6,12 +6,13 @@ import { ReservationsService } from '../../core/services/reservations.service';
 import { RoomsService } from '../../core/services/rooms.service';
 import { Reservation } from '../../core/models/reservation.model';
 import { Room } from '../../core/models/room.model';
-import { reservationTotal } from '../../core/utils/dates';
+import { nightsBetween, reservationTotal } from '../../core/utils/dates';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 
 interface ReservationRow extends Reservation {
   roomNumber: string;
   roomType: string;
+  nights: number;
   total: number;
 }
 
@@ -40,6 +41,7 @@ export class MyReservations implements OnInit {
         ...res,
         roomNumber: room?.number ?? '?',
         roomType: room?.type ?? '?',
+        nights: nightsBetween(res.checkIn, res.checkOut),
         total: reservationTotal(res.checkIn, res.checkOut, res.pricePerNight),
       };
     });

@@ -6,16 +6,17 @@ import { RoomsService } from '../../../core/services/rooms.service';
 import { CustomersService } from '../../../core/services/customers.service';
 import { AdminHighlightService } from '../admin-highlight.service';
 import { Reservation } from '../../../core/models/reservation.model';
-import { reservationTotal } from '../../../core/utils/dates';
+import { nightsBetween, reservationTotal } from '../../../core/utils/dates';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 
 interface ReservationRow extends Reservation {
   customerName: string;
   roomNumber: string;
+  nights: number;
   total: number;
 }
 
-type SortKey = 'customerName' | 'roomNumber' | 'checkIn' | 'checkOut' | 'total' | 'status';
+type SortKey = 'customerName' | 'roomNumber' | 'checkIn' | 'checkOut' | 'nights' | 'total' | 'status';
 
 @Component({
   selector: 'app-reservations-tab',
@@ -107,6 +108,7 @@ export class ReservationsTab implements OnInit {
             ...res,
             roomNumber: room?.number ?? '?',
             customerName: customer ? `${customer.firstName} ${customer.lastName}` : '?',
+            nights: nightsBetween(res.checkIn, res.checkOut),
             total: reservationTotal(res.checkIn, res.checkOut, res.pricePerNight),
           };
         }),

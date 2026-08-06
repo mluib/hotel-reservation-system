@@ -4,11 +4,11 @@
   <form [formGroup]="filterForm" class="filters">
     <div class="field">
       <label for="filter-checkin">Check-in</label>
-      <input id="filter-checkin" type="date" formControlName="checkIn" />
+      <input id="filter-checkin" type="date" formControlName="checkIn" [min]="minDate" />
     </div>
     <div class="field">
       <label for="filter-checkout">Check-out</label>
-      <input id="filter-checkout" type="date" formControlName="checkOut" />
+      <input id="filter-checkout" type="date" formControlName="checkOut" [min]="minDate" />
     </div>
     <div class="field">
       <label for="filter-type">Room type</label>
@@ -21,11 +21,11 @@
     </div>
     <div class="field price-field">
       <label for="filter-min">Min price</label>
-      <input id="filter-min" type="number" formControlName="minPrice" placeholder="$" />
+      <input id="filter-min" type="number" formControlName="minPrice" placeholder="€" />
     </div>
     <div class="field price-field">
       <label for="filter-max">Max price</label>
-      <input id="filter-max" type="number" formControlName="maxPrice" placeholder="$" />
+      <input id="filter-max" type="number" formControlName="maxPrice" placeholder="€" />
     </div>
     <button type="button" class="btn btn-secondary" (click)="clearFilters()">Clear filters</button>
   </form>
@@ -39,7 +39,7 @@
   <div class="room-grid">
     @for (room of rooms(); track room.id) {
       <div class="room-card">
-        @if (resolveImageUrl(room.imageUrl); as url) {
+        @if (resolveRoomImageUrl(room); as url) {
           <img [src]="url" alt="" class="room-photo" />
         } @else {
           <div class="room-photo photo-placeholder">Photo</div>
@@ -52,7 +52,7 @@
             }}</span>
           </div>
           <div class="room-price">
-            ${{ room.pricePerNight }}<span class="unit"> / night</span>
+            {{ room.pricePerNight }}&euro;<span class="unit"> / night</span>
           </div>
           <button type="button" class="btn btn-primary" style="width: 100%" (click)="viewAndBook(room)">
             View &amp; Book

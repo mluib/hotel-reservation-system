@@ -16,18 +16,18 @@ export const routes: Routes = [
   },
   {
     path: 'rooms/:roomId/book',
-    canActivate: [roleGuard('Customer')],
+    canActivate: [roleGuard('Customer', 'Booking is only available to customer accounts.')],
     loadComponent: () => import('./features/booking/booking-page').then((m) => m.BookingPage),
   },
   {
     path: 'reservations/mine',
-    canActivate: [roleGuard('Customer')],
+    canActivate: [roleGuard('Customer', 'My Reservations is only available to customer accounts.')],
     loadComponent: () =>
       import('./features/reservations/my-reservations').then((m) => m.MyReservations),
   },
   {
     path: 'admin',
-    canActivate: [roleGuard('Admin')],
+    canActivate: [roleGuard('Admin', 'The admin section is only available to admin accounts.')],
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },
   { path: '**', redirectTo: '' },

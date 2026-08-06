@@ -7,7 +7,8 @@ import { ReservationsService } from '../../core/services/reservations.service';
 import { Room } from '../../core/models/room.model';
 import { checkOutAfterCheckIn } from '../../core/validators/date-range.validator';
 import { extractErrorMessage } from '../../core/utils/http-error';
-import { nightsBetween } from '../../core/utils/dates';
+import { nightsBetween, todayIsoDate } from '../../core/utils/dates';
+import { RoomFilterState } from '../rooms/room-filter-state.service';
 
 @Component({
   selector: 'app-booking-page',
@@ -21,13 +22,20 @@ export class BookingPage implements OnInit {
   private readonly router = inject(Router);
   private readonly roomsService = inject(RoomsService);
   private readonly reservationsService = inject(ReservationsService);
+  private readonly filterState = inject(RoomFilterState);
 
   protected readonly room = signal<Room | null>(null);
   protected readonly submitting = signal(false);
   protected readonly serverError = signal<string | null>(null);
+  protected readonly minDate = todayIsoDate();
 
+  // Prefilled from the Rooms filter's dates when they were already set, so a
+  // customer who picked dates while browsing doesn't have to enter them again.
   protected readonly form = this.fb.nonNullable.group(
-    { checkIn: [''], checkOut: [''] },
+    {
+      checkIn: [this.filterState.value().checkIn],
+      checkOut: [this.filterState.value().checkOut],
+    },
     { validators: checkOutAfterCheckIn() },
   );
 
@@ -46,11 +54,11 @@ export class BookingPage implements OnInit {
   protected readonly total = computed(() => this.nights() * (this.room()?.pricePerNight ?? 0));
 
   // Recomputed on every change signal read, mirroring the mockup's inline
-  // "N nights x $price/night" label.
+  // "N nights x price€/night" label.
   protected readonly nightsLabel = computed(() => {
     const n = this.nights();
     const price = this.room()?.pricePerNight ?? 0;
-    return `${n} night${n === 1 ? '' : 's'} × $${price}/night`;
+    return `${n} night${n === 1 ? '' : 's'} × ${price}€/night`;
   });
 
   ngOnInit(): void {

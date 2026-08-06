@@ -7,6 +7,8 @@ import { RoomsService } from '../../core/services/rooms.service';
 import { ROOM_TYPES, Room, RoomType } from '../../core/models/room.model';
 import { checkOutAfterCheckIn } from '../../core/validators/date-range.validator';
 import { resolveImageUrl } from '../../core/utils/image-url';
+import { todayIsoDate } from '../../core/utils/dates';
+import { EMPTY_ROOM_FILTER, RoomFilterState } from './room-filter-state.service';
 
 @Component({
   selector: 'app-rooms-page',
@@ -19,18 +21,16 @@ export class RoomsPage implements OnInit {
   private readonly roomsService = inject(RoomsService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly filterState = inject(RoomFilterState);
 
   protected readonly roomTypes = ROOM_TYPES;
   protected readonly rooms = signal<Room[]>([]);
+  protected readonly minDate = todayIsoDate();
 
+  // Seeded from whatever was last selected (possibly on a previous visit), rather
+  // than always starting blank.
   protected readonly filterForm = this.fb.nonNullable.group(
-    {
-      checkIn: [''],
-      checkOut: [''],
-      type: ['all'],
-      minPrice: [''],
-      maxPrice: [''],
-    },
+    { ...this.filterState.value() },
     { validators: checkOutAfterCheckIn() },
   );
 
@@ -38,19 +38,22 @@ export class RoomsPage implements OnInit {
     this.fetch();
     this.filterForm.valueChanges
       .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
+      .subscribe((v) => {
+        this.filterState.value.set(v as typeof EMPTY_ROOM_FILTER);
         if (this.filterForm.valid) this.fetch();
       });
   }
 
-  protected resolveImageUrl = resolveImageUrl;
+  protected resolveRoomImageUrl(room: Room): string | null {
+    return resolveImageUrl(room.imageUrl, this.roomsService.imageVersion());
+  }
 
   protected viewAndBook(room: Room): void {
     this.router.navigate(['/rooms', room.id, 'book']);
   }
 
   protected clearFilters(): void {
-    this.filterForm.reset({ checkIn: '', checkOut: '', type: 'all', minPrice: '', maxPrice: '' });
+    this.filterForm.reset(EMPTY_ROOM_FILTER);
   }
 
   private fetch(): void {

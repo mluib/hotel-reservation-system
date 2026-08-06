@@ -60,6 +60,10 @@
           <label for="signup-password">Password</label>
           <input id="signup-password" type="password" formControlName="password" />
         </div>
+        <div class="field">
+          <label for="signup-confirm-password">Confirm password</label>
+          <input id="signup-confirm-password" type="password" formControlName="confirmPassword" />
+        </div>
         @if (error()) {
           <div class="banner banner-error">{{ error() }}</div>
         }

@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { AppNoticeService } from '../services/app-notice.service';
 import { Role } from '../models/auth.model';
 
 /** Requires any logged-in user; otherwise redirects to sign-in with a returnUrl. */
@@ -15,8 +16,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
 /** Requires a logged-in user with the given role. Not-logged-in goes to sign-in
  * (with returnUrl); logged in but wrong role goes home rather than looping back
- * to sign-in, since signing in again wouldn't change their role. */
-export const roleGuard = (role: Role): CanActivateFn => {
+ * to sign-in, since signing in again wouldn't change their role — but that's a
+ * silent bounce unless a deniedMessage is given, so it's shown as a dialog at the
+ * app root instead of leaving the user to guess why they landed on Home. */
+export const roleGuard = (role: Role, deniedMessage?: string): CanActivateFn => {
   return (_route, state) => {
     const auth = inject(AuthService);
     const router = inject(Router);
@@ -27,6 +30,7 @@ export const roleGuard = (role: Role): CanActivateFn => {
 
     if (auth.roles().includes(role)) return true;
 
+    if (deniedMessage) inject(AppNoticeService).show(deniedMessage);
     return router.createUrlTree(['/']);
   };
 };

@@ -1,6 +1,6 @@
 <nav class="nav">
   <div class="nav-left">
-    <span class="hotel-name">{{ hotelService.hotel()?.name || 'Hotel Reservation System' }}</span>
+    <a routerLink="/" class="hotel-name">{{ hotelService.hotel()?.name || 'Hotel Reservation System' }}</a>
     <a routerLink="/" routerLinkActive="nav-link-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
     <a routerLink="/rooms" routerLinkActive="nav-link-active">Rooms</a>
     @if (auth.isCustomer()) {

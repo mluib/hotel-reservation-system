@@ -1,2 +1,6 @@
 <app-nav></app-nav>
 <router-outlet></router-outlet>
+
+@if (notice.message(); as message) {
+  <app-error-dialog title="Heads up" [message]="message" (closed)="notice.clear()"></app-error-dialog>
+}

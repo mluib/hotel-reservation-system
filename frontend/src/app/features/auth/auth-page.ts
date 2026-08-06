@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { extractErrorMessage } from '../../core/utils/http-error';
+import { passwordsMatch } from '../../core/validators/passwords-match.validator';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -29,12 +30,16 @@ export class AuthPage implements OnInit {
     password: ['', Validators.required],
   });
 
-  protected readonly signUpForm = this.fb.nonNullable.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-  });
+  protected readonly signUpForm = this.fb.nonNullable.group(
+    {
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+      confirmPassword: ['', Validators.required],
+    },
+    { validators: passwordsMatch() },
+  );
 
   ngOnInit(): void {
     if (this.auth.isLoggedIn()) {
@@ -66,13 +71,18 @@ export class AuthPage implements OnInit {
   }
 
   submitSignUp(): void {
+    if (this.signUpForm.hasError('passwordsMismatch')) {
+      this.error.set('Passwords do not match.');
+      return;
+    }
     if (this.signUpForm.invalid) {
       this.error.set('All fields are required.');
       return;
     }
     this.error.set(null);
     this.submitting.set(true);
-    this.auth.register(this.signUpForm.getRawValue()).subscribe({
+    const { confirmPassword, ...request } = this.signUpForm.getRawValue();
+    this.auth.register(request).subscribe({
       next: () => this.router.navigateByUrl(this.returnUrl),
       error: (err) => {
         this.submitting.set(false);

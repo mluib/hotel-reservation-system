@@ -20,7 +20,7 @@
       <tr [class.row-highlight]="highlight.highlightRoomId() === room.id">
         <td>{{ room.number }}</td>
         <td>{{ room.type }}</td>
-        <td>${{ room.pricePerNight }}</td>
+        <td>{{ room.pricePerNight }}&euro;</td>
         <td style="text-align: right">
           <div style="display: flex; gap: 8px; justify-content: flex-end">
             <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(room)">Edit</button>

@@ -11,7 +11,9 @@ import { resolveImageUrl } from '../../core/utils/image-url';
 })
 export class Home implements OnInit {
   protected readonly hotelService = inject(HotelService);
-  protected readonly heroImageUrl = computed(() => resolveImageUrl(this.hotelService.hotel()?.imageUrl));
+  protected readonly heroImageUrl = computed(() =>
+    resolveImageUrl(this.hotelService.hotel()?.imageUrl, this.hotelService.imageVersion()),
+  );
 
   ngOnInit(): void {
     this.hotelService.ensureLoaded();
