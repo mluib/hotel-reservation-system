@@ -1,0 +1,46 @@
+<div class="dialog-overlay">
+  <div class="dialog-panel">
+    <div class="dialog-title">{{ title }}</div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="field">
+        <label for="room-number">Room number</label>
+        <input id="room-number" formControlName="number" />
+      </div>
+      <div class="field">
+        <label for="room-type">Type</label>
+        <select id="room-type" formControlName="type">
+          @for (type of roomTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="room-price">Price / night</label>
+        <input id="room-price" type="number" formControlName="pricePerNight" />
+      </div>
+
+      @if (isNew) {
+        <p style="font-size: 12px; color: var(--color-text-muted); margin: -4px 0 12px">
+          Save the room first, then edit it to add a photo.
+        </p>
+      } @else {
+        <div class="field">
+          <label>Photo</label>
+          @if (resolveImageUrl(room()?.imageUrl); as url) {
+            <img [src]="url" alt="" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px" />
+          }
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" [disabled]="uploading()" />
+        </div>
+      }
+
+      @if (error()) {
+        <div class="banner banner-error">{{ error() }}</div>
+      }
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

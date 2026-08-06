@@ -1,0 +1,19 @@
+<div class="home-page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Welcome</div>
+      <h1>{{ hotelService.hotel()?.name || 'Loading…' }}</h1>
+      <p class="address">{{ hotelService.hotel()?.address }}</p>
+      <p class="description">
+        A small hotel with six rooms across three types — Single, Double and Suite. Quiet, easy to
+        find, and a short walk from the center of town.
+      </p>
+      <a routerLink="/rooms" class="btn btn-primary">View Rooms</a>
+    </div>
+    @if (heroImageUrl(); as url) {
+      <img [src]="url" alt="" class="hero-photo" />
+    } @else {
+      <div class="hero-photo photo-placeholder">Photo</div>
+    }
+  </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="reservations-page">
+  <h1>My Reservations</h1>
+
+  @if (bookingSuccess()) {
+    <div class="banner banner-success">Booking confirmed</div>
+  }
+
+  @if (rows().length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>Type</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>{{ row.roomNumber }}</td>
+            <td>{{ row.roomType }}</td>
+            <td>{{ row.checkIn | slice: 0 : 10 }}</td>
+            <td>{{ row.checkOut | slice: 0 : 10 }}</td>
+            <td>${{ row.total }}</td>
+            <td>
+              <span class="badge" [class.badge-confirmed]="row.status === 'Confirmed'" [class.badge-cancelled]="row.status === 'Cancelled'">{{
+                row.status
+              }}</span>
+            </td>
+            <td style="text-align: right">
+              @if (row.status === 'Confirmed') {
+                <button type="button" class="btn btn-danger btn-sm" (click)="pendingCancelId.set(row.id)">
+                  Cancel
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="empty">No reservations yet. <a routerLink="/rooms">Browse rooms</a> to book one.</p>
+  }
+</div>
+
+@if (pendingCancelId(); as id) {
+  <app-confirm-dialog
+    message="Cancel this reservation?"
+    (confirmed)="cancel(id)"
+    (cancelled)="pendingCancelId.set(null)"
+  ></app-confirm-dialog>
+}

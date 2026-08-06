@@ -1,0 +1,28 @@
+<div class="dialog-overlay">
+  <div class="dialog-panel">
+    <div class="dialog-title">Edit customer</div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="field">
+        <label for="cust-first">First name</label>
+        <input id="cust-first" formControlName="firstName" />
+      </div>
+      <div class="field">
+        <label for="cust-last">Last name</label>
+        <input id="cust-last" formControlName="lastName" />
+      </div>
+      <div class="field">
+        <label for="cust-email">Email</label>
+        <input id="cust-email" type="email" formControlName="email" />
+      </div>
+
+      @if (error()) {
+        <div class="banner banner-error">{{ error() }}</div>
+      }
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

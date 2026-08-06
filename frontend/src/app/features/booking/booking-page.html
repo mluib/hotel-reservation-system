@@ -1,0 +1,40 @@
+@if (room(); as r) {
+  <div class="booking-page">
+    <a routerLink="/rooms">&larr; Back to rooms</a>
+    <h1>Book Room {{ r.number }}</h1>
+
+    <div class="summary-row">
+      <div>
+        <div class="room-type">{{ r.type }}</div>
+        <div class="room-number">Room {{ r.number }}</div>
+      </div>
+      <div class="room-price">${{ r.pricePerNight }}<span class="unit"> /night</span></div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="confirmBooking()">
+      <div class="date-row">
+        <div class="field">
+          <label for="booking-checkin">Check-in</label>
+          <input id="booking-checkin" type="date" formControlName="checkIn" />
+        </div>
+        <div class="field">
+          <label for="booking-checkout">Check-out</label>
+          <input id="booking-checkout" type="date" formControlName="checkOut" />
+        </div>
+      </div>
+
+      @if (serverError()) {
+        <div class="banner banner-error">{{ serverError() }}</div>
+      }
+
+      <div class="total-row">
+        <span class="nights-label">{{ nightsLabel() }}</span>
+        <span class="total">${{ total() }}</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%" [disabled]="submitting()">
+        Confirm Booking
+      </button>
+    </form>
+  </div>
+}

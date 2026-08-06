@@ -1,0 +1,9 @@
+.tab-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+th a {
+  color: var(--color-text-muted);
+}

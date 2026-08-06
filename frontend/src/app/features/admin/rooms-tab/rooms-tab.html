@@ -1,0 +1,49 @@
+<div class="tab-header">
+  <button type="button" class="btn btn-primary" (click)="openNew()">Add room</button>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th><a href="javascript:void(0)" (click)="toggleSort('number')">Number {{ sortArrow('number') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('type')">Type {{ sortArrow('type') }}</a></th>
+      <th>
+        <a href="javascript:void(0)" (click)="toggleSort('pricePerNight')"
+          >Price/night {{ sortArrow('pricePerNight') }}</a
+        >
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (room of sortedRooms(); track room.id) {
+      <tr [class.row-highlight]="highlight.highlightRoomId() === room.id">
+        <td>{{ room.number }}</td>
+        <td>{{ room.type }}</td>
+        <td>${{ room.pricePerNight }}</td>
+        <td style="text-align: right">
+          <div style="display: flex; gap: 8px; justify-content: flex-end">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(room)">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="pendingDelete.set(room)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (dialogOpen()) {
+  <app-room-dialog [room]="editingRoom()" (saved)="onDialogSaved()" (cancelled)="dialogOpen.set(false)"></app-room-dialog>
+}
+
+@if (pendingDelete(); as room) {
+  <app-confirm-dialog
+    [message]="'Delete room ' + room.number + '? This cannot be undone.'"
+    (confirmed)="confirmDelete()"
+    (cancelled)="pendingDelete.set(null)"
+  ></app-confirm-dialog>
+}
+
+@if (deleteError(); as msg) {
+  <app-error-dialog [message]="msg" (closed)="deleteError.set(null)"></app-error-dialog>
+}

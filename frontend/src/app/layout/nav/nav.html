@@ -1,0 +1,21 @@
+<nav class="nav">
+  <div class="nav-left">
+    <span class="hotel-name">{{ hotelService.hotel()?.name || 'Hotel Reservation System' }}</span>
+    <a routerLink="/" routerLinkActive="nav-link-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a routerLink="/rooms" routerLinkActive="nav-link-active">Rooms</a>
+    @if (auth.isCustomer()) {
+      <a routerLink="/reservations/mine" routerLinkActive="nav-link-active">My Reservations</a>
+    }
+    @if (auth.isAdmin()) {
+      <a routerLink="/admin" routerLinkActive="nav-link-active">Admin</a>
+    }
+  </div>
+  <div class="nav-right">
+    @if (!auth.isLoggedIn()) {
+      <a routerLink="/auth" class="btn btn-primary">Sign In</a>
+    } @else {
+      <span class="user-label">{{ userLabel() }}</span>
+      <button type="button" class="btn btn-secondary" (click)="logout()">Log out</button>
+    }
+  </div>
+</nav>

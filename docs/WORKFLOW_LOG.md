@@ -128,3 +128,36 @@ The fourth flagged item from the wireframe review, handed over as a scoped brief
 A second item flagged from the same mockup review; asked to implement it directly in this session rather than as another brief to the backend session.
 
 - Asked to implement the fix directly in this session -> both delete use cases now check for related reservations first (any status — a cancelled reservation is still a historical record that would be orphaned) and reject with a clear error instead of letting the database cascade or throw a raw exception, with matching unit test coverage added and the full three-tier suite green afterward.
+
+## 2026-08-06 — Phase 3 kickoff: planning (Claude Code)
+
+- Asked to execute Phase 3, but first confirm Phase 1 and 2 were actually finished, using the Claude Design mockup as the entry point -> cross-checked the workflow log against the current controllers and DTOs, confirmed both phases complete, and confirmed the mockup as the starting point.
+- Asked whether planning was needed given no prior Angular experience -> entered a planning pass covering prerequisites, folder structure, routing, auth handling, and styling approach.
+- Asked how Node.js should be installed and how the build should be sequenced given no Angular experience -> chose to install Node.js manually with guidance rather than have it installed automatically, and to build Phase 3 as one continuous pass rather than staged review checkpoints.
+- Reviewing the backend for the frontend build surfaced two real gaps beyond styling: no CORS policy, and no way to obtain an Admin account -> both proposed as small, scoped backend additions alongside the frontend work, approved rather than deferred.
+- Draft plan reviewed and annotated with four questions — whether Angular uses TypeScript, whether an already-installed Node.js needed a PATH change, a request to pause for a commit before starting the frontend, and what the in-app browser tool is -> confirmed TypeScript, found the PATH was already correct but not yet visible to this session's own shells, added a mid-build commit checkpoint, and explained the browser tool; plan updated with all four.
+- Asked whether the real, already-attached SQL Server database would be used for verification -> confirmed it would be, the same database already used throughout backend development rather than an isolated test environment; existing row counts were checked and the plan updated to say so plainly.
+- Asked whether the chosen Angular architecture was standard practice or a personal choice, given modern alternatives exist -> laid out which parts follow Angular's current defaults (standalone components, functional guards/interceptors, signals over a state-management library) versus deliberate choices against real alternatives (zoneless change detection, Angular Material or Tailwind, template-driven forms), then kept the plan as recommended once confirmed.
+
+## 2026-08-06 — Phase 3: backend prep (Claude Code)
+
+- Implemented the approved backend tweaks (CORS policy, string-serialized enums, a customer "my profile" endpoint, a dev-only admin account seed) -> full three-tier test suite stayed green.
+- Asked why Program's entry point became async and switched to RunAsync -> explained the dev admin seed's asynchronous Identity calls required it, with RunAsync following for consistency once the method was already async.
+- Pointed out a CORS code comment described config-driven origins that weren't actually configured anywhere -> corrected by adding the real config entry and rewording the comment to match.
+- Asked for a go-ahead before committing -> approved and committed as its own commit, separate from the frontend work to follow.
+
+## 2026-08-06 — Phase 3: Angular scaffold and full implementation (Claude Code)
+
+- Session restarted to pick up the newly installed Node.js -> still not visible to this session's shells; traced to the Machine-level PATH being correct but not yet inherited by the already-running process tree.
+- Reported multiple Claude Code processes still running after closing and reopening the application -> diagnosed via process start times as several stale process trees left over from prior days rather than a fresh restart, most likely because closing the window doesn't fully quit a tray-resident Electron app.
+- Asked what Electron is -> explained in plain terms as background context to the troubleshooting.
+- Asked whether that makes it a hybrid app -> clarified the similarity to mobile hybrid apps and the key difference (Electron bundles its own Chromium rather than using the OS's WebView).
+- Application fully restarted -> Node.js and npm became visible to this session's shells; Angular workspace scaffolded (standalone components, no state-management library, plain CSS reproducing the mockup's palette and typography instead of a UI framework).
+- Continued the build -> implemented Home, sign-in/sign-up, room browsing with server-side filtering, booking, and My Reservations against the real API, replacing the mockup's fake roles and in-memory data.
+- A live click-through of the new screens found the "My Reservations" nav link missing for a signed-up customer -> traced to a wrong guess at the JWT's role-claim identifier (guessed the xmlsoap schema, the token actually used the microsoft.com schema); corrected after decoding a real token to confirm the actual key, re-verified end to end.
+- The same click-through found the booking page's live "nights x price" total frozen at zero -> traced to reading a form's plain value from inside a reactive computation that only reacts to signals, fixed by bridging the form's change stream into a signal first.
+- Continued the build -> implemented the full admin section (rooms, reservations, customers, and hotel tabs, matching dialogs, the cross-tab "jump to customer/room" highlight, and an unsaved-changes guard on the hotel form) against the real API.
+- Found no backend endpoint exists for editing a reservation's dates or status directly, only cancel and delete -> dropped that dialog from the mockup rather than building UI against an endpoint that doesn't exist.
+- Found the room photo-upload endpoint needs a server-issued room id that doesn't exist yet when adding a new room -> disabled the photo control in the "add room" dialog, enabling it only once editing an existing room.
+- Verified every flow end to end against the running backend and its real dev database (customer sign-up through booking and cancellation; the seeded admin account through all four admin tabs, including both delete-rejection error paths) using Claude Code's own browser tool -> caught and fixed the two bugs above in the process.
+- Asked whether the log entries for this session actually held to the stated conventions -> re-reviewed them against the rules and found three bullets missing their required arrow, a chronology error, a factual reversal in the JWT-bug description, and several real exchanges missing entirely (the plan-annotation round, the database question, the architecture-alternatives question, the Electron/hybrid-app questions split into one bullet instead of two); rewrote the affected entries.

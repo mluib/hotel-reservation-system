@@ -1,0 +1,22 @@
+<div class="admin-page">
+  <h1>Admin</h1>
+  <div class="tabs">
+    @for (tab of [
+      { path: 'rooms', label: 'Rooms' },
+      { path: 'reservations', label: 'Reservations' },
+      { path: 'customers', label: 'Customers' },
+      { path: 'hotel', label: 'Hotel' },
+    ]; track tab.path) {
+      <a
+        [routerLink]="tab.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        class="btn"
+        [class.btn-primary]="rla.isActive"
+        [class.btn-secondary]="!rla.isActive"
+        >{{ tab.label }}</a
+      >
+    }
+  </div>
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,15 @@
+.reservations-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 32px 72px;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 0 0 20px;
+}
+
+.empty {
+  color: var(--color-text-muted);
+  padding: 32px 0;
+}
