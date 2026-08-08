@@ -169,6 +169,22 @@ namespace HotelReservation.Api
 
             var app = builder.Build();
 
+            // Apply pending EF Core migrations automatically on startup, so a fresh
+            // container (or any real SQL Server target) always has an up-to-date schema
+            // without a separate manual migration step. Guarded by IsSqlServer(), not by
+            // environment: HotelReservation.Tests.Integration's CustomWebApplicationFactory
+            // also runs as "Development" but swaps in a SQLite provider for tests, so an
+            // environment check alone wouldn't have excluded it — the provider check does.
+            // also: migration anyway is only consistent for SQL Server
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<HotelDbContext>();
+                if (db.Database.IsSqlServer())
+                {
+                    await db.Database.MigrateAsync();
+                }
+            }
+
             // Configure the HTTP request pipeline.
             {
                 if (app.Environment.IsDevelopment())
