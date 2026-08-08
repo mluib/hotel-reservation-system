@@ -235,6 +235,19 @@ namespace HotelReservation.Api
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
+            // The system is designed around exactly one Hotel row always existing (see
+            // UpdateHotel/GetHotel, which look it up with no id — there is no "create hotel"
+            // endpoint at all). A brand-new database therefore has no way to ever get that
+            // first row through the UI. Seed a placeholder here, independent of the admin-user
+            // check below, so it runs on every startup regardless of whether the admin already
+            // exists. Dev-only, same as the rest of this method.
+            var hotelDbContext = services.GetRequiredService<HotelReservation.Infrastructure.Persistence.HotelDbContext>();
+            if (!await hotelDbContext.Hotels.AnyAsync())
+            {
+                hotelDbContext.Hotels.Add(new HotelReservation.Domain.Entities.Hotel("Hotel One", "123 Main St"));
+                await hotelDbContext.SaveChangesAsync();
+            }
+
             var adminEmail = app.Configuration["Seed:AdminEmail"];
             var adminPassword = app.Configuration["Seed:AdminPassword"];
             if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))

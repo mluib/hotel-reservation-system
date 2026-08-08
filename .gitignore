@@ -432,3 +432,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Local Docker Compose overrides (e.g. real secrets for local-only use)
+docker-compose.override.yml
