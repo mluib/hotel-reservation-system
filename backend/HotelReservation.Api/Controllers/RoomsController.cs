@@ -2,6 +2,7 @@ using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Rooms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace HotelReservation.Api.Controllers;
 
@@ -14,19 +15,22 @@ public class RoomsController : ControllerBase
     private readonly GetRoomById _getRoomById;
     private readonly UpdateRoom _updateRoom;
     private readonly DeleteRoom _deleteRoom;
+    private readonly UploadRoomImage _uploadRoomImage;
 
     public RoomsController(
         CreateRoom createRoom,
         GetRooms getRooms,
         GetRoomById getRoomById,
         UpdateRoom updateRoom,
-        DeleteRoom deleteRoom)
+        DeleteRoom deleteRoom,
+        UploadRoomImage uploadRoomImage)
     {
         _createRoom = createRoom;
         _getRooms = getRooms;
         _getRoomById = getRoomById;
         _updateRoom = updateRoom;
         _deleteRoom = deleteRoom;
+        _uploadRoomImage = uploadRoomImage;
     }
 
     [HttpPost]
@@ -65,7 +69,36 @@ public class RoomsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(System.Guid id)
     {
-        await _deleteRoom.ExecuteAsync(id);
-        return Ok();
+        try
+        {
+            await _deleteRoom.ExecuteAsync(id);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/image")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UploadImage(System.Guid id, IFormFile file)
+    {
+        try
+        {
+            var request = new ImageUploadRequest
+            {
+                Content = file.OpenReadStream(),
+                ContentType = file.ContentType,
+                Length = file.Length
+            };
+
+            var dto = await _uploadRoomImage.ExecuteAsync(id, request);
+            return Ok(dto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

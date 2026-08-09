@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "backend/HotelReservation.Api/HotelReservation.Api.csproj",
+        "--launch-profile",
+        "http"
+      ],
+      "port": 5044
+    },
+    {
+      "name": "frontend-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "start"],
+      "port": 4200
+    }
+  ]
+}

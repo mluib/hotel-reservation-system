@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
+.git
+.gitignore
+*.md

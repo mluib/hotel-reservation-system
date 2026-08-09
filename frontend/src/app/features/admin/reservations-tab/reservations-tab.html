@@ -1,0 +1,55 @@
+<table class="data-table">
+  <thead>
+    <tr>
+      <th><a href="javascript:void(0)" (click)="toggleSort('customerName')">Customer {{ sortArrow('customerName') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('roomNumber')">Room {{ sortArrow('roomNumber') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('checkIn')">Check-in {{ sortArrow('checkIn') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('checkOut')">Check-out {{ sortArrow('checkOut') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('nights')">Nights {{ sortArrow('nights') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('total')">Price {{ sortArrow('total') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('status')">Status {{ sortArrow('status') }}</a></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of sortedRows(); track row.id) {
+      <tr>
+        <td><a href="javascript:void(0)" (click)="jumpToCustomer(row.customerId)">{{ row.customerName }}</a></td>
+        <td><a href="javascript:void(0)" (click)="jumpToRoom(row.roomId)">{{ row.roomNumber }}</a></td>
+        <td>{{ row.checkIn.slice(0, 10) }}</td>
+        <td>{{ row.checkOut.slice(0, 10) }}</td>
+        <td>{{ row.nights }}</td>
+        <td>{{ row.total }}&euro;</td>
+        <td>
+          <span class="badge" [class.badge-confirmed]="row.status === 'Confirmed'" [class.badge-cancelled]="row.status === 'Cancelled'">{{
+            row.status
+          }}</span>
+        </td>
+        <td style="text-align: right">
+          <div style="display: flex; gap: 8px; justify-content: flex-end">
+            @if (row.status === 'Confirmed') {
+              <button type="button" class="btn btn-danger btn-sm" (click)="pendingCancel.set(row)">Cancel</button>
+            }
+            <button type="button" class="btn btn-danger btn-sm" (click)="pendingDelete.set(row)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (pendingCancel(); as row) {
+  <app-confirm-dialog
+    message="Cancel this reservation?"
+    (confirmed)="confirmCancel()"
+    (cancelled)="pendingCancel.set(null)"
+  ></app-confirm-dialog>
+}
+
+@if (pendingDelete(); as row) {
+  <app-confirm-dialog
+    message="Delete this reservation? This cannot be undone."
+    (confirmed)="confirmDelete()"
+    (cancelled)="pendingDelete.set(null)"
+  ></app-confirm-dialog>
+}

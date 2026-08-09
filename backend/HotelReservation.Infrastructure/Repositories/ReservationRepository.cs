@@ -49,6 +49,19 @@ public class ReservationRepository : IReservationRepository
         return await _context.Customers.AnyAsync(c => c.Id == customerId);
     }
 
+    // Intentionally status-agnostic (no filter on Status): even a cancelled reservation
+    // is still a historical record referencing this room, and would be orphaned by the delete.
+    public async Task<bool> ExistsForRoomAsync(Guid roomId)
+    {
+        return await _context.Reservations.AnyAsync(r => r.RoomId == roomId);
+    }
+
+    // Same reasoning as ExistsForRoomAsync above: any reservation, any status, blocks delete.
+    public async Task<bool> ExistsForCustomerAsync(Guid customerId)
+    {
+        return await _context.Reservations.AnyAsync(r => r.CustomerId == customerId);
+    }
+
     public async Task<Reservation?> GetByIdAsync(Guid id)
     {
         return await _context.Reservations

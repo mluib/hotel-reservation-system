@@ -1,0 +1,56 @@
+<div class="hotel-card">
+  <div class="hotel-card-heading">Hotel details</div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="field">
+      <label for="hotel-name">Name</label>
+      <input id="hotel-name" formControlName="name" />
+    </div>
+    <div class="field">
+      <label for="hotel-address">Address</label>
+      <input id="hotel-address" formControlName="address" />
+    </div>
+
+    <div class="field">
+      <label for="hotel-photo">Photo</label>
+      @if (previewUrl(); as url) {
+        <img [src]="url" alt="" style="width: 100%; max-width: 300px; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 8px" />
+      } @else {
+        <div class="photo-placeholder" style="width: 100%; max-width: 300px; height: 160px; border-radius: 8px; margin-bottom: 8px">
+          Photo
+        </div>
+      }
+      <input id="hotel-photo" type="file" accept="image/*" (change)="onFileSelected($event)" />
+    </div>
+
+    @if (error()) {
+      <div class="banner banner-error">{{ error() }}</div>
+    }
+
+    <div style="display: flex; align-items: center; gap: 12px">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">Save changes</button>
+      @if (savedFlash()) {
+        <span class="badge badge-confirmed">Saved</span>
+      }
+      @if (hasUnsavedChanges()) {
+        <span style="color: var(--color-accent); font-size: 12px; font-weight: 600">Unsaved changes</span>
+      }
+    </div>
+  </form>
+</div>
+
+@if (leaveResolver()) {
+  <div class="dialog-overlay">
+    <div class="dialog-panel" style="width: 400px">
+      <div class="dialog-title">Unsaved changes</div>
+      <div style="font-size: 14px; margin-bottom: 20px">
+        You have unsaved changes to the hotel details. Save before leaving?
+      </div>
+      <div class="dialog-actions" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-secondary" (click)="keepEditing()">Keep editing</button>
+        <button type="button" class="btn btn-danger" (click)="discard()">Discard</button>
+        <button type="button" class="btn btn-primary" (click)="saveAndContinue()">Save &amp; continue</button>
+      </div>
+    </div>
+  </div>
+}

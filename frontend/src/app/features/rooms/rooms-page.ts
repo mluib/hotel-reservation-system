@@ -1,0 +1,71 @@
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { debounceTime } from 'rxjs';
+import { RoomsService } from '../../core/services/rooms.service';
+import { ROOM_TYPES, Room, RoomType } from '../../core/models/room.model';
+import { checkOutAfterCheckIn } from '../../core/validators/date-range.validator';
+import { resolveImageUrl } from '../../core/utils/image-url';
+import { todayIsoDate } from '../../core/utils/dates';
+import { EMPTY_ROOM_FILTER, RoomFilterState } from './room-filter-state.service';
+
+@Component({
+  selector: 'app-rooms-page',
+  imports: [ReactiveFormsModule],
+  templateUrl: './rooms-page.html',
+  styleUrl: './rooms-page.css',
+})
+export class RoomsPage implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly roomsService = inject(RoomsService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly filterState = inject(RoomFilterState);
+
+  protected readonly roomTypes = ROOM_TYPES;
+  protected readonly rooms = signal<Room[]>([]);
+  protected readonly minDate = todayIsoDate();
+
+  // Seeded from whatever was last selected (possibly on a previous visit), rather
+  // than always starting blank.
+  protected readonly filterForm = this.fb.nonNullable.group(
+    { ...this.filterState.value() },
+    { validators: checkOutAfterCheckIn() },
+  );
+
+  ngOnInit(): void {
+    this.fetch();
+    this.filterForm.valueChanges
+      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => {
+        this.filterState.value.set(v as typeof EMPTY_ROOM_FILTER);
+        if (this.filterForm.valid) this.fetch();
+      });
+  }
+
+  protected resolveRoomImageUrl(room: Room): string | null {
+    return resolveImageUrl(room.imageUrl, this.roomsService.imageVersion());
+  }
+
+  protected viewAndBook(room: Room): void {
+    this.router.navigate(['/rooms', room.id, 'book']);
+  }
+
+  protected clearFilters(): void {
+    this.filterForm.reset(EMPTY_ROOM_FILTER);
+  }
+
+  private fetch(): void {
+    const v = this.filterForm.getRawValue();
+    this.roomsService
+      .getAll({
+        type: v.type === 'all' ? null : (v.type as RoomType),
+        minPrice: v.minPrice ? Number(v.minPrice) : null,
+        maxPrice: v.maxPrice ? Number(v.maxPrice) : null,
+        checkIn: v.checkIn || null,
+        checkOut: v.checkOut || null,
+      })
+      .subscribe((rooms) => this.rooms.set(rooms));
+  }
+}

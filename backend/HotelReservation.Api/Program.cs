@@ -1,4 +1,5 @@
 
+using System.Text.Json.Serialization;
 using HotelReservation.Application.Customers;
 using HotelReservation.Application.Hotels;
 using HotelReservation.Application.Interfaces;
@@ -7,21 +8,42 @@ using HotelReservation.Application.Reservations;
 using HotelReservation.Application.Rooms;
 using HotelReservation.Infrastructure.Persistence;
 using HotelReservation.Infrastructure.Repositories;
+using HotelReservation.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             {
-                builder.Services.AddControllers();
+                builder.Services.AddControllers()
+                    // Serialize enums (RoomType, ReservationStatus) as their names ("Single",
+                    // "Confirmed") instead of the default underlying int, so API consumers
+                    // don't have to hardcode numeric-to-name mappings.
+                    .AddJsonOptions(options =>
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
                 builder.Services.AddEndpointsApiExplorer();
+
+                // CORS: allow the Angular dev server to call this API. Origins are read from
+                // Cors:AllowedOrigins (set in appsettings.Development.json to localhost:4200)
+                // so a Docker/staging origin can be added later without touching this code;
+                // the literal below is only a fallback if that config section is ever missing.
+                var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                    ?? new[] { "http://localhost:4200" };
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("Frontend", policy =>
+                        policy.WithOrigins(allowedOrigins)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod());
+                });
 
                 // OpenAPI
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -121,6 +143,7 @@ namespace HotelReservation.Api
                 builder.Services.AddScoped<GetCustomers>();
                 builder.Services.AddScoped<UpdateCustomer>();
                 builder.Services.AddScoped<DeleteCustomer>();
+                builder.Services.AddScoped<GetCurrentCustomer>();
 
                 // Room Use-Case
                 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
@@ -129,14 +152,38 @@ namespace HotelReservation.Api
                 builder.Services.AddScoped<GetRoomById>();
                 builder.Services.AddScoped<UpdateRoom>();
                 builder.Services.AddScoped<DeleteRoom>();
+                builder.Services.AddScoped<UploadRoomImage>();
 
                 // Hotel Use-Case
                 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
                 builder.Services.AddScoped<GetHotel>();
                 builder.Services.AddScoped<UpdateHotel>();
+                builder.Services.AddScoped<UploadHotelImage>();
+
+                // Image storage (local disk, under wwwroot)
+                var webRootPath = builder.Environment.WebRootPath
+                    ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+                builder.Services.AddSingleton<IImageStorageService>(
+                    _ => new ImageStorageService(webRootPath));
             }
 
             var app = builder.Build();
+
+            // Apply pending EF Core migrations automatically on startup, so a fresh
+            // container (or any real SQL Server target) always has an up-to-date schema
+            // without a separate manual migration step. Guarded by IsSqlServer(), not by
+            // environment: HotelReservation.Tests.Integration's CustomWebApplicationFactory
+            // also runs as "Development" but swaps in a SQLite provider for tests, so an
+            // environment check alone wouldn't have excluded it — the provider check does.
+            // also: migration anyway is only consistent for SQL Server
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<HotelDbContext>();
+                if (db.Database.IsSqlServer())
+                {
+                    await db.Database.MigrateAsync();
+                }
+            }
 
             // Configure the HTTP request pipeline.
             {
@@ -151,6 +198,9 @@ namespace HotelReservation.Api
                 }
 
                 app.UseHttpsRedirection();
+                app.UseStaticFiles();
+
+                app.UseCors("Frontend");
 
                 app.UseAuthentication();
                 app.UseAuthorization();
@@ -158,7 +208,60 @@ namespace HotelReservation.Api
                 app.MapControllers();
             }
 
-            app.Run();
+            // Dev-only seed: without this there's no way to obtain an Admin account, since
+            // registration always assigns "Customer" and there's no promotion mechanism yet.
+            // Provisional — proper role/user seeding is deferred to the Phase 6 backlog
+            // ("JWT: role/user seeding") for production-appropriate config/secrets handling.
+            if (app.Environment.IsDevelopment())
+            {
+                await SeedDevAdminAsync(app);
+            }
+
+            await app.RunAsync();
+        }
+
+        // Ensures the Admin/Customer Identity roles exist and that one admin login is
+        // available to sign in with, sourced from configuration rather than hardcoded.
+        // Development-only (see call site) — not a production seeding strategy.
+        private static async Task SeedDevAdminAsync(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            foreach (var role in new[] { "Admin", "Customer" })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            // The system is designed around exactly one Hotel row always existing (see
+            // UpdateHotel/GetHotel, which look it up with no id — there is no "create hotel"
+            // endpoint at all). A brand-new database therefore has no way to ever get that
+            // first row through the UI. Seed a placeholder here, independent of the admin-user
+            // check below, so it runs on every startup regardless of whether the admin already
+            // exists. Dev-only, same as the rest of this method.
+            var hotelDbContext = services.GetRequiredService<HotelReservation.Infrastructure.Persistence.HotelDbContext>();
+            if (!await hotelDbContext.Hotels.AnyAsync())
+            {
+                hotelDbContext.Hotels.Add(new HotelReservation.Domain.Entities.Hotel("Hotel One", "123 Main St"));
+                await hotelDbContext.SaveChangesAsync();
+            }
+
+            var adminEmail = app.Configuration["Seed:AdminEmail"];
+            var adminPassword = app.Configuration["Seed:AdminPassword"];
+            if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+                return;
+
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var existing = await userManager.FindByEmailAsync(adminEmail);
+            if (existing != null)
+                return;
+
+            var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

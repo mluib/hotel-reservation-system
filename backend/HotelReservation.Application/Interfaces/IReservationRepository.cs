@@ -19,6 +19,10 @@ public interface IReservationRepository
 
     Task<bool> CustomerExistsAsync(Guid customerId);
 
+    Task<bool> ExistsForRoomAsync(Guid roomId);
+
+    Task<bool> ExistsForCustomerAsync(Guid customerId);
+
     Task<Reservation?> GetByIdAsync(Guid id);
 
     Task<IEnumerable<Reservation>> GetAllAsync();

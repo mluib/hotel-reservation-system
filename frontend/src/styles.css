@@ -1,0 +1,278 @@
+/* Global design tokens, lifted directly from the Claude Design mockup
+   (docs/raw-ai-logs/ClaudeDesignMockup/project/Hotel Reservation System.dc.html)
+   rather than reinterpreted. Component styles reference these variables instead
+   of repeating literal color/spacing values. */
+
+:root {
+  --color-bg: #faf8f4;
+  --color-surface: #ffffff;
+  --color-text: #262420;
+  --color-text-muted: #736e64;
+  --color-border: #e6e1d6;
+  --color-border-input: #d6cfc0;
+  --color-accent: #a6522d;
+  --color-accent-hover: #8c4324;
+  --color-selection: #f3e6de;
+  --color-chip-bg: #f1efe9;
+  --color-chip-text: #57534b;
+  --color-placeholder-bg: #f1efe9;
+  --color-placeholder-text: #a49f93;
+  --color-overlay: rgba(38, 36, 32, 0.45);
+
+  --color-success-bg: #e6f2ea;
+  --color-success-text: #2f6b45;
+  --color-success-border: #bcdcc7;
+
+  --color-danger-bg: #fbeceb;
+  --color-danger-text: #a23a32;
+  --color-danger-border: #f0c4bf;
+
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Work Sans', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+/* :not(.btn) so this never fights with the .btn-* rules below — an <a class="btn
+   btn-primary"> (Sign In, View Rooms, admin tabs, ...) needs the button's own color
+   to win on hover, not the plain-link accent color. */
+a:not(.btn) {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:not(.btn):hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+input,
+select {
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--color-selection);
+}
+
+/* Reusable pieces shared across many feature components (forms, dialogs, tables),
+   matching how the mockup repeats the same handful of inline style strings
+   everywhere rather than a different look per screen. */
+
+.btn {
+  display: inline-block;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-input);
+  font-weight: 500;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  color: var(--color-text);
+}
+
+.btn-danger {
+  background: var(--color-surface);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-border);
+  font-weight: 500;
+}
+
+.btn-danger:hover:not(:disabled) {
+  color: var(--color-danger-text);
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.banner {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.banner-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.banner-success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  display: inline-block;
+  font-weight: 600;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-confirmed {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-cancelled {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--color-chip-bg);
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.dialog-panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 420px;
+  max-width: 92vw;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.row-highlight {
+  transition: background-color 0.5s ease;
+  background: var(--color-selection);
+}
+
+.photo-placeholder {
+  background: var(--color-placeholder-bg);
+  color: var(--color-placeholder-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}

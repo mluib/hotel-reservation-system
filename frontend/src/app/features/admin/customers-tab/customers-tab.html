@@ -1,0 +1,41 @@
+<table class="data-table">
+  <thead>
+    <tr>
+      <th><a href="javascript:void(0)" (click)="toggleSort('firstName')">First name {{ sortArrow('firstName') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('lastName')">Last name {{ sortArrow('lastName') }}</a></th>
+      <th><a href="javascript:void(0)" (click)="toggleSort('email')">Email {{ sortArrow('email') }}</a></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (customer of sortedCustomers(); track customer.id) {
+      <tr [class.row-highlight]="highlight.highlightCustomerId() === customer.id">
+        <td>{{ customer.firstName }}</td>
+        <td>{{ customer.lastName }}</td>
+        <td>{{ customer.email }}</td>
+        <td style="text-align: right">
+          <div style="display: flex; gap: 8px; justify-content: flex-end">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="editingCustomer.set(customer)">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="pendingDelete.set(customer)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (editingCustomer(); as customer) {
+  <app-customer-dialog [customer]="customer" (saved)="onDialogSaved()" (cancelled)="editingCustomer.set(null)"></app-customer-dialog>
+}
+
+@if (pendingDelete(); as customer) {
+  <app-confirm-dialog
+    [message]="'Delete ' + customer.firstName + ' ' + customer.lastName + '? This cannot be undone.'"
+    (confirmed)="confirmDelete()"
+    (cancelled)="pendingDelete.set(null)"
+  ></app-confirm-dialog>
+}
+
+@if (deleteError(); as msg) {
+  <app-error-dialog [message]="msg" (closed)="deleteError.set(null)"></app-error-dialog>
+}

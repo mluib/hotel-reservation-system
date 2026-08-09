@@ -22,7 +22,8 @@ public class GetHotel
         {
             Id = hotel.Id,
             Name = hotel.Name,
-            Address = hotel.Address
+            Address = hotel.Address,
+            ImageUrl = hotel.ImageUrl
         };
     }
 }

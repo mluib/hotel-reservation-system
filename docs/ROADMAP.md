@@ -10,7 +10,7 @@ Phase order for the remaining work, decided 2026-08-03 (see [`WORKFLOW_LOG.md`](
 - **Phase 2 — Backend contract pass**
   Informed by Phase 1: adjust/extend the DTOs and endpoints the frontend will actually consume (naming, response shapes, any missing fields or endpoints the design surfaced). This is *not* the full review backlog below — deep optimization (DDD value objects, pagination, FluentValidation, perf) is deliberately deferred to Phase 6, once real frontend usage shows what actually matters.
 
-- **Phase 3 — Angular scaffold + implementation**
+- **Phase 3 (done) — Angular scaffold + implementation**
   Build against the stabilized API contract; small backend contract tweaks feed back as they surface.
 
 - **Phase 4 — DevOps**

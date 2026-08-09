@@ -1,0 +1,9 @@
+<div class="dialog-overlay">
+  <div class="dialog-panel" style="width: 400px">
+    <div class="dialog-title">{{ title() }}</div>
+    <div class="banner banner-error" style="margin-bottom: 20px">{{ message() }}</div>
+    <div class="dialog-actions" style="justify-content: flex-end">
+      <button type="button" class="btn btn-primary" (click)="closed.emit()">OK</button>
+    </div>
+  </div>
+</div>

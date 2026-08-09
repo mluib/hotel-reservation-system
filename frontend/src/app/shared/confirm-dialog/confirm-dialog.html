@@ -1,0 +1,12 @@
+<div class="dialog-overlay">
+  <div class="dialog-panel" style="width: 380px">
+    <div class="dialog-title">Confirm</div>
+    <div style="font-size: 14px; margin-bottom: 20px">{{ message() }}</div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancel</button>
+      <button type="button" class="btn" style="background: var(--color-danger-text); color: #fff" (click)="confirmed.emit()">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>

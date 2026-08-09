@@ -1,0 +1,76 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>{{ mode() === 'signin' ? 'Sign in' : 'Create your account' }}</h1>
+
+    <div class="tabs">
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="mode() === 'signin'"
+        [class.btn-secondary]="mode() !== 'signin'"
+        (click)="setMode('signin')"
+      >
+        Sign in
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="mode() === 'signup'"
+        [class.btn-secondary]="mode() !== 'signup'"
+        (click)="setMode('signup')"
+      >
+        Create account
+      </button>
+    </div>
+
+    @if (mode() === 'signin') {
+      <form [formGroup]="signInForm" (ngSubmit)="submitSignIn()">
+        <div class="field">
+          <label for="signin-email">Email</label>
+          <input id="signin-email" type="email" formControlName="email" />
+        </div>
+        <div class="field">
+          <label for="signin-password">Password</label>
+          <input id="signin-password" type="password" formControlName="password" />
+        </div>
+        @if (error()) {
+          <div class="banner banner-error">{{ error() }}</div>
+        }
+        <button type="submit" class="btn btn-primary" style="width: 100%" [disabled]="submitting()">
+          Sign in
+        </button>
+      </form>
+    } @else {
+      <form [formGroup]="signUpForm" (ngSubmit)="submitSignUp()">
+        <div class="name-row">
+          <div class="field">
+            <label for="signup-first">First name</label>
+            <input id="signup-first" formControlName="firstName" />
+          </div>
+          <div class="field">
+            <label for="signup-last">Last name</label>
+            <input id="signup-last" formControlName="lastName" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="signup-email">Email</label>
+          <input id="signup-email" type="email" formControlName="email" />
+        </div>
+        <div class="field">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" formControlName="password" />
+        </div>
+        <div class="field">
+          <label for="signup-confirm-password">Confirm password</label>
+          <input id="signup-confirm-password" type="password" formControlName="confirmPassword" />
+        </div>
+        @if (error()) {
+          <div class="banner banner-error">{{ error() }}</div>
+        }
+        <button type="submit" class="btn btn-primary" style="width: 100%" [disabled]="submitting()">
+          Create account
+        </button>
+      </form>
+    }
+  </div>
+</div>
