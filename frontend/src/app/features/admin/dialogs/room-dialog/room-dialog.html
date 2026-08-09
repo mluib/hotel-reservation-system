@@ -20,7 +20,7 @@
       </div>
 
       <div class="field">
-        <label>Photo</label>
+        <label for="room-photo">Photo</label>
         @if (previewUrl(); as url) {
           <img [src]="url" alt="" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px" />
         } @else {
@@ -28,7 +28,7 @@
             Photo
           </div>
         }
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+        <input id="room-photo" type="file" accept="image/*" (change)="onFileSelected($event)" />
       </div>
 
       @if (error()) {

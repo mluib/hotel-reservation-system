@@ -81,6 +81,7 @@ export class AuthPage implements OnInit {
     }
     this.error.set(null);
     this.submitting.set(true);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to exclude it from the request sent to the backend
     const { confirmPassword, ...request } = this.signUpForm.getRawValue();
     this.auth.register(request).subscribe({
       next: () => this.router.navigateByUrl(this.returnUrl),
