@@ -14,19 +14,22 @@ public class CustomersController : ControllerBase
     private readonly UpdateCustomer _updateCustomer;
     private readonly DeleteCustomer _deleteCustomer;
     private readonly GetCurrentCustomer _getCurrentCustomer;
+    private readonly ILogger<CustomersController> _logger;
 
     public CustomersController(
         GetCustomerById getCustomerById,
         GetCustomers getCustomers,
         UpdateCustomer updateCustomer,
         DeleteCustomer deleteCustomer,
-        GetCurrentCustomer getCurrentCustomer)
+        GetCurrentCustomer getCurrentCustomer,
+        ILogger<CustomersController> logger)
     {
         _getCustomerById = getCustomerById;
         _getCustomers = getCustomers;
         _updateCustomer = updateCustomer;
         _deleteCustomer = deleteCustomer;
         _getCurrentCustomer = getCurrentCustomer;
+        _logger = logger;
     }
 
     // Customer-facing profile lookup (e.g. for the frontend nav bar), scoped to the
@@ -77,6 +80,7 @@ public class CustomersController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            _logger.LogWarning(ex, "Customer {CustomerId} delete rejected: {Reason}", id, ex.Message);
             return BadRequest(new { error = ex.Message });
         }
     }

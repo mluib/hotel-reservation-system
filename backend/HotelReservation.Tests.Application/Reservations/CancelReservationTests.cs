@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Reservations;
@@ -28,7 +29,7 @@ public class CancelReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id1");
 
-        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
         await useCase.ExecuteAsync(reservation.Id);
 
@@ -52,7 +53,7 @@ public class CancelReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("caller-id");
 
-        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
         await useCase.Invoking(x => x.ExecuteAsync(reservation.Id)).Should().ThrowAsync<InvalidOperationException>();
 
@@ -76,7 +77,7 @@ public class CancelReservationTests
         currentUser.SetupGet(c => c.UserId).Returns("admin-id");
         currentUser.Setup(c => c.IsInRole("Admin")).Returns(true);
 
-        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
         await useCase.ExecuteAsync(reservation.Id);
 
@@ -99,7 +100,7 @@ public class CancelReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id2");
 
-        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
         await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid())).Should().ThrowAsync<InvalidOperationException>().WithMessage("Reservation not found.*");
     }
