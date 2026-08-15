@@ -26,6 +26,9 @@ public class AccountController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            // AuthService already logs the specific validation failure, and the automatic
+            // request-summary line already records the resulting status code -- nothing
+            // useful left to add here.
             return BadRequest(new { error = ex.Message });
         }
     }

@@ -183,3 +183,28 @@ A second item flagged from the same mockup review; asked to implement it directl
 - Asked for ESLint to be added to the frontend -> added via its standard schematic; the small number of pre-existing violations it surfaced (two form labels not associated with their inputs, one intentionally unused destructured variable) were fixed.
 - Asked for the GitHub Actions workflow to be created -> a two-job workflow building and testing the backend and building and linting the frontend was written, followed by an extended walkthrough of how GitHub Actions actually decides when to run against a pull request versus a push to main, and what an eventual optional image-publishing job would look like.
 - Asked to update the README's Docker/CI status and commit it together with this log directly to main, once the CI workflow was confirmed working -> README's status line and a new "Running with Docker" section were added; both files were committed to main.
+
+## 2026-08-09 — Phase 5 planning: application/runtime logging (Claude Code)
+
+- Asked for a Phase 5 plan to be drafted in parallel while Phase 4 was still in progress -> the backend was investigated and found to have no logging, no exception handling, and inconsistent error responses across controllers; a plan was written covering Serilog wiring, structured request logging, and `ILogger` calls at business-significant events.
+- Asked whether Phase 5 should add exception handling despite the roadmap filing that under Phase 6 -> chose a minimal global exception-handling middleware now, leaving full `ProblemDetails` standardization for Phase 6.
+- Pointed out the plan's claim that CI didn't exist yet was stale -> corrected to reflect the CI workflow that had since been added.
+- Asked what the existing `appsettings.json` "Logging" section was for -> explained it governs the built-in console/debug providers, which `UseSerilog` would replace outright.
+- Asked for a concrete example of an already-unhandled exception the new middleware would catch -> pointed to the reservation double-booking case, which had no try/catch anywhere in its call path.
+- Asked whether Serilog was the common, standard choice -> confirmed it as the de facto standard for structured logging in .NET and kept it in the plan.
+
+## 2026-08-09 — Phase 5 implementation: Serilog and error logging (Claude Code)
+
+- Confirmed Phase 4 had merged to main and said to proceed -> a `phase5-logging` branch was created and the plan implemented in one continuous pass: Serilog wired up (console sink, environment-driven levels, replacing the previously-unused default `Logging` config), one structured line per HTTP request, a minimal exception-handling middleware, and `ILogger` calls at reservation creation/cancellation and the existing auth/delete/upload rejection paths; existing unit tests were updated for the resulting constructor changes, a deeper Serilog/`WebApplicationFactory` incompatibility was found and fixed along the way (a lazily-configured logger conflicting with the test host being built via a second, independent service provider), and the whole change was verified via the full test suite plus a manual pass through registration, login, booking, and a deliberately triggered double-booking -- confirming the previously-unhandled crash now produces a clean logged 500 instead.
+- Pointed out the appsettings' `MinimumLevel:Override` block had been needlessly duplicated with identical values across the base and Development config files -> removed the redundant copy.
+- Asked why a login failure was being logged in two separate places -> found the controller-level warning added nothing beyond what the service layer already logged more specifically, and removed it as genuine duplication.
+
+## 2026-08-10 — Local dev workflow and a real CORS bug (Claude Code)
+
+- Asked how to run the frontend to test the Phase 5 changes -> re-verified the already-working `docker-compose` stack before moving to native tooling.
+- Decided Docker wasn't the right fit for day-to-day development and asked to run the frontend via CLI instead, with the backend run through Visual Studio -> pointed to the existing native dev-server setup already prepared for this; a blocked PowerShell script-execution policy and Angular CLI's one-time analytics prompt were resolved along the way.
+- Reported a CORS error blocking the frontend's requests to the backend -> traced to a genuine bug in the new exception-handling middleware: it cleared response headers (including one CORS had already added) before writing its generic error body; fixed by no longer clearing the response.
+- Reported the same CORS error persisting after restarting the backend -> traced instead to Visual Studio running the backend's `https` launch profile, whose HTTP-to-HTTPS redirect breaks the frontend's cross-origin request; confirmed switching profiles resolved it.
+- Asked whether the now-unused `https` profile should be removed -> removed outright rather than commented out, since comment support in that JSON file's readers couldn't be confirmed reliable.
+- Asked to set up running the frontend from VS Code without Chrome installed -> a task was written to start the dev server opening the OS default browser, initially placed at the repo root.
+- Pointed out that file needed to live inside `frontend/.vscode/` instead -> found the Angular CLI's own scaffolding already had an equivalent, better-equipped task there, so the redundant one was removed and its debug configuration switched from Chrome to Edge.

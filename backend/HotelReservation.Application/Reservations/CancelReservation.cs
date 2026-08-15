@@ -1,4 +1,5 @@
 using HotelReservation.Application.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace HotelReservation.Application.Reservations;
 
@@ -7,15 +8,18 @@ public class CancelReservation
     private readonly IReservationRepository _repository;
     private readonly ICurrentUserService _currentUser;
     private readonly ICustomerRepository _customerRepository;
+    private readonly ILogger<CancelReservation> _logger;
 
     public CancelReservation(
         IReservationRepository repository,
         ICurrentUserService currentUser,
-        ICustomerRepository customerRepository)
+        ICustomerRepository customerRepository,
+        ILogger<CancelReservation> logger)
     {
         _repository = repository;
         _currentUser = currentUser;
         _customerRepository = customerRepository;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(Guid id)
@@ -25,7 +29,10 @@ public class CancelReservation
 
         var reservation = await _repository.GetByIdAsync(id);
         if (reservation == null)
+        {
+            _logger.LogWarning("Cancel rejected: reservation {ReservationId} not found", id);
             throw new InvalidOperationException("Reservation not found.");
+        }
 
         // Admins can cancel any reservation; customers only their own.
         if (!_currentUser.IsInRole("Admin"))
@@ -35,10 +42,17 @@ public class CancelReservation
                 throw new InvalidOperationException("Customer does not exist.");
 
             if (reservation.CustomerId != customer.Id)
+            {
+                _logger.LogWarning(
+                    "Cancel rejected: reservation {ReservationId} does not belong to customer {CustomerId}",
+                    id, customer.Id);
                 throw new InvalidOperationException("Reservation does not belong to the current customer.");
+            }
         }
 
         reservation.Cancel();
         await _repository.UpdateAsync(reservation);
+
+        _logger.LogInformation("Reservation {ReservationId} cancelled", id);
     }
 }

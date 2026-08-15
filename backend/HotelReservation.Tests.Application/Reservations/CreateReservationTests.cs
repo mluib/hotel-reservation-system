@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Reservations;
@@ -26,7 +27,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns(Guid.NewGuid().ToString());
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow.AddDays(5), CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -49,7 +50,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id1");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -73,7 +74,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id2");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -94,7 +95,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns(Guid.NewGuid().ToString());
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -122,7 +123,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id3");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 

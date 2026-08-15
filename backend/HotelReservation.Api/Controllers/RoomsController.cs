@@ -16,6 +16,7 @@ public class RoomsController : ControllerBase
     private readonly UpdateRoom _updateRoom;
     private readonly DeleteRoom _deleteRoom;
     private readonly UploadRoomImage _uploadRoomImage;
+    private readonly ILogger<RoomsController> _logger;
 
     public RoomsController(
         CreateRoom createRoom,
@@ -23,7 +24,8 @@ public class RoomsController : ControllerBase
         GetRoomById getRoomById,
         UpdateRoom updateRoom,
         DeleteRoom deleteRoom,
-        UploadRoomImage uploadRoomImage)
+        UploadRoomImage uploadRoomImage,
+        ILogger<RoomsController> logger)
     {
         _createRoom = createRoom;
         _getRooms = getRooms;
@@ -31,6 +33,7 @@ public class RoomsController : ControllerBase
         _updateRoom = updateRoom;
         _deleteRoom = deleteRoom;
         _uploadRoomImage = uploadRoomImage;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -76,6 +79,7 @@ public class RoomsController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            _logger.LogWarning(ex, "Room {RoomId} delete rejected: {Reason}", id, ex.Message);
             return BadRequest(new { error = ex.Message });
         }
     }
@@ -98,6 +102,7 @@ public class RoomsController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            _logger.LogWarning(ex, "Room {RoomId} image upload rejected: {Reason}", id, ex.Message);
             return BadRequest(new { error = ex.Message });
         }
     }

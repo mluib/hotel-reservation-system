@@ -5,6 +5,7 @@ using System.Text;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace HotelReservation.Application.Reservations;
 
@@ -14,17 +15,20 @@ public class CreateReservation
     private readonly IRoomRepository _roomRepository;
     private readonly HotelReservation.Application.Interfaces.ICurrentUserService _currentUser;
     private readonly HotelReservation.Application.Interfaces.ICustomerRepository _customerRepository;
+    private readonly ILogger<CreateReservation> _logger;
 
     public CreateReservation(
         IReservationRepository repository,
         IRoomRepository roomRepository,
         HotelReservation.Application.Interfaces.ICurrentUserService currentUser,
-        HotelReservation.Application.Interfaces.ICustomerRepository customerRepository)
+        HotelReservation.Application.Interfaces.ICustomerRepository customerRepository,
+        ILogger<CreateReservation> logger)
     {
         _repository = repository;
         _roomRepository = roomRepository;
         _currentUser = currentUser;
         _customerRepository = customerRepository;
+        _logger = logger;
     }
 
     public async Task<Guid> ExecuteAsync(
@@ -57,7 +61,12 @@ public class CreateReservation
             request.CheckOut);
 
         if (overlapping)
+        {
+            _logger.LogWarning(
+                "Reservation rejected: room {RoomId} already booked for {CheckIn:d} - {CheckOut:d}",
+                request.RoomId, request.CheckIn, request.CheckOut);
             throw new InvalidOperationException("Room is already reserved for this period.");
+        }
 
         var reservation = new Reservation(
             request.RoomId,
@@ -67,6 +76,11 @@ public class CreateReservation
             room.PricePerNight);
 
         await _repository.AddAsync(reservation);
+
+        _logger.LogInformation(
+            "Reservation {ReservationId} created for room {RoomId}, customer {CustomerId}, {CheckIn:d} - {CheckOut:d}",
+            reservation.Id, request.RoomId, customerId, request.CheckIn, request.CheckOut);
+
         return reservation.Id;
     }
 }

@@ -1,5 +1,6 @@
 
 using System.Text.Json.Serialization;
+using HotelReservation.Api.Middleware;
 using HotelReservation.Application.Customers;
 using HotelReservation.Application.Hotels;
 using HotelReservation.Application.Interfaces;
@@ -11,6 +12,8 @@ using HotelReservation.Infrastructure.Repositories;
 using HotelReservation.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace HotelReservation.Api
 {
@@ -18,7 +21,47 @@ namespace HotelReservation.Api
     {
         public static async Task Main(string[] args)
         {
+            // Bootstrap logger: covers anything that goes wrong before the full pipeline
+            // (configured from appsettings' "Serilog" section, wired up via UseSerilog
+            // below) exists yet -- e.g. bad configuration or a host build failure.
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
+
+            try
+            {
+                await RunAsync(args);
+            }
+            // WebApplicationFactory (used by HotelReservation.Tests.Integration) builds the
+            // host by invoking this Main method and relies on a HostAbortedException
+            // unwinding back out of it once the builder is captured, without ever calling
+            // Run(). A catch-all here would otherwise swallow that and break the test host.
+            catch (Exception ex) when (ex is not HostAbortedException)
+            {
+                Log.Fatal(ex, "Application terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+        }
+
+        private static async Task RunAsync(string[] args)
+        {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Replace the bootstrap logger with the fully configured one now that
+            // builder.Configuration (appsettings + env) is available. Built eagerly from
+            // Log.Logger rather than via UseSerilog's lazy (context, services, config)
+            // overload: that overload wraps a ReloadableLogger which freezes on first use
+            // and throws if the host is ever built a second time -- which is exactly what
+            // WebApplicationFactory (HotelReservation.Tests.Integration) does internally.
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+            builder.Host.UseSerilog();
 
             // Add services to the container.
             {
@@ -187,6 +230,16 @@ namespace HotelReservation.Api
 
             // Configure the HTTP request pipeline.
             {
+                // One structured line per request (method, path, status code, elapsed ms),
+                // replacing the framework's own multi-line-per-request logging. Registered
+                // first so it wraps every other middleware, including the exception handler
+                // below, and reports the true final status code and duration.
+                app.UseSerilogRequestLogging();
+
+                // Catches anything no controller/use case already handles, logs it, and
+                // returns a generic error instead of an unhandled 500 with no trace anywhere.
+                app.UseMiddleware<ExceptionHandlingMiddleware>();
+
                 if (app.Environment.IsDevelopment())
                 {
                     // OpenAPI
