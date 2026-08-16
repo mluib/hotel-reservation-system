@@ -1,15 +1,9 @@
 # AI-assisted Development — Workflow Log
 
-Running log of notable AI-agent interactions during development: what was generated, what was wrong or needed correction, and why.
+Running log of notable AI-agent interactions during development.
+Format: `[what was asked] -> [what was produced]`
 
-Kept lightweight — a couple of bullet points per entry, added as things happen. Used as raw material for a polished writeup at the end of the project.
-
-Format:
-
-- `[what was asked] -> [what was produced]` — exactly one `->` per bullet.
-- A follow-up correction, refinement, or decision is its **own bullet** in the same form, not a clause tacked onto the original one — it's a separate ask, even if it happened moments later.
-- Describe outcomes and reasoning, not specific classes/methods/files — that detail already lives in the diffs and commits; the log's job is to stay legible to a reader who isn't going to open the code.
-- The agent never refers to itself as "I"/"me"/"mine" — write "Claude Code"/"Copilot"/"the agent", or phrase it passively (e.g. "rewrote the file" rather than "I rewrote the file").
+Kept lightweight, added as things happen. Used as raw material for a polished writeup at the end of the project.
 
 This is the living version of the log — reconstructed and dated from the raw ChatGPT/Copilot exports in `docs/raw-ai-logs/` plus the git history, and maintained going forward per the standing instruction in [`CLAUDE.md`](../CLAUDE.md). `docs/raw-ai-logs/` remains untouched as the frozen original transcripts this was built from.
 
@@ -208,3 +202,29 @@ A second item flagged from the same mockup review; asked to implement it directl
 - Asked whether the now-unused `https` profile should be removed -> removed outright rather than commented out, since comment support in that JSON file's readers couldn't be confirmed reliable.
 - Asked to set up running the frontend from VS Code without Chrome installed -> a task was written to start the dev server opening the OS default browser, initially placed at the repo root.
 - Pointed out that file needed to live inside `frontend/.vscode/` instead -> found the Angular CLI's own scaffolding already had an equivalent, better-equipped task there, so the redundant one was removed and its debug configuration switched from Chrome to Edge.
+
+## 2026-08-16 — Phase 6 planning: deep backend review (Claude Code)
+
+- Asked to fully plan Phase 6 now that Phase 5 was finished -> ran parallel exploration of the API layer, the domain/application/infrastructure layers, and the test suite to inventory the real current state of every backlog item, then designed a concrete nine-stage implementation sequence with an explicit dependency-driven ordering (DTO cleanup before value objects, contract hardening before value objects, aggregate cleanup grouped with value objects, repository efficiency before pagination, REST/secrets/tests kept last).
+- Asked how far Phase 6 should take the DDD value-object item, given value objects had been explicitly deferred during the original domain-model review -> chose to build all three (EmailAddress, Money, DateRange) as the roadmap already specified, keeping domain events out of scope since nothing in the app currently needs them.
+- Asked how deep the JWT/secrets hardening should go, then asked for the mechanics of .NET user-secrets and Docker Compose environment-variable/`.env` handling to be explained, and whether a production hotel-seeding path was worth building for a project that will never see a real deployment -> explained both mechanisms; settled on rotating the committed JWT key plus moving it and the docker-compose secrets to user-secrets and a gitignored `.env`, documenting the seeding gap as a deliberate non-goal instead of fixing it.
+- Asked to also remove the default key/password fallback values in `Program.cs` -> added a fail-fast startup check to the secrets stage of the plan, so a missing `Jwt:Key` throws immediately instead of silently falling back to the hardcoded placeholder.
+- Asked whether Phase 6 should run as one continuous pass or staged with checkpoints -> chose staged, so each of the nine planned stages gets its own implement/verify/commit checkpoint.
+- Reported that pulling in Visual Studio's Git Changes panel appeared to change nothing -> verified it had actually succeeded (local `main` fast-forwarded to match `origin/main`, bringing in the already-merged Phase 5 logging/exception-handling work), confirming the plan's sync prerequisite was already satisfied.
+
+## 2026-08-16 — Phase 6 Stage 1: DTO cleanup (Claude Code)
+
+- Asked to start Stage 1 and change the files -> added `ReservationDto`, replacing the three anonymous-object returns in the reservation-listing use cases, and collapsed the byte-identical `CreateRoomRequest`/`UpdateRoomRequest` into one `RoomRequest` type; `UpdateCustomerRequest` and the Auth DTOs were left as-is with the reasoning documented inline; full three-tier suite green.
+- Pointed out the Auth interfaces/DTOs should probably move into the project's existing shared folders -> corrected an earlier "leave as-is" call: `IAuthService`/`IJwtTokenService` moved into the existing `Interfaces/` folder and the three Auth DTOs into the existing `DTOs/` folder, matching the convention every other feature already followed; the now-empty `Authentication/` folder was removed and all references updated, suite green.
+- Asked about scaling the DTOs/Interfaces folder structure for larger codebases, and about MediatR/CQRS as the typical pairing for feature-folder architectures -> explained both (subfolders-by-feature vs. full vertical slices; MediatR as the mediator-pattern plumbing CQRS setups typically use); concluded neither is warranted at this project's current size and left the structure as-is.
+
+## 2026-08-16 — Phase 6 Stage 2: API contract hardening (Claude Code)
+
+- Asked to continue with Stage 2 -> built a shared exception taxonomy (`NotFoundException`/`ConflictException`/`ForbiddenException`/`ValidationException`/`UnauthenticatedException`), migrated every use case's ad-hoc `InvalidOperationException` to the matching type, rewrote the global exception-handling middleware to return real `ProblemDetails` responses, fixed status codes across every controller (204 for no-body updates/deletes, 201 for registration), added Swagger response documentation and `DataAnnotations` validation to every request DTO, and updated the existing test suite's exception-type assertions to match; verified live against the running API (correct `ProblemDetails` shape and content type, automatic validation errors) in addition to the automated suite.
+- Asked why `Login()` still had its own try/catch when every other action now flows through the middleware, then agreed the two failure paths (no such account vs. wrong password) don't actually need different handling from an unauthenticated caller -> `AuthService.LoginAsync` now throws `UnauthenticatedException` like the rest of the taxonomy, and the controller's now-redundant catch was removed.
+- Pointed out the new exception types' descriptive comments should use `///` instead of plain `//` -> converted the exception types', middleware's, and two DTOs' comments to XML doc comments now that Swagger's XML-comment integration was wired up.
+- Asked why that documentation file was needed given it only feeds `IncludeXmlComments` -> surfaced and fixed a real gap this raised: XML doc generation had only been enabled on the Api project, so the Application-layer doc comments (DTOs, exception types) were never actually reaching Swagger; enabled it on the Application project too and added a second `IncludeXmlComments` call, then verified live that the DTO summaries actually appear in the generated Swagger document.
+- Asked for a comment on the prerequisite that `GenerateDocumentationFile` must be enabled -> added.
+- Pointed out `CustomersController` still had a plain `//` method comment -> converted to an XML doc comment.
+- Suggested moving the bare-404 checks in the Hotel/Room/Customer/Reservation single-item lookups into the Application layer instead of the controller, matching how every other rejection already worked -> migrated all five (including the current-customer profile lookup) to throw `NotFoundException`, updated the one existing test covering that path, and simplified the controllers to no longer null-check.
+- Pointed out the middleware now logs every rejection at Error level, when some had previously been logged as warnings -> split the logging so the known exception taxonomy logs at Warning and only genuine 500s log at Error; verified live that a 404 now carries a real detail message and is logged as a Warning, not an Error.
