@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -15,7 +16,7 @@ public class UpdateHotel
     public async Task ExecuteAsync(UpdateHotelRequest request)
     {
         var hotel = await _repository.GetAsync();
-        if (hotel == null) throw new InvalidOperationException("Hotel not found.");
+        if (hotel == null) throw new NotFoundException("Hotel not found.");
 
         hotel.Update(request.Name, request.Address);
 

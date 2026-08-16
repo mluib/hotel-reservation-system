@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -20,10 +21,10 @@ public class GetMyReservations
     public async Task<IEnumerable<ReservationDto>> ExecuteAsync()
     {
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
-            throw new InvalidOperationException("Unauthenticated");
+            throw new UnauthenticatedException("Unauthenticated");
 
         var customer = await _customerRepository.GetByIdentityUserIdAsync(_currentUser.UserId!);
-        if (customer == null) throw new InvalidOperationException("Customer does not exist.");
+        if (customer == null) throw new NotFoundException("Customer does not exist.");
 
         var reservations = await _repository.GetByCustomerIdAsync(customer.Id);
 

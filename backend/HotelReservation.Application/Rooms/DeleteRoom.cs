@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Rooms;
@@ -16,10 +17,10 @@ public class DeleteRoom
     public async Task ExecuteAsync(System.Guid id)
     {
         var existing = await _repository.GetByIdAsync(id);
-        if (existing == null) throw new InvalidOperationException("Room not found.");
+        if (existing == null) throw new NotFoundException("Room not found.");
 
         var hasReservations = await _reservationRepository.ExistsForRoomAsync(id);
-        if (hasReservations) throw new InvalidOperationException("Cannot delete a room that has reservations.");
+        if (hasReservations) throw new ConflictException("Cannot delete a room that has reservations.");
 
         await _repository.DeleteAsync(existing);
     }

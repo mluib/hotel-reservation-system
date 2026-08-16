@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
@@ -36,21 +37,21 @@ public class CreateReservation
     {
         // Validate dates
         if (request.CheckOut <= request.CheckIn)
-            throw new InvalidOperationException("Check-out must be after check-in.");
+            throw new ValidationException("Check-out must be after check-in.");
 
         // Ensure room exists, and read its current price to snapshot onto the reservation
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
         if (room == null)
-            throw new InvalidOperationException("Room does not exist.");
+            throw new NotFoundException("Room does not exist.");
 
         // Determine customer id from the authenticated user. Clients must not provide CustomerId.
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
-            throw new InvalidOperationException("Unauthenticated user cannot create a reservation.");
+            throw new UnauthenticatedException("Unauthenticated user cannot create a reservation.");
 
         // Look up domain customer by the IdentityUserId (string) rather than parsing the identity id as a GUID.
         var customer = await _customerRepository.GetByIdentityUserIdAsync(_currentUser.UserId!);
         if (customer == null)
-            throw new InvalidOperationException("Customer does not exist.");
+            throw new NotFoundException("Customer does not exist.");
 
         var customerId = customer.Id;
 
@@ -65,7 +66,7 @@ public class CreateReservation
             _logger.LogWarning(
                 "Reservation rejected: room {RoomId} already booked for {CheckIn:d} - {CheckOut:d}",
                 request.RoomId, request.CheckIn, request.CheckOut);
-            throw new InvalidOperationException("Room is already reserved for this period.");
+            throw new ConflictException("Room is already reserved for this period.");
         }
 
         var reservation = new Reservation(

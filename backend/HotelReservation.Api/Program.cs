@@ -124,6 +124,22 @@ namespace HotelReservation.Api
                             Array.Empty<string>()
                         }
                     });
+
+                    // Prerequisite: GenerateDocumentationFile must be turned on in each
+                    // project's own .csproj, or its .xml simply won't exist here to load --
+                    // currently set on both HotelReservation.Api.csproj and
+                    // HotelReservation.Application.csproj.
+                    //
+                    // Api's own XML doc file (controllers/middleware) plus Application's
+                    // (DTOs, exception types) -- both land in this project's output
+                    // directory since Application is a ProjectReference, so its generated
+                    // .xml is copied alongside its .dll the same way HotelReservation.Api.xml is.
+                    foreach (var assemblyName in new[] { "HotelReservation.Api", "HotelReservation.Application" })
+                    {
+                        var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
+                        if (File.Exists(xmlPath))
+                            c.IncludeXmlComments(xmlPath);
+                    }
                 });
 
                 // Database

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Reservations;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Domain.Entities;
@@ -31,7 +32,7 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow.AddDays(5), CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>();
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
@@ -54,7 +55,7 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>().WithMessage("Room is already reserved for this period.*");
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ConflictException>().WithMessage("Room is already reserved for this period.*");
     }
 
     [Fact]
@@ -99,7 +100,7 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>().WithMessage("Room does not exist.*");
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<NotFoundException>().WithMessage("Room does not exist.*");
     }
 
     [Fact]

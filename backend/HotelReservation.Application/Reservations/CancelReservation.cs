@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -25,13 +26,13 @@ public class CancelReservation
     public async Task ExecuteAsync(Guid id)
     {
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
-            throw new InvalidOperationException("Unauthenticated user cannot cancel a reservation.");
+            throw new UnauthenticatedException("Unauthenticated user cannot cancel a reservation.");
 
         var reservation = await _repository.GetByIdAsync(id);
         if (reservation == null)
         {
             _logger.LogWarning("Cancel rejected: reservation {ReservationId} not found", id);
-            throw new InvalidOperationException("Reservation not found.");
+            throw new NotFoundException("Reservation not found.");
         }
 
         // Admins can cancel any reservation; customers only their own.
@@ -39,14 +40,14 @@ public class CancelReservation
         {
             var customer = await _customerRepository.GetByIdentityUserIdAsync(_currentUser.UserId!);
             if (customer == null)
-                throw new InvalidOperationException("Customer does not exist.");
+                throw new NotFoundException("Customer does not exist.");
 
             if (reservation.CustomerId != customer.Id)
             {
                 _logger.LogWarning(
                     "Cancel rejected: reservation {ReservationId} does not belong to customer {CustomerId}",
                     id, customer.Id);
-                throw new InvalidOperationException("Reservation does not belong to the current customer.");
+                throw new ForbiddenException("Reservation does not belong to the current customer.");
             }
         }
 

@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -12,10 +13,10 @@ public class GetReservationById
         _repository = repository;
     }
 
-    public async Task<ReservationDto?> ExecuteAsync(System.Guid id)
+    public async Task<ReservationDto> ExecuteAsync(System.Guid id)
     {
         var r = await _repository.GetByIdAsync(id);
-        if (r == null) return null;
+        if (r == null) throw new NotFoundException("Reservation not found.");
 
         return new ReservationDto
         {

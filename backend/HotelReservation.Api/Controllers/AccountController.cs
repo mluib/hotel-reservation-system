@@ -18,34 +18,22 @@ public class AccountController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
+    [ProducesResponseType<AuthenticationResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        try
-        {
-            var resp = await _auth.RegisterAsync(request);
-            return Ok(resp);
-        }
-        catch (InvalidOperationException ex)
-        {
-            // AuthService already logs the specific validation failure, and the automatic
-            // request-summary line already records the resulting status code -- nothing
-            // useful left to add here.
-            return BadRequest(new { error = ex.Message });
-        }
+        var resp = await _auth.RegisterAsync(request);
+        return StatusCode(StatusCodes.Status201Created, resp);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [ProducesResponseType<AuthenticationResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        try
-        {
-            var resp = await _auth.LoginAsync(request);
-            return Ok(resp);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Unauthorized(new { error = ex.Message });
-        }
+        var resp = await _auth.LoginAsync(request);
+        return Ok(resp);
     }
 }

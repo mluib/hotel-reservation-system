@@ -20,40 +20,44 @@ public class HotelController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get()
     {
         var dto = await _getHotel.ExecuteAsync();
-        if (dto == null) return NotFound();
         return Ok(dto);
     }
 
     [HttpPut]
     [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(UpdateHotelRequest request)
     {
         await _updateHotel.ExecuteAsync(request);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost("image")]
     [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
     {
-        try
+        var request = new ImageUploadRequest
         {
-            var request = new ImageUploadRequest
-            {
-                Content = file.OpenReadStream(),
-                ContentType = file.ContentType,
-                Length = file.Length
-            };
+            Content = file.OpenReadStream(),
+            ContentType = file.ContentType,
+            Length = file.Length
+        };
 
-            var dto = await _uploadHotelImage.ExecuteAsync(request);
-            return Ok(dto);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var dto = await _uploadHotelImage.ExecuteAsync(request);
+        return Ok(dto);
     }
 }

@@ -1,16 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using HotelReservation.Domain.Enums;
 
 namespace HotelReservation.Application.DTOs;
 
-// Shared by both create and update: the two were previously separate types
-// (CreateRoomRequest/UpdateRoomRequest) with an identical shape, since a room's
-// number/type/price/hotel are the same fields whether you're creating or editing one.
 public class RoomRequest
 {
+    [Required]
+    [MaxLength(20)]
     public string Number { get; set; }
 
     public RoomType Type { get; set; }
 
+    [Range(0.01, double.MaxValue, ErrorMessage = "PricePerNight must be greater than zero.")]
     public decimal PricePerNight { get; set; }
 
     public Guid HotelId { get; set; }

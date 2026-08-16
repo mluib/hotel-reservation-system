@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Customers;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 
@@ -34,7 +35,7 @@ public class GetCurrentCustomerTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_NoLinkedCustomer_ReturnsNull()
+    public async Task ExecuteAsync_NoLinkedCustomer_Throws()
     {
         var customerRepo = new Mock<ICustomerRepository>();
         customerRepo.Setup(c => c.GetByIdentityUserIdAsync("identity-2")).ReturnsAsync((Customer?)null);
@@ -44,9 +45,8 @@ public class GetCurrentCustomerTests
 
         var useCase = new GetCurrentCustomer(customerRepo.Object, currentUser.Object);
 
-        var dto = await useCase.ExecuteAsync();
-
-        dto.Should().BeNull();
+        await useCase.Invoking(x => x.ExecuteAsync())
+            .Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class GetCurrentCustomerTests
         var useCase = new GetCurrentCustomer(customerRepo.Object, currentUser.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync())
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Unauthenticated user has no profile.*");
+            .Should().ThrowAsync<UnauthenticatedException>().WithMessage("Unauthenticated user has no profile.*");
 
         customerRepo.Verify(c => c.GetByIdentityUserIdAsync(It.IsAny<string>()), Times.Never);
     }
