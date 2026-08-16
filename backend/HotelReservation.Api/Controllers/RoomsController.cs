@@ -38,7 +38,7 @@ public class RoomsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create(CreateRoomRequest request)
+    public async Task<IActionResult> Create(RoomRequest request)
     {
         var id = await _createRoom.ExecuteAsync(request);
         var dto = await _getRoomById.ExecuteAsync(id);
@@ -62,7 +62,7 @@ public class RoomsController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(System.Guid id, UpdateRoomRequest request)
+    public async Task<IActionResult> Update(System.Guid id, RoomRequest request)
     {
         await _updateRoom.ExecuteAsync(id, request);
         return Ok();

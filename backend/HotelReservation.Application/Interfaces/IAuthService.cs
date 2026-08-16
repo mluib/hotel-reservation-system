@@ -1,4 +1,6 @@
-namespace HotelReservation.Application.Authentication;
+using HotelReservation.Application.DTOs;
+
+namespace HotelReservation.Application.Interfaces;
 
 public interface IAuthService
 {

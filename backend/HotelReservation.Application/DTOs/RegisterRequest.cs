@@ -1,4 +1,4 @@
-namespace HotelReservation.Application.Authentication;
+namespace HotelReservation.Application.DTOs;
 
 public class RegisterRequest
 {

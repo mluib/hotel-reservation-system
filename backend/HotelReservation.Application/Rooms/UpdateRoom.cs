@@ -13,7 +13,7 @@ public class UpdateRoom
         _repository = repository;
     }
 
-    public async Task ExecuteAsync(System.Guid id, UpdateRoomRequest request)
+    public async Task ExecuteAsync(System.Guid id, RoomRequest request)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null) throw new InvalidOperationException("Room not found.");

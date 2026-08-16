@@ -163,8 +163,8 @@ namespace HotelReservation.Api
 
                     builder.Services.AddAuthorization();
 
-                    builder.Services.AddScoped<Application.Authentication.IJwtTokenService, Infrastructure.Services.JwtTokenService>();
-                    builder.Services.AddScoped<Application.Authentication.IAuthService, Infrastructure.Services.AuthService>();
+                    builder.Services.AddScoped<Application.Interfaces.IJwtTokenService, Infrastructure.Services.JwtTokenService>();
+                    builder.Services.AddScoped<Application.Interfaces.IAuthService, Infrastructure.Services.AuthService>();
                 }
 
                 // Accessor for current user (used by application services to enforce ownership)

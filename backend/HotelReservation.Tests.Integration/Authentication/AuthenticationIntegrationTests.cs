@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using HotelReservation.Application.Authentication;
+using HotelReservation.Application.DTOs;
 using Xunit;
 
 namespace HotelReservation.Tests.Integration.Authentication;

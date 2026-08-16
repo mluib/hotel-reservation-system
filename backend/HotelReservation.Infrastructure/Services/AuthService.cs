@@ -1,4 +1,4 @@
-using HotelReservation.Application.Authentication;
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using Microsoft.AspNetCore.Identity;

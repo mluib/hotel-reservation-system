@@ -1,3 +1,4 @@
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Reservations;
@@ -11,12 +12,12 @@ public class GetReservationById
         _repository = repository;
     }
 
-    public async Task<object?> ExecuteAsync(System.Guid id)
+    public async Task<ReservationDto?> ExecuteAsync(System.Guid id)
     {
         var r = await _repository.GetByIdAsync(id);
         if (r == null) return null;
 
-        return new
+        return new ReservationDto
         {
             Id = r.Id,
             RoomId = r.RoomId,

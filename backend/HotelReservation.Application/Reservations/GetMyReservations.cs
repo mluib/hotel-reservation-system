@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Reservations;
@@ -16,7 +17,7 @@ public class GetMyReservations
         _customerRepository = customerRepository;
     }
 
-    public async Task<IEnumerable<object>> ExecuteAsync()
+    public async Task<IEnumerable<ReservationDto>> ExecuteAsync()
     {
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
             throw new InvalidOperationException("Unauthenticated");
@@ -26,10 +27,10 @@ public class GetMyReservations
 
         var reservations = await _repository.GetByCustomerIdAsync(customer.Id);
 
-        var list = new List<object>();
+        var list = new List<ReservationDto>();
         foreach (var r in reservations)
         {
-            list.Add(new
+            list.Add(new ReservationDto
             {
                 Id = r.Id,
                 RoomId = r.RoomId,
