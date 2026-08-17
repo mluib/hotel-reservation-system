@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
@@ -17,7 +18,7 @@ public class UpdateCustomer
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
-            throw new InvalidOperationException("Customer not found.");
+            throw new NotFoundException("Customer not found.");
 
         // Use domain method to update allowed fields and preserve invariants
         existing.Update(request.FirstName, request.LastName, request.Email);

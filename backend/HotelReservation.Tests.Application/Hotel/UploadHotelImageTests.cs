@@ -5,6 +5,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Hotels;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Domain.Entities;
@@ -61,7 +62,7 @@ public class UploadHotelImageTests
         var useCase = new UploadHotelImage(hotelRepo.Object, storage.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(MakeRequest()))
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Hotel not found.*");
+            .Should().ThrowAsync<NotFoundException>().WithMessage("Hotel not found.*");
 
         storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
@@ -79,7 +80,7 @@ public class UploadHotelImageTests
         var useCase = new UploadHotelImage(hotelRepo.Object, storage.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(MakeRequest(contentType: "application/pdf")))
-            .Should().ThrowAsync<InvalidOperationException>();
+            .Should().ThrowAsync<ValidationException>();
 
         storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         hotelRepo.Verify(r => r.UpdateAsync(It.IsAny<Domain.Entities.Hotel>()), Times.Never);
@@ -100,7 +101,7 @@ public class UploadHotelImageTests
         var oversized = MakeRequest(length: 6 * 1024 * 1024);
 
         await useCase.Invoking(x => x.ExecuteAsync(oversized))
-            .Should().ThrowAsync<InvalidOperationException>();
+            .Should().ThrowAsync<ValidationException>();
 
         storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         hotelRepo.Verify(r => r.UpdateAsync(It.IsAny<Domain.Entities.Hotel>()), Times.Never);

@@ -1,4 +1,5 @@
 using HotelReservation.Application.Common;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -18,7 +19,7 @@ public class UploadHotelImage
     public async Task<HotelDto> ExecuteAsync(ImageUploadRequest request)
     {
         var hotel = await _repository.GetAsync();
-        if (hotel == null) throw new InvalidOperationException("Hotel not found.");
+        if (hotel == null) throw new NotFoundException("Hotel not found.");
 
         ImageValidation.Validate(request);
 

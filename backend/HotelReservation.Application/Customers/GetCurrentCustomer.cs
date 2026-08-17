@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -16,21 +17,21 @@ public class GetCurrentCustomer
         _currentUser = currentUser;
     }
 
-    public async Task<CustomerDto?> ExecuteAsync()
+    public async Task<CustomerDto> ExecuteAsync()
     {
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
-            throw new InvalidOperationException("Unauthenticated user has no profile.");
+            throw new UnauthenticatedException("Unauthenticated user has no profile.");
 
         var customer = await _repository.GetByIdentityUserIdAsync(_currentUser.UserId!);
         if (customer == null)
-            return null;
+            throw new NotFoundException("No customer profile is linked to the authenticated user.");
 
         return new CustomerDto
         {
             Id = customer.Id,
             FirstName = customer.FirstName,
             LastName = customer.LastName,
-            Email = customer.Email
+            Email = customer.Email.Value
         };
     }
 }

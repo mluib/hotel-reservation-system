@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using HotelReservation.Domain.Enums;
+using HotelReservation.Domain.ValueObjects;
 
 namespace HotelReservation.Domain.Entities;
 
@@ -14,14 +15,18 @@ public class Reservation
 
     public Guid CustomerId { get; private set; }
 
-    public DateTime CheckIn { get; private set; }
-
-    public DateTime CheckOut { get; private set; }
+    public DateRange Stay { get; private set; }
 
     public ReservationStatus Status { get; private set; }
 
-    public decimal PricePerNight { get; private set; }
+    public Money PricePerNight { get; private set; }
 
+    /// <summary>
+    /// EF Core materialization constructor -- see <see cref="Customer"/>'s for why this is
+    /// needed now that Stay/PricePerNight are <see cref="DateRange"/>/<see cref="Money"/>
+    /// rather than raw DateTime/decimal.
+    /// </summary>
+    private Reservation() { }
 
     public Reservation(
         Guid roomId,
@@ -30,17 +35,12 @@ public class Reservation
         DateTime checkOut,
         decimal pricePerNight)
     {
-        if (checkOut <= checkIn)
-            throw new ArgumentException(
-                "Check-out must be after check-in.");
-
         Id = Guid.NewGuid();
         RoomId = roomId;
         CustomerId = customerId;
-        CheckIn = checkIn;
-        CheckOut = checkOut;
+        Stay = new DateRange(checkIn, checkOut);
         Status = ReservationStatus.Confirmed;
-        PricePerNight = pricePerNight;
+        PricePerNight = new Money(pricePerNight);
     }
 
 

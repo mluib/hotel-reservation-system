@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Customers;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 
@@ -49,7 +50,7 @@ public class DeleteCustomerTests
         var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(customer.Id))
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Cannot delete a customer that has reservations.*");
+            .Should().ThrowAsync<ConflictException>().WithMessage("Cannot delete a customer that has reservations.*");
 
         customerRepo.Verify(c => c.DeleteAsync(It.IsAny<Customer>()), Times.Never);
     }
@@ -65,7 +66,7 @@ public class DeleteCustomerTests
         var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid()))
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Customer not found.*");
+            .Should().ThrowAsync<NotFoundException>().WithMessage("Customer not found.*");
 
         reservationRepo.Verify(r => r.ExistsForCustomerAsync(It.IsAny<Guid>()), Times.Never);
     }

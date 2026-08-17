@@ -25,7 +25,7 @@ public class GetRooms
                 Id = r.Id,
                 Number = r.Number,
                 Type = r.Type,
-                PricePerNight = r.PricePerNight,
+                PricePerNight = r.PricePerNight.Amount,
                 HotelId = r.HotelId,
                 ImageUrl = r.ImageUrl
             });

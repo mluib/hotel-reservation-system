@@ -30,7 +30,8 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Email");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -76,17 +77,8 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CheckIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CheckOut")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("PricePerNight")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("RoomId")
                         .HasColumnType("uniqueidentifier");
@@ -118,9 +110,6 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PricePerNight")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -333,15 +322,67 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("HotelReservation.Domain.Entities.Reservation", b =>
                 {
                     b.HasOne("HotelReservation.Domain.Entities.Customer", null)
-                        .WithMany("Reservations")
+                        .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HotelReservation.Domain.Entities.Room", null)
-                        .WithMany("Reservations")
+                        .WithMany()
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("HotelReservation.Domain.ValueObjects.Money", "PricePerNight", b1 =>
+                        {
+                            b1.Property<Guid>("ReservationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("PricePerNight");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(3)
+                                .HasColumnType("nvarchar(3)")
+                                .HasDefaultValue("EUR")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("ReservationId");
+
+                            b1.ToTable("Reservations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ReservationId");
+                        });
+
+                    b.OwnsOne("HotelReservation.Domain.ValueObjects.DateRange", "Stay", b1 =>
+                        {
+                            b1.Property<Guid>("ReservationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<DateTime>("CheckIn")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("CheckIn");
+
+                            b1.Property<DateTime>("CheckOut")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("CheckOut");
+
+                            b1.HasKey("ReservationId");
+
+                            b1.ToTable("Reservations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ReservationId");
+                        });
+
+                    b.Navigation("PricePerNight")
+                        .IsRequired();
+
+                    b.Navigation("Stay")
                         .IsRequired();
                 });
 
@@ -351,6 +392,34 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
                         .WithMany("Rooms")
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("HotelReservation.Domain.ValueObjects.Money", "PricePerNight", b1 =>
+                        {
+                            b1.Property<Guid>("RoomId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("PricePerNight");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(3)
+                                .HasColumnType("nvarchar(3)")
+                                .HasDefaultValue("EUR")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("RoomId");
+
+                            b1.ToTable("Rooms");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RoomId");
+                        });
+
+                    b.Navigation("PricePerNight")
                         .IsRequired();
                 });
 
@@ -405,19 +474,9 @@ namespace HotelReservation.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HotelReservation.Domain.Entities.Customer", b =>
-                {
-                    b.Navigation("Reservations");
-                });
-
             modelBuilder.Entity("HotelReservation.Domain.Entities.Hotel", b =>
                 {
                     b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("HotelReservation.Domain.Entities.Room", b =>
-                {
-                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

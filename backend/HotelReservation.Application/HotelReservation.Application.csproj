@@ -4,6 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Same reasoning as HotelReservation.Api.csproj: DTOs/exceptions here rely on
+         [ProducesResponseType] and their own semantics rather than every member having a
+         summary, so missing-XML-comment warnings would just be noise. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

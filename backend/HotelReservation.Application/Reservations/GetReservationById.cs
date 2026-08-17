@@ -1,3 +1,5 @@
+using HotelReservation.Application.Common.Exceptions;
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Reservations;
@@ -11,20 +13,20 @@ public class GetReservationById
         _repository = repository;
     }
 
-    public async Task<object?> ExecuteAsync(System.Guid id)
+    public async Task<ReservationDto> ExecuteAsync(System.Guid id)
     {
         var r = await _repository.GetByIdAsync(id);
-        if (r == null) return null;
+        if (r == null) throw new NotFoundException("Reservation not found.");
 
-        return new
+        return new ReservationDto
         {
             Id = r.Id,
             RoomId = r.RoomId,
             CustomerId = r.CustomerId,
-            CheckIn = r.CheckIn,
-            CheckOut = r.CheckOut,
+            CheckIn = r.Stay.CheckIn,
+            CheckOut = r.Stay.CheckOut,
             Status = r.Status,
-            PricePerNight = r.PricePerNight
+            PricePerNight = r.PricePerNight.Amount
         };
     }
 }

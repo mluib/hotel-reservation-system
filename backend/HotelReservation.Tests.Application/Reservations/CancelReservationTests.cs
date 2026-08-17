@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Reservations;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using HotelReservation.Domain.Enums;
@@ -55,7 +56,7 @@ public class CancelReservationTests
 
         var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
-        await useCase.Invoking(x => x.ExecuteAsync(reservation.Id)).Should().ThrowAsync<InvalidOperationException>();
+        await useCase.Invoking(x => x.ExecuteAsync(reservation.Id)).Should().ThrowAsync<ForbiddenException>();
 
         reservation.Status.Should().Be(ReservationStatus.Confirmed);
         repoMock.Verify(r => r.UpdateAsync(It.IsAny<Reservation>()), Times.Never);
@@ -102,6 +103,6 @@ public class CancelReservationTests
 
         var useCase = new CancelReservation(repoMock.Object, currentUser.Object, customerRepo.Object, NullLogger<CancelReservation>.Instance);
 
-        await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid())).Should().ThrowAsync<InvalidOperationException>().WithMessage("Reservation not found.*");
+        await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid())).Should().ThrowAsync<NotFoundException>().WithMessage("Reservation not found.*");
     }
 }

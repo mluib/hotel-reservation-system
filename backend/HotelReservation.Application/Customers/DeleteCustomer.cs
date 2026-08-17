@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Customers;
@@ -17,11 +18,11 @@ public class DeleteCustomer
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
-            throw new InvalidOperationException("Customer not found.");
+            throw new NotFoundException("Customer not found.");
 
         var hasReservations = await _reservationRepository.ExistsForCustomerAsync(id);
         if (hasReservations)
-            throw new InvalidOperationException("Cannot delete a customer that has reservations.");
+            throw new ConflictException("Cannot delete a customer that has reservations.");
 
         await _repository.DeleteAsync(existing);
     }

@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Rooms;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using HotelReservation.Domain.Enums;
@@ -50,7 +51,7 @@ public class DeleteRoomTests
         var useCase = new DeleteRoom(roomRepo.Object, reservationRepo.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(room.Id))
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Cannot delete a room that has reservations.*");
+            .Should().ThrowAsync<ConflictException>().WithMessage("Cannot delete a room that has reservations.*");
 
         roomRepo.Verify(r => r.DeleteAsync(It.IsAny<Room>()), Times.Never);
     }
@@ -66,7 +67,7 @@ public class DeleteRoomTests
         var useCase = new DeleteRoom(roomRepo.Object, reservationRepo.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid()))
-            .Should().ThrowAsync<InvalidOperationException>().WithMessage("Room not found.*");
+            .Should().ThrowAsync<NotFoundException>().WithMessage("Room not found.*");
 
         reservationRepo.Verify(r => r.ExistsForRoomAsync(It.IsAny<Guid>()), Times.Never);
     }

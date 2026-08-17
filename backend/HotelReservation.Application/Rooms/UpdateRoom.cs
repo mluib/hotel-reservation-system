@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
@@ -13,10 +14,10 @@ public class UpdateRoom
         _repository = repository;
     }
 
-    public async Task ExecuteAsync(System.Guid id, UpdateRoomRequest request)
+    public async Task ExecuteAsync(System.Guid id, RoomRequest request)
     {
         var existing = await _repository.GetByIdAsync(id);
-        if (existing == null) throw new InvalidOperationException("Room not found.");
+        if (existing == null) throw new NotFoundException("Room not found.");
 
         // Use domain method to update allowed fields and preserve invariants
         existing.Update(request.Number, request.Type, request.PricePerNight, request.HotelId);

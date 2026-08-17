@@ -32,7 +32,7 @@ Which AI tool did what, across the project's history:
 - Describe outcomes and reasoning, not specific classes/methods/files — that detail already lives in the diffs and commits; the log needs to stay legible to a reader who won't open the code (e.g. an employer reviewing the CV writeup).
 - Never write "I"/"me"/"mine" for the agent's own actions — name the tool ("Claude Code"/"Copilot") or phrase it passively instead. This applies generally, not just to the log.
 - Prefix each entry's date (or date-grouped section) with the actual date the work happened. If a single day covers more than one topic (e.g. a design pass and a separate backend pass), use separate date-headed sections per topic rather than one mixed list.
-- Keep entries to a few bullet points — headwords/short sentences are fine. The log should have no gaps (every session's notable work should be represented), but it does not need prose detail; save that for the Phase 7 final writeup.
+- Keep it lightweight — each entry is one bullet, headwords/short sentences are fine. The log should have no gaps (every session's notable work should be represented), but it does not need prose detail; save that for the Phase 7 final writeup.
 - Stale entries — including from prior sessions, not just the current one — are fair game to rewrite into this format when spotted, not just flagged.
 - Do this without being asked each time — it's a standing expectation for this repo, not a one-off task.
 - `docs/raw-ai-logs/` (the original ChatGPT/Copilot chat exports) is a frozen historical archive — don't edit it; it already fed into `WORKFLOW_LOG.md` once and doesn't need to change again.

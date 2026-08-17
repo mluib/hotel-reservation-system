@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using HotelReservation.Application.Common.Exceptions;
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
 namespace HotelReservation.Application.Reservations;
@@ -16,28 +18,28 @@ public class GetMyReservations
         _customerRepository = customerRepository;
     }
 
-    public async Task<IEnumerable<object>> ExecuteAsync()
+    public async Task<IEnumerable<ReservationDto>> ExecuteAsync()
     {
         if (string.IsNullOrWhiteSpace(_currentUser.UserId))
-            throw new InvalidOperationException("Unauthenticated");
+            throw new UnauthenticatedException("Unauthenticated");
 
         var customer = await _customerRepository.GetByIdentityUserIdAsync(_currentUser.UserId!);
-        if (customer == null) throw new InvalidOperationException("Customer does not exist.");
+        if (customer == null) throw new NotFoundException("Customer does not exist.");
 
         var reservations = await _repository.GetByCustomerIdAsync(customer.Id);
 
-        var list = new List<object>();
+        var list = new List<ReservationDto>();
         foreach (var r in reservations)
         {
-            list.Add(new
+            list.Add(new ReservationDto
             {
                 Id = r.Id,
                 RoomId = r.RoomId,
                 CustomerId = r.CustomerId,
-                CheckIn = r.CheckIn,
-                CheckOut = r.CheckOut,
+                CheckIn = r.Stay.CheckIn,
+                CheckOut = r.Stay.CheckOut,
                 Status = r.Status,
-                PricePerNight = r.PricePerNight
+                PricePerNight = r.PricePerNight.Amount
             });
         }
 

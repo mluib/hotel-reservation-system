@@ -12,6 +12,13 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      # Program.cs fails fast at startup if Jwt:Key is missing (Phase 6 secrets hardening) --
+      # locally that's covered by user-secrets or the committed .env, neither of which reach
+      # this CI runner, so it needs its own value here. Same dev-only placeholder already
+      # committed in the repo-root .env, not a real secret, so a plain env var is enough --
+      # no need for a GitHub Actions secret.
+      Jwt__Key: ql8UiF/DgXWrZniua1SrrhAWE8QhNDWBZOwrAtlTGuE=
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

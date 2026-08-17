@@ -1,4 +1,5 @@
 using HotelReservation.Application.Common;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 
@@ -18,7 +19,7 @@ public class UploadRoomImage
     public async Task<RoomDto> ExecuteAsync(Guid roomId, ImageUploadRequest request)
     {
         var room = await _repository.GetByIdAsync(roomId);
-        if (room == null) throw new InvalidOperationException("Room not found.");
+        if (room == null) throw new NotFoundException("Room not found.");
 
         ImageValidation.Validate(request);
 
@@ -33,7 +34,7 @@ public class UploadRoomImage
             Id = room.Id,
             Number = room.Number,
             Type = room.Type,
-            PricePerNight = room.PricePerNight,
+            PricePerNight = room.PricePerNight.Amount,
             HotelId = room.HotelId,
             ImageUrl = room.ImageUrl
         };

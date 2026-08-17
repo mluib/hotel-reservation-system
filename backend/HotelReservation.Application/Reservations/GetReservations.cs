@@ -14,21 +14,21 @@ public class GetReservations
         _repository = repository;
     }
 
-    public async Task<IEnumerable<object>> ExecuteAsync()
+    public async Task<IEnumerable<ReservationDto>> ExecuteAsync()
     {
         var reservations = await _repository.GetAllAsync();
-        var list = new List<object>();
+        var list = new List<ReservationDto>();
         foreach (var r in reservations)
         {
-            list.Add(new
+            list.Add(new ReservationDto
             {
                 Id = r.Id,
                 RoomId = r.RoomId,
                 CustomerId = r.CustomerId,
-                CheckIn = r.CheckIn,
-                CheckOut = r.CheckOut,
+                CheckIn = r.Stay.CheckIn,
+                CheckOut = r.Stay.CheckOut,
                 Status = r.Status,
-                PricePerNight = r.PricePerNight
+                PricePerNight = r.PricePerNight.Amount
             });
         }
 

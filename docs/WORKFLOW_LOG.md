@@ -1,15 +1,9 @@
 # AI-assisted Development — Workflow Log
 
-Running log of notable AI-agent interactions during development: what was generated, what was wrong or needed correction, and why.
+Running log of notable AI-agent interactions during development.
+Format: `[what was asked] -> [what was produced]`
 
-Kept lightweight — a couple of bullet points per entry, added as things happen. Used as raw material for a polished writeup at the end of the project.
-
-Format:
-
-- `[what was asked] -> [what was produced]` — exactly one `->` per bullet.
-- A follow-up correction, refinement, or decision is its **own bullet** in the same form, not a clause tacked onto the original one — it's a separate ask, even if it happened moments later.
-- Describe outcomes and reasoning, not specific classes/methods/files — that detail already lives in the diffs and commits; the log's job is to stay legible to a reader who isn't going to open the code.
-- The agent never refers to itself as "I"/"me"/"mine" — write "Claude Code"/"Copilot"/"the agent", or phrase it passively (e.g. "rewrote the file" rather than "I rewrote the file").
+Kept lightweight, added as things happen. Used as raw material for a polished writeup at the end of the project.
 
 This is the living version of the log — reconstructed and dated from the raw ChatGPT/Copilot exports in `docs/raw-ai-logs/` plus the git history, and maintained going forward per the standing instruction in [`CLAUDE.md`](../CLAUDE.md). `docs/raw-ai-logs/` remains untouched as the frozen original transcripts this was built from.
 
@@ -208,3 +202,88 @@ A second item flagged from the same mockup review; asked to implement it directl
 - Asked whether the now-unused `https` profile should be removed -> removed outright rather than commented out, since comment support in that JSON file's readers couldn't be confirmed reliable.
 - Asked to set up running the frontend from VS Code without Chrome installed -> a task was written to start the dev server opening the OS default browser, initially placed at the repo root.
 - Pointed out that file needed to live inside `frontend/.vscode/` instead -> found the Angular CLI's own scaffolding already had an equivalent, better-equipped task there, so the redundant one was removed and its debug configuration switched from Chrome to Edge.
+
+## 2026-08-16 — Phase 6 planning: deep backend review (Claude Code)
+
+- Asked to fully plan Phase 6 now that Phase 5 was finished -> ran parallel exploration of the API layer, the domain/application/infrastructure layers, and the test suite to inventory the real current state of every backlog item, then designed a concrete nine-stage implementation sequence with an explicit dependency-driven ordering (DTO cleanup before value objects, contract hardening before value objects, aggregate cleanup grouped with value objects, repository efficiency before pagination, REST/secrets/tests kept last).
+- Asked how far Phase 6 should take the DDD value-object item, given value objects had been explicitly deferred during the original domain-model review -> chose to build all three (EmailAddress, Money, DateRange) as the roadmap already specified, keeping domain events out of scope since nothing in the app currently needs them.
+- Asked how deep the JWT/secrets hardening should go, then asked for the mechanics of .NET user-secrets and Docker Compose environment-variable/`.env` handling to be explained, and whether a production hotel-seeding path was worth building for a project that will never see a real deployment -> explained both mechanisms; settled on rotating the committed JWT key plus moving it and the docker-compose secrets to user-secrets and a gitignored `.env`, documenting the seeding gap as a deliberate non-goal instead of fixing it.
+- Asked to also remove the default key/password fallback values in `Program.cs` -> added a fail-fast startup check to the secrets stage of the plan, so a missing `Jwt:Key` throws immediately instead of silently falling back to the hardcoded placeholder.
+- Asked whether Phase 6 should run as one continuous pass or staged with checkpoints -> chose staged, so each of the nine planned stages gets its own implement/verify/commit checkpoint.
+- Reported that pulling in Visual Studio's Git Changes panel appeared to change nothing -> verified it had actually succeeded (local `main` fast-forwarded to match `origin/main`, bringing in the already-merged Phase 5 logging/exception-handling work), confirming the plan's sync prerequisite was already satisfied.
+
+## 2026-08-16 — Phase 6 Stage 1: DTO cleanup (Claude Code)
+
+- Asked to start Stage 1 and change the files -> added `ReservationDto`, replacing the three anonymous-object returns in the reservation-listing use cases, and collapsed the byte-identical `CreateRoomRequest`/`UpdateRoomRequest` into one `RoomRequest` type; `UpdateCustomerRequest` and the Auth DTOs were left as-is with the reasoning documented inline; full three-tier suite green.
+- Pointed out the Auth interfaces/DTOs should probably move into the project's existing shared folders -> corrected an earlier "leave as-is" call: `IAuthService`/`IJwtTokenService` moved into the existing `Interfaces/` folder and the three Auth DTOs into the existing `DTOs/` folder, matching the convention every other feature already followed; the now-empty `Authentication/` folder was removed and all references updated, suite green.
+- Asked about scaling the DTOs/Interfaces folder structure for larger codebases, and about MediatR/CQRS as the typical pairing for feature-folder architectures -> explained both (subfolders-by-feature vs. full vertical slices; MediatR as the mediator-pattern plumbing CQRS setups typically use); concluded neither is warranted at this project's current size and left the structure as-is.
+
+## 2026-08-16 — Phase 6 Stage 2: API contract hardening (Claude Code)
+
+- Asked to continue with Stage 2 -> built a shared exception taxonomy (`NotFoundException`/`ConflictException`/`ForbiddenException`/`ValidationException`/`UnauthenticatedException`), migrated every use case's ad-hoc `InvalidOperationException` to the matching type, rewrote the global exception-handling middleware to return real `ProblemDetails` responses, fixed status codes across every controller (204 for no-body updates/deletes, 201 for registration), added Swagger response documentation and `DataAnnotations` validation to every request DTO, and updated the existing test suite's exception-type assertions to match; verified live against the running API (correct `ProblemDetails` shape and content type, automatic validation errors) in addition to the automated suite.
+- Asked why `Login()` still had its own try/catch when every other action now flows through the middleware, then agreed the two failure paths (no such account vs. wrong password) don't actually need different handling from an unauthenticated caller -> `AuthService.LoginAsync` now throws `UnauthenticatedException` like the rest of the taxonomy, and the controller's now-redundant catch was removed.
+- Pointed out the new exception types' descriptive comments should use `///` instead of plain `//` -> converted the exception types', middleware's, and two DTOs' comments to XML doc comments now that Swagger's XML-comment integration was wired up.
+- Asked why that documentation file was needed given it only feeds `IncludeXmlComments` -> surfaced and fixed a real gap this raised: XML doc generation had only been enabled on the Api project, so the Application-layer doc comments (DTOs, exception types) were never actually reaching Swagger; enabled it on the Application project too and added a second `IncludeXmlComments` call, then verified live that the DTO summaries actually appear in the generated Swagger document.
+- Asked for a comment on the prerequisite that `GenerateDocumentationFile` must be enabled -> added.
+- Pointed out `CustomersController` still had a plain `//` method comment -> converted to an XML doc comment.
+- Suggested moving the bare-404 checks in the Hotel/Room/Customer/Reservation single-item lookups into the Application layer instead of the controller, matching how every other rejection already worked -> migrated all five (including the current-customer profile lookup) to throw `NotFoundException`, updated the one existing test covering that path, and simplified the controllers to no longer null-check.
+- Pointed out the middleware now logs every rejection at Error level, when some had previously been logged as warnings -> split the logging so the known exception taxonomy logs at Warning and only genuine 500s log at Error; verified live that a 404 now carries a real detail message and is logged as a Warning, not an Error.
+
+## 2026-08-16 — Branch cleanup: moving Phase 6 commits off main (Claude Code)
+
+- Reported that Phase 6 work had been committed directly to `main` without branching first, and asked how to fix it now that commits already existed -> explained the safe fix: since nothing had been pushed to `origin` yet, create a new branch at the current commit to carry the existing commits, then reset local `main` back to match `origin/main`.
+- Reported the fix had been applied (via Visual Studio) and asked for it to be checked -> verified `main` was back in sync with `origin/main` and the new branch held all three commits, pushed and tracked correctly.
+
+## 2026-08-16 — Phase 6 Stage 3: DDD value objects (Claude Code)
+
+- Asked to perform Stage 3 -> built `EmailAddress`, `Money`, and `DateRange` value objects, wired them into `Customer`/`Room`/`Reservation`, and added the project's first EF Fluent configuration (a `ValueConverter` for `EmailAddress`, owned-entity mappings for `Money`/`DateRange`); found and fixed two problems along the way -- EF's constructor-based entity materialization broke once property types stopped matching constructor parameters one-to-one (fixed with private parameterless constructors), and removing the old manual check-in/check-out validation naively would have changed the order a bad request gets rejected in, so it was replaced with an equivalent up-front `DateRange` construction instead of just deleted; generated and reviewed the migration, catching that its Currency-column backfill defaulted to an empty string rather than a real value before applying it.
+- Approved applying the migration to the real dev database -> applied; confirmed clean via the running API.
+
+## 2026-08-17 — Phase 6 Stage 3 follow-up: legacy data, wrap-up (Claude Code)
+
+- Live verification surfaced two legacy reservation rows with a zero price -- a pre-existing artifact from before the PricePerNight column existed, now caught by Money's own validation running on every read, not just writes -- breaking room/reservation listing against the real dev database; developer corrected the two rows' values directly in SSMS -> re-verified live afterward that listing worked correctly again.
+- Asked whether Stage 3 was finished -> confirmed, with a final full build-and-test check.
+- Asked for the new value objects' constructor comments to use XML doc style, and how `EmailAddress` gets set by EF given its type doesn't match the database column -> converted the comments; explained the `ValueConverter` mechanism backing `CustomerConfiguration` (one lambda per read/write direction, conversion happening entirely in EF's materialization pipeline since the database column itself stays a plain string).
+- Asked whether `DateRange.Overlaps()` was actually used anywhere -> confirmed zero call sites currently, by design -- the two repository queries that conceptually need it can't call it directly since EF can't translate an arbitrary instance method into SQL, so it exists to be exercised by Stage 9's own dedicated unit tests instead.
+
+## 2026-08-17 — Phase 6 Stage 4: aggregate boundary cleanup (Claude Code)
+
+- Asked to continue with Stage 4 -> removed the confirmed-dead `Hotel.AddRoom` method and the `Room`/`Customer` "Reservations" navigation properties, formalizing `Room`, `Customer`, and `Reservation` as independent aggregate roots; reconfigured the two `Reservation` foreign keys explicitly (no longer inferrable once those navigations were gone) and switched their delete behavior from the previous convention-inferred cascade to a restrict, so the database enforces the same no-delete-with-reservations rule the application layer already does, as defense-in-depth; the removal also forced through repository-layer cleanup originally scoped for the next stage, since those queries no longer compiled otherwise; migration reviewed (touched only the two foreign keys' delete behavior, as expected) and full suite green.
+- Approved applying the migration to the dev database -> applied; confirmed the new restrict behavior was actually in effect via the database's own constraint metadata, rather than testing it with a live delete attempt against real data.
+
+## 2026-08-17 — Phase 6 Stage 5: repository efficiency (Claude Code)
+
+- Asked to continue with Stage 5 -> most of the originally-planned work had already been forced through in Stage 4; what remained was moving the room-availability overlap query out of the room repository into a proper method on the reservation repository instead of reaching directly into another aggregate's table, dropping an unused eager-load on the hotel repository, and removing two confirmed-dead repository methods; full suite green, and live-verified against real data that availability filtering still correctly excludes rooms with a confirmed overlapping reservation while including ones whose only overlap is cancelled.
+- Asked to confirm the change meant two database queries now where there used to be one -> confirmed, and explained exactly why: materializing the overlap results inside the reservation repository (needed to keep the repository interface returning a plain, already-fetched collection rather than leaking the underlying query-provider abstraction) means the two queries can no longer be folded into a single SQL statement the way the old, less clean version could.
+
+## 2026-08-17 — Phase 6 Stage 6: pagination skipped (Claude Code)
+
+- Asked whether pagination was really necessary for this project -> laid out the real tradeoff: the dev dataset is tiny (2 rooms, a handful of reservations/customers) with no real performance problem to solve, while implementing it would be the one stage requiring a coordinated frontend change across every list-consuming component; recommended skipping it.
+- Confirmed skipping Stage 6, and asked for the missing workflow-log entries for the prior stages to be backfilled -> documented the skip as a deliberate, reasoned non-goal (matching the earlier production-hotel-seeding-path precedent) in both the plan file and this log, then backfilled the entries for Stages 3-5 above.
+
+## 2026-08-17 — Phase 6 Stage 7: REST/route consistency cleanup (Claude Code)
+
+- Asked to continue with Stage 7 -> standardized on "mine" over "me" for the customer profile route (paired with the one frontend call site that needed it), documented the Hotel controller's singular route and the Customers controller's lack of a create endpoint as deliberate rather than gaps, deferred the Account-to-Auth rename as accepted debt (same frontend-coordination cost as the "mine" rename, for a pure naming preference with no functional payoff), and standardized the `[Authorize]` attribute style across controllers; verified live end-to-end (register, log in, load the profile via the renamed route) through the browser, not just the automated suite.
+
+## 2026-08-17 — Frontend fix: stale error-message parsing (Claude Code)
+
+- Asked whether any frontend changes were still outstanding from earlier stages -> investigated systematically and found a real, live regression: the frontend's error-message helper still expected the pre-Stage-2 response shape, so every one of the seven feature files using it had been silently showing a generic fallback message instead of the actual backend rejection reason ever since Stage 2 shipped; confirmed separately that the no-content response changes from that same stage were already handled correctly by the frontend's existing typing, so no further issue there.
+- Asked for it to be fixed, referencing Stage 2 -> updated the parser to read the new response shape's specific-reason field for thrown exceptions and its field-error list for automatic validation failures; verified live in the browser against both real cases (a duplicate-email conflict and a too-short password).
+
+## 2026-08-17 — Phase 6 Stage 8: secrets/JWT hardening (Claude Code)
+
+- Reported the frontend fix had been committed, asked to continue with Stage 8, and asked for the plan's docker-compose secrets approach to be changed first: commit a real, working `.env` instead of gitignoring it, with a comment explaining it's a demo-only tradeoff -> updated the plan accordingly, then implemented: rotated the JWT signing key, made startup fail fast on missing config instead of silently falling back to the old hardcoded key, moved the dev admin/JWT secrets to user-secrets for native development, committed the new `.env` (with a narrowly scoped `.gitignore` exception) and wired docker-compose to read from it; verified live both the fail-fast path and normal startup, and confirmed the test suite's web-application-factory host does pick up user-secrets correctly (a known gotcha elsewhere that turned out not to apply here).
+- Pointed out that the JWT token-generation code still had silent fallback defaults for the issuer/audience, despite startup now failing fast on those same values -> confirmed the fallbacks were unreachable in practice and could silently drift from the startup check's definition, so made them fail fast too for consistency; left the token-lifetime default as-is, since a missing value there is a harmless tunable, not config whose absence should be treated as a broken deployment.
+- Reported that launching via Visual Studio was now failing, and asked for the commands to (re-)create the secrets -> confirmed the secrets file itself was already correct at the exact location Visual Studio also reads from, pointed to a stale build as the more likely cause (the secrets identifier only takes effect after recompiling), and provided the commands regardless.
+- Reported the expected secrets folder couldn't be found on their machine -> raised the possibility that Claude Code's own tool environment might not share the real Windows filesystem, and recommended running the setup commands directly in a real terminal instead of relying on the earlier tool-run commands having landed anywhere Visual Studio could see; confirmed this resolved it.
+
+## 2026-08-17 — Running-instructions documentation (Claude Code)
+
+- Asked for a docs file covering backend/frontend build-and-run instructions for all three scenarios each (Docker, docker-compose, Visual Studio/VS Code) -> wrote `docs/RUNNING.md` covering all six combinations, cross-checked against the actual Dockerfiles, compose file, and editor launch configs rather than assumed, and linked it from the README.
+- Asked for the standalone-Docker commands to be added too -> added a full working recipe (a manually created Docker network standing in for what compose sets up automatically) for both backend and frontend.
+- Asked to revert those additions, since the networking explanation had gotten too complicated for what the doc needed -> reverted both sections back to the simpler build-verification framing.
+
+## 2026-08-17 — Phase 6 Stage 9: authorization/ownership/repository tests (Claude Code)
+
+- Asked to continue with Stage 9 -> added exactly the roadmap's stated scope: domain-layer value-object tests, an application-layer ownership test extending the existing cancel-reservation pattern, integration-level authorization tests (anonymous, wrong-role, and the previously-missing cross-customer-ownership case), and repository-level tests against a real database provider; along the way, fixed the new tests' own fixtures once the enforced foreign keys correctly rejected made-up reference ids, and had to separate a delete-test's setup and assertion into different database contexts after the first attempt turned out to be exercising the ORM's own in-memory tracking guard instead of the actual database constraint it was meant to prove; full three-tier suite went from 32 to 66 tests, all green.
+- Asked whether testing simple logic like the date-overlap check was really necessary -> explained why boundary-condition comparisons are an exception to "simple code needs no tests" (an easy place to get an operator subtly wrong, with real behavioral consequences), and that this specific method has no other caller or coverage of its own logic; agreed the value objects' constructor-validation tests are closer to the genuinely trivial end of that spectrum, but still worth their near-zero cost.

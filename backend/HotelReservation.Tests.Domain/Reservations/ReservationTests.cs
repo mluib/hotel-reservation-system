@@ -32,6 +32,6 @@ public class ReservationTests
         var roomId = Guid.NewGuid();
         var customerId = Guid.NewGuid();
         var r = new Reservation(roomId, customerId, DateTime.UtcNow, DateTime.UtcNow.AddDays(1), 150.50m);
-        r.PricePerNight.Should().Be(150.50m);
+        r.PricePerNight.Amount.Should().Be(150.50m);
     }
 }

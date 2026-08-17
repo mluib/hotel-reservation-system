@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using HotelReservation.Application.Reservations;
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Domain.Entities;
@@ -31,7 +32,10 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow.AddDays(5), CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>();
+        // Now thrown by DateRange's own constructor (a Domain-layer ArgumentException, mapped
+        // to 400 by the middleware same as ValidationException was) rather than a manual
+        // Application-layer check.
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -54,7 +58,7 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>().WithMessage("Room is already reserved for this period.*");
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ConflictException>().WithMessage("Room is already reserved for this period.*");
     }
 
     [Fact]
@@ -99,7 +103,7 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<InvalidOperationException>().WithMessage("Room does not exist.*");
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<NotFoundException>().WithMessage("Room does not exist.*");
     }
 
     [Fact]
@@ -130,6 +134,6 @@ public class CreateReservationTests
         await useCase.ExecuteAsync(req);
 
         added.Should().NotBeNull();
-        added!.PricePerNight.Should().Be(199.99m);
+        added!.PricePerNight.Amount.Should().Be(199.99m);
     }
 }

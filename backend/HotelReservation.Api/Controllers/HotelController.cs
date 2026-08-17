@@ -1,9 +1,14 @@
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Hotels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelReservation.Api.Controllers;
 
+// Deliberately singular ("api/hotel", not "api/hotels"): the system assumes exactly one
+// Hotel row exists (see HotelRepository.GetAsync's own "assume single hotel" comment) and
+// there is no create-hotel endpoint. A plural route would imply a collection that never
+// exists -- singular is more honest about the domain here, not an inconsistency to fix.
 [ApiController]
 [Route("api/[controller]")]
 public class HotelController : ControllerBase
@@ -20,40 +25,44 @@ public class HotelController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get()
     {
         var dto = await _getHotel.ExecuteAsync();
-        if (dto == null) return NotFound();
         return Ok(dto);
     }
 
     [HttpPut]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(UpdateHotelRequest request)
     {
         await _updateHotel.ExecuteAsync(request);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost("image")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
     {
-        try
+        var request = new ImageUploadRequest
         {
-            var request = new ImageUploadRequest
-            {
-                Content = file.OpenReadStream(),
-                ContentType = file.ContentType,
-                Length = file.Length
-            };
+            Content = file.OpenReadStream(),
+            ContentType = file.ContentType,
+            Length = file.Length
+        };
 
-            var dto = await _uploadHotelImage.ExecuteAsync(request);
-            return Ok(dto);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var dto = await _uploadHotelImage.ExecuteAsync(request);
+        return Ok(dto);
     }
 }

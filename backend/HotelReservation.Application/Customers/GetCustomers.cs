@@ -26,7 +26,7 @@ public class GetCustomers
                 Id = c.Id,
                 FirstName = c.FirstName,
                 LastName = c.LastName,
-                Email = c.Email
+                Email = c.Email.Value
             });
         }
 

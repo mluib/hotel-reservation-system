@@ -1,4 +1,5 @@
-using HotelReservation.Application.Authentication;
+using HotelReservation.Application.Common.Exceptions;
+using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -38,7 +39,16 @@ public class AuthService : IAuthService
             _logger.LogWarning(
                 "Registration failed for {Email}: {Errors}",
                 request.Email, string.Join(';', result.Errors.Select(e => e.Description)));
-            throw new InvalidOperationException(string.Join(';', result.Errors.Select(e => e.Description)));
+
+            var message = string.Join(';', result.Errors.Select(e => e.Description));
+
+            // Identity's own error codes tell us whether this is "someone already has this
+            // email" (a real conflict) versus a request-shape problem (weak password, etc.).
+            var isDuplicate = result.Errors.Any(e => e.Code is "DuplicateUserName" or "DuplicateEmail");
+            if (isDuplicate)
+                throw new ConflictException(message);
+
+            throw new ValidationException(message);
         }
 
         // Always assign the "Customer" role
@@ -67,14 +77,14 @@ public class AuthService : IAuthService
         if (user == null)
         {
             _logger.LogWarning("Login failed for {Email}: no such account", request.Email);
-            throw new InvalidOperationException("Invalid credentials.");
+            throw new UnauthenticatedException("Invalid credentials.");
         }
 
         var valid = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!valid)
         {
             _logger.LogWarning("Login failed for {Email}: wrong password", request.Email);
-            throw new InvalidOperationException("Invalid credentials.");
+            throw new UnauthenticatedException("Invalid credentials.");
         }
 
         var roles = await _userManager.GetRolesAsync(user);

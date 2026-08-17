@@ -1,3 +1,4 @@
+using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
@@ -13,10 +14,10 @@ public class GetHotel
         _repository = repository;
     }
 
-    public async Task<HotelDto?> ExecuteAsync()
+    public async Task<HotelDto> ExecuteAsync()
     {
         var hotel = await _repository.GetAsync();
-        if (hotel == null) return null;
+        if (hotel == null) throw new NotFoundException("Hotel not found.");
 
         return new HotelDto
         {
