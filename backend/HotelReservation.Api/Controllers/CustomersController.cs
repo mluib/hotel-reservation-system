@@ -29,17 +29,23 @@ public class CustomersController : ControllerBase
         _getCurrentCustomer = getCurrentCustomer;
     }
 
+    // Deliberately no [HttpPost] here: customers are only ever created via
+    // AccountController.Register, atomically with the linked IdentityUser. A bare create
+    // endpoint on this controller would let someone create an orphaned Customer row with no
+    // login, which ownership checks elsewhere (keyed on IdentityUserId) aren't designed to
+    // handle.
+
     /// <summary>
     /// Customer-facing profile lookup (e.g. for the frontend nav bar), scoped to the
     /// caller instead of an admin-only id lookup. Must be routed before "{id}" so
-    /// "me" isn't parsed as an id.
+    /// "mine" isn't parsed as an id.
     /// </summary>
-    [HttpGet("me")]
+    [HttpGet("mine")]
     [Authorize(Roles = "Customer")]
     [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetMe()
+    public async Task<IActionResult> GetMine()
     {
         var dto = await _getCurrentCustomer.ExecuteAsync();
         return Ok(dto);

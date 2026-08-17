@@ -1,9 +1,14 @@
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Hotels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelReservation.Api.Controllers;
 
+// Deliberately singular ("api/hotel", not "api/hotels"): the system assumes exactly one
+// Hotel row exists (see HotelRepository.GetAsync's own "assume single hotel" comment) and
+// there is no create-hotel endpoint. A plural route would imply a collection that never
+// exists -- singular is more honest about the domain here, not an inconsistency to fix.
 [ApiController]
 [Route("api/[controller]")]
 public class HotelController : ControllerBase
@@ -29,7 +34,7 @@ public class HotelController : ControllerBase
     }
 
     [HttpPut]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -42,7 +47,7 @@ public class HotelController : ControllerBase
     }
 
     [HttpPost("image")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

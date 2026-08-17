@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 import { Customer } from '../models/customer.model';
 import { AuthService } from '../auth/auth.service';
 
-const BASE_URL = `${environment.apiBaseUrl}/customers/me`;
+const BASE_URL = `${environment.apiBaseUrl}/customers/mine`;
 
 // Keeps the logged-in customer's own profile (first/last name) around, mainly so
 // the nav bar can show a real name instead of the JWT's bare email. Loads once per

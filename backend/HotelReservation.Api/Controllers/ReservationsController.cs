@@ -1,7 +1,7 @@
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Reservations;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotelReservation.Api.Controllers;
 
@@ -33,7 +33,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPost]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer")]
+    [Authorize(Roles = "Customer")]
     [ProducesResponseType<ReservationDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -49,7 +49,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpGet]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType<IEnumerable<ReservationDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -60,7 +60,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpGet("mine")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer")]
+    [Authorize(Roles = "Customer")]
     [ProducesResponseType<IEnumerable<ReservationDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMine()
@@ -70,7 +70,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType<ReservationDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -82,7 +82,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -94,7 +94,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPost("{id}/cancel")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Customer,Admin")]
+    [Authorize(Roles = "Customer,Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
