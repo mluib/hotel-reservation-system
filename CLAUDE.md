@@ -5,9 +5,9 @@ A CV portfolio project: a hotel reservation system built with deliberate, docume
 ## Stack & architecture
 
 - **Backend** (`backend/`): ASP.NET Core Web API on .NET 10, Clean Architecture — `HotelReservation.Domain` (entities/enums, no external deps) → `HotelReservation.Application` (use cases, DTOs, repository interfaces) ← `HotelReservation.Infrastructure` (EF Core, repositories, Identity, JWT) ← `HotelReservation.Api` (thin controllers, DI wiring). Three test projects: `Tests.Domain` (unit), `Tests.Application` (unit, Moq), `Tests.Integration` (`WebApplicationFactory` + SQLite in-memory).
-- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/roadmap.md`.
-- Auth: ASP.NET Core Identity + JWT Bearer, role-based authorization. `IdentityUser` (auth) and domain `Customer` (business entity) are deliberately separate, linked via `IdentityUserId` — see `docs/raw-ai-logs/ChatGPT/decisions.md` for the full rationale.
-- Full architectural rationale lives in `docs/raw-ai-logs/ChatGPT/{tech-stack,decisions}.md` (written early in the project, still accurate for the backend).
+- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/roadmap.md` and `docs/frontend.md`.
+- Auth: ASP.NET Core Identity + JWT Bearer, role-based authorization. `IdentityUser` (auth) and domain `Customer` (business entity) are deliberately separate, linked via `IdentityUserId` — see `docs/raw-ai-logs/chat-gpt/decisions.md` for the full rationale.
+- Full architectural rationale lives in `docs/raw-ai-logs/chat-gpt/{tech-stack,decisions}.md` (written early in the project, still accurate for the backend).
 
 ## Where things stand / what's next
 
@@ -17,8 +17,8 @@ See [`docs/roadmap.md`](docs/roadmap.md) for the phase-by-phase plan (UX design 
 
 Which AI tool did what, across the project's history:
 - **ChatGPT**: initial project idea, planning, architecture discussion, generating implementation prompts.
-- **GitHub Copilot** (Visual Studio, ask/agent mode): the bulk of the initial backend implementation — CRUD, validation, auth, tests — working from those prompts.
-- **Claude Design**: the Phase 1 UX/design pass — the screen mockups under `docs/raw-ai-logs/ClaudeDesignMockup/` that the Angular frontend was built against.
+- **GitHub Copilot** (Visual Studio, ask/agent mode): parts of the initial backend implementation — CRUD, validation, auth, tests — working from those prompts, guided and corrected throughout by the developer.
+- **Claude Design**: the Phase 1 UX/design pass — the screen mockups under `docs/raw-ai-logs/claude-design/mockup/` that the Angular frontend was built against.
 - **Claude Code**: architecture/code review, repo restructuring, Angular frontend implementation, DevOps setup, and maintaining `docs/workflow-log.md`.
 
 ## Standing instruction: maintain the AI-workflow log

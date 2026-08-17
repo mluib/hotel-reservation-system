@@ -21,6 +21,7 @@ docker compose up -d --build
 - Frontend: http://localhost:4200
 - Backend / Swagger: http://localhost:5044/swagger
 - A default hotel and an admin login (`admin@hotel.local` / `Admin123!`) are seeded automatically on first run (development only)
+- Needs ports `4200`, `5044`, and `14330` free on the host — startup fails for whichever service's port is already taken (e.g. a native dev server already running there); `14330` (not SQL Server's default `1433`) is deliberate, since a locally-installed SQL Server commonly already holds that one
 
 ```bash
 docker compose logs -f   # tail logs
