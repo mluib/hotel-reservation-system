@@ -9,6 +9,7 @@
          Swagger's response docs, so missing-XML-comment warnings (CS1591) would just be
          noise, suppressed rather than papered over with comments that add no information. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <UserSecretsId>740b8db6-59f0-495d-bd13-fa68729b782e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

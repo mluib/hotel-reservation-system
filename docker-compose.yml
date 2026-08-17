@@ -3,7 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "HotelDev_2026!"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
     ports:
       - "1433:1433"
     volumes:
@@ -21,10 +21,11 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      ConnectionStrings__DefaultConnection: "Server=db;Database=HotelReservationDb;User Id=sa;Password=HotelDev_2026!;TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=HotelReservationDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
       Cors__AllowedOrigins__0: "http://localhost:4200"
-      Seed__AdminEmail: "admin@hotel.local"
-      Seed__AdminPassword: "Admin123!"
+      Jwt__Key: "${JWT_KEY}"
+      Seed__AdminEmail: "${SEED_ADMIN_EMAIL}"
+      Seed__AdminPassword: "${SEED_ADMIN_PASSWORD}"
     ports:
       - "5044:8080"
 

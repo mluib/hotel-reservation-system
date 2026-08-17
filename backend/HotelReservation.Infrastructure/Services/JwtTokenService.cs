@@ -19,9 +19,17 @@ public class JwtTokenService : IJwtTokenService
 
     public string GenerateToken(string userId, string userName, System.Collections.Generic.IList<string> roles)
     {
+        // Issuer/Audience fall back to a throw, not a silent default, to match Program.cs's
+        // own fail-fast check on these same two keys -- this method only ever runs after
+        // the app has already started, which under that check means they're already
+        // guaranteed present. A duplicated silent default here would be genuinely
+        // unreachable in this app, and it previously risked drifting from Program.cs's
+        // definition of "what happens if these are missing" without anyone noticing.
+        // ExpireMinutes stays a real default: it's a tunable, not config whose absence
+        // should be treated as a broken deployment.
         var key = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
-        var issuer = _config["Jwt:Issuer"] ?? "hotel";
-        var audience = _config["Jwt:Audience"] ?? "hotel_audience";
+        var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer not configured");
+        var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience not configured");
         var expiresMinutes = int.TryParse(_config["Jwt:ExpireMinutes"], out var m) ? m : 60;
 
         var claims = new System.Collections.Generic.List<Claim>

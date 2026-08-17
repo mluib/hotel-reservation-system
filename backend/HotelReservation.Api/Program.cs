@@ -153,10 +153,20 @@ namespace HotelReservation.Api
                     builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
                     .AddEntityFrameworkStores<HotelDbContext>();
 
-                    // JWT Authentication
-                    var jwtKey = builder.Configuration["Jwt:Key"] ?? "Q2hhbmdlVGhpc0RldktleTEyMzQ1Njc4OTAxMjM0NTY3ODkw";
-                    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "hotel";
-                    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "hotel_audience";
+                    // JWT Authentication. No fallback defaults here (previously a hardcoded
+                    // placeholder key) -- missing config now fails fast and loud at startup
+                    // instead of silently running with a weak, guessable key. Jwt:Key is a
+                    // real secret (user-secrets locally, the committed .env for
+                    // docker-compose); Issuer/Audience aren't secret and stay in
+                    // appsettings.json, but are held to the same fail-fast standard for
+                    // consistency.
+                    var jwtKey = builder.Configuration["Jwt:Key"]
+                        ?? throw new InvalidOperationException(
+                            "Jwt:Key is not configured. Set it via 'dotnet user-secrets set \"Jwt:Key\" \"...\"' for native dev, or via the repo-root .env file for docker-compose.");
+                    var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+                        ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+                    var jwtAudience = builder.Configuration["Jwt:Audience"]
+                        ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
 
                     builder.Services.AddAuthentication(options =>
                     {
@@ -279,8 +289,12 @@ namespace HotelReservation.Api
 
             // Dev-only seed: without this there's no way to obtain an Admin account, since
             // registration always assigns "Customer" and there's no promotion mechanism yet.
-            // Provisional — proper role/user seeding is deferred to the Phase 6 backlog
-            // ("JWT: role/user seeding") for production-appropriate config/secrets handling.
+            // Seed:AdminEmail/AdminPassword now come from user-secrets (native dev) or the
+            // committed .env (docker-compose) rather than committed plaintext appsettings --
+            // see Phase 6's secrets-hardening stage. Still explicitly dev-only: no
+            // production-appropriate seeding/promotion path exists, and building one was a
+            // deliberate non-goal for this project (see the workflow log) rather than an
+            // oversight.
             if (app.Environment.IsDevelopment())
             {
                 await SeedDevAdminAsync(app);
