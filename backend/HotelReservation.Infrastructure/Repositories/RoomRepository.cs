@@ -2,6 +2,7 @@ using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using HotelReservation.Domain.Enums;
+using HotelReservation.Domain.ValueObjects;
 using HotelReservation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace HotelReservation.Infrastructure.Repositories;
 public class RoomRepository : IRoomRepository
 {
     private readonly HotelDbContext _context;
+    private readonly IReservationRepository _reservationRepository;
 
-    public RoomRepository(HotelDbContext context)
+    public RoomRepository(HotelDbContext context, IReservationRepository reservationRepository)
     {
         _context = context;
+        _reservationRepository = reservationRepository;
     }
 
     public async Task AddAsync(Room room)
@@ -43,18 +46,24 @@ public class RoomRepository : IRoomRepository
 
         if (filter?.CheckIn != null && filter?.CheckOut != null)
         {
-            // Room no longer has a Reservations navigation (Phase 6 aggregate cleanup), so
-            // this is now a subquery against Reservations directly rather than filtering an
-            // already-loaded collection -- still translates to a single SQL query (a
-            // correlated NOT EXISTS), just expressed differently.
-            var checkIn = filter.CheckIn.Value;
-            var checkOut = filter.CheckOut.Value;
-            var overlappingRoomIds = _context.Reservations
-                .Where(res =>
-                    res.Status != ReservationStatus.Cancelled &&
-                    res.Stay.CheckIn < checkOut &&
-                    checkIn < res.Stay.CheckOut)
-                .Select(res => res.RoomId);
+            // Goes through IReservationRepository rather than querying _context.Reservations
+            // directly -- Room no longer has a Reservations navigation to filter (Phase 6
+            // aggregate cleanup), and reaching into another aggregate's table directly from
+            // here would be a layering smell regardless. Two round trips instead of one
+            // correlated subquery; see GetOverlappingRoomIdsAsync's own remarks for why
+            // that's an accepted tradeoff.
+            var range = new DateRange(filter.CheckIn.Value, filter.CheckOut.Value);
+            var overlappingRoomIds = await _reservationRepository.GetOverlappingRoomIdsAsync(range);
+ 
+            // alternative with one correlated subquery (one sql query) instead of two sql queries
+            //var checkIn = filter.CheckIn.Value;
+            //var checkOut = filter.CheckOut.Value;
+            //var overlappingRoomIds = _context.Reservations
+            //    .Where(res =>
+            //        res.Status != ReservationStatus.Cancelled &&
+            //        res.Stay.CheckIn < checkOut &&
+            //        checkIn < res.Stay.CheckOut)
+            //    .Select(res => res.RoomId);
 
             query = query.Where(r => !overlappingRoomIds.Contains(r.Id));
         }

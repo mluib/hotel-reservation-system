@@ -16,9 +16,9 @@ public class HotelRepository : IHotelRepository
 
     public async Task<Hotel?> GetAsync()
     {
-        // Assume single hotel in system; return first
+        // Assume single hotel in system; return first. No Include(h => h.Rooms) -- HotelDto
+        // never uses the Rooms collection, so loading it here was pure over-fetch.
         return await _context.Hotels
-            .Include(h => h.Rooms)
             .FirstOrDefaultAsync();
     }
 

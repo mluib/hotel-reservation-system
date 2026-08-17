@@ -1,6 +1,7 @@
 ﻿using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
 using HotelReservation.Domain.Enums;
+using HotelReservation.Domain.ValueObjects;
 using HotelReservation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,14 +40,15 @@ public class ReservationRepository : IReservationRepository
                 r.Stay.CheckOut > checkIn);
     }
 
-    public async Task<bool> RoomExistsAsync(Guid roomId)
+    public async Task<IEnumerable<Guid>> GetOverlappingRoomIdsAsync(DateRange range)
     {
-        return await _context.Rooms.AnyAsync(r => r.Id == roomId);
-    }
-
-    public async Task<bool> CustomerExistsAsync(Guid customerId)
-    {
-        return await _context.Customers.AnyAsync(c => c.Id == customerId);
+        return await _context.Reservations
+            .Where(r =>
+                r.Status != ReservationStatus.Cancelled &&
+                r.Stay.CheckIn < range.CheckOut &&
+                range.CheckIn < r.Stay.CheckOut)
+            .Select(r => r.RoomId)
+            .ToListAsync();
     }
 
     // Intentionally status-agnostic (no filter on Status): even a cancelled reservation
