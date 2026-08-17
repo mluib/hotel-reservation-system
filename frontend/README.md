@@ -1,6 +1,6 @@
 # Frontend
 
-Angular app for the hotel reservation system (see the [repo root README](../README.md) and [`docs/ROADMAP.md`](../docs/ROADMAP.md) for the overall project). Built against the Claude Design mockup at `docs/raw-ai-logs/ClaudeDesignMockup/`.
+Angular app for the hotel reservation system (see the [repo root README](../README.md) and [`docs/roadmap.md`](../docs/roadmap.md) for the overall project). Built against the Claude Design mockup at `docs/raw-ai-logs/ClaudeDesignMockup/`.
 
 ## Running locally
 

@@ -5,13 +5,13 @@ A CV portfolio project: a hotel reservation system built with deliberate, docume
 ## Stack & architecture
 
 - **Backend** (`backend/`): ASP.NET Core Web API on .NET 10, Clean Architecture — `HotelReservation.Domain` (entities/enums, no external deps) → `HotelReservation.Application` (use cases, DTOs, repository interfaces) ← `HotelReservation.Infrastructure` (EF Core, repositories, Identity, JWT) ← `HotelReservation.Api` (thin controllers, DI wiring). Three test projects: `Tests.Domain` (unit), `Tests.Application` (unit, Moq), `Tests.Integration` (`WebApplicationFactory` + SQLite in-memory).
-- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/ROADMAP.md`.
+- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/roadmap.md`.
 - Auth: ASP.NET Core Identity + JWT Bearer, role-based authorization. `IdentityUser` (auth) and domain `Customer` (business entity) are deliberately separate, linked via `IdentityUserId` — see `docs/raw-ai-logs/ChatGPT/decisions.md` for the full rationale.
 - Full architectural rationale lives in `docs/raw-ai-logs/ChatGPT/{tech-stack,decisions}.md` (written early in the project, still accurate for the backend).
 
 ## Where things stand / what's next
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the phase-by-phase plan (UX design → backend contract pass → Angular → DevOps → logging → deep backend review → final docs). Don't jump ahead to the deep backend review backlog before the frontend phases — it's deliberately sequenced last so it's informed by real usage.
+See [`docs/roadmap.md`](docs/roadmap.md) for the phase-by-phase plan (UX design → backend contract pass → Angular → DevOps → logging → deep backend review → final docs). Don't jump ahead to the deep backend review backlog before the frontend phases — it's deliberately sequenced last so it's informed by real usage.
 
 ## Tool-attribution note (for the CV writeup)
 
@@ -19,11 +19,11 @@ Which AI tool did what, across the project's history:
 - **ChatGPT**: initial project idea, planning, architecture discussion, generating implementation prompts.
 - **GitHub Copilot** (Visual Studio, ask/agent mode): the bulk of the initial backend implementation — CRUD, validation, auth, tests — working from those prompts.
 - **Claude Design**: the Phase 1 UX/design pass — the screen mockups under `docs/raw-ai-logs/ClaudeDesignMockup/` that the Angular frontend was built against.
-- **Claude Code**: architecture/code review, repo restructuring, Angular frontend implementation, DevOps setup, and maintaining `docs/WORKFLOW_LOG.md`.
+- **Claude Code**: architecture/code review, repo restructuring, Angular frontend implementation, DevOps setup, and maintaining `docs/workflow-log.md`.
 
 ## Standing instruction: maintain the AI-workflow log
 
-**Every session in this repo must proactively keep [`docs/WORKFLOW_LOG.md`](docs/WORKFLOW_LOG.md) up to date** — this is what makes the log complete without the user having to remember to ask for it.
+**Every session in this repo must proactively keep [`docs/workflow-log.md`](docs/workflow-log.md) up to date** — this is what makes the log complete without the user having to remember to ask for it.
 
 - After any meaningful prompt, decision, correction, or non-trivial piece of work, append a bullet: `[developer input] -> [what resulted]` — **exactly one `->` per bullet**.
   - **Before the arrow: developer input only** — something the developer actually said, asked, decided, corrected, or reported in the conversation. Never an agent action, an agent-found event, or an autonomous continuation dressed up as if it were requested. If a stretch of work has no developer input driving it, it doesn't get its own bullet — fold it into the *after* side of the bullet for whichever developer input actually set it in motion, even if that was a few turns earlier.
@@ -35,7 +35,7 @@ Which AI tool did what, across the project's history:
 - Keep it lightweight — each entry is one bullet, headwords/short sentences are fine. The log should have no gaps (every session's notable work should be represented), but it does not need prose detail; save that for the Phase 7 final writeup.
 - Stale entries — including from prior sessions, not just the current one — are fair game to rewrite into this format when spotted, not just flagged.
 - Do this without being asked each time — it's a standing expectation for this repo, not a one-off task.
-- `docs/raw-ai-logs/` (the original ChatGPT/Copilot chat exports) is a frozen historical archive — don't edit it; it already fed into `WORKFLOW_LOG.md` once and doesn't need to change again.
+- `docs/raw-ai-logs/` (the original ChatGPT/Copilot chat exports) is a frozen historical archive — don't edit it; it already fed into `workflow-log.md` once and doesn't need to change again.
 
 ## Git conventions
 

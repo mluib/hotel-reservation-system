@@ -1,6 +1,6 @@
 # Roadmap
 
-Phase order for the remaining work, decided 2026-08-03 (see [`WORKFLOW_LOG.md`](WORKFLOW_LOG.md) for the reasoning behind the order). The guiding principle: the frontend's actual needs should drive backend work, not the other way around — so design comes before contract changes, and the deep backend review is deliberately last, once real usage patterns exist.
+Phase order for the remaining work, decided 2026-08-03 (see [`workflow-log.md`](workflow-log.md) for the reasoning behind the order). The guiding principle: the frontend's actual needs should drive backend work, not the other way around — so design comes before contract changes, and the deep backend review is deliberately last, once real usage patterns exist.
 
 - **Phase 0 (done)** — Repo restructured into `backend/` + `frontend/`, this roadmap, the living workflow log, and `CLAUDE.md` standing instructions.
 
@@ -17,7 +17,7 @@ Phase order for the remaining work, decided 2026-08-03 (see [`WORKFLOW_LOG.md`](
   `backend/Dockerfile`, `frontend/Dockerfile`, root `docker-compose.yml` for local full-stack runs, GitHub Actions CI (build+test backend, build+lint frontend). CD is optional/stretch.
 
 - **Phase 5 — Application/runtime logging**
-  Add structured *operational* logging to the running backend (e.g. Serilog — request logs, error logs; already flagged below as "Add proper logging"). The deliverable is code — the Serilog setup in `Program.cs` and `ILogger` calls at the right points — not files: the log output itself is transient console/stdout data while the app runs, never committed. This is separate from `WORKFLOW_LOG.md`, which is the meta-record of *how the project was built with AI*, is an actual committed doc, and isn't a phase — it's already running continuously since Phase 0.
+  Add structured *operational* logging to the running backend (e.g. Serilog — request logs, error logs; already flagged below as "Add proper logging"). The deliverable is code — the Serilog setup in `Program.cs` and `ILogger` calls at the right points — not files: the log output itself is transient console/stdout data while the app runs, never committed. This is separate from `workflow-log.md`, which is the meta-record of *how the project was built with AI*, is an actual committed doc, and isn't a phase — it's already running continuously since Phase 0.
 
 - **Phase 6 — Deep backend review**
   The full backlog, done last, informed by real frontend/DevOps needs:
@@ -35,4 +35,4 @@ Phase order for the remaining work, decided 2026-08-03 (see [`WORKFLOW_LOG.md`](
   - Tests: authorization integration tests, application ownership tests, repository/infrastructure tests (save/load reservations)
 
 - **Phase 7 — Final documentation pass**
-  Polished architecture write-up and README, using `WORKFLOW_LOG.md` as raw material — the CV deliverable.
+  Polished architecture write-up and README, using `workflow-log.md` as raw material — the CV deliverable.

@@ -27,4 +27,4 @@ docker compose logs -f   # tail logs
 docker compose down      # stop (add -v to also clear the database volume)
 ```
 
-See [`docs/RUNNING.md`](docs/RUNNING.md) for the other five ways to run this (backend/frontend, each via Docker standalone, docker-compose, or natively in Visual Studio/VS Code).
+See [`docs/running.md`](docs/running.md) for the other five ways to run this (backend/frontend, each via Docker standalone, docker-compose, or natively in Visual Studio/VS Code).

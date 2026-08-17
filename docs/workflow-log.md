@@ -279,7 +279,7 @@ A second item flagged from the same mockup review; asked to implement it directl
 
 ## 2026-08-17 — Running-instructions documentation (Claude Code)
 
-- Asked for a docs file covering backend/frontend build-and-run instructions for all three scenarios each (Docker, docker-compose, Visual Studio/VS Code) -> wrote `docs/RUNNING.md` covering all six combinations, cross-checked against the actual Dockerfiles, compose file, and editor launch configs rather than assumed, and linked it from the README.
+- Asked for a docs file covering backend/frontend build-and-run instructions for all three scenarios each (Docker, docker-compose, Visual Studio/VS Code) -> wrote `docs/running.md` covering all six combinations, cross-checked against the actual Dockerfiles, compose file, and editor launch configs rather than assumed, and linked it from the README.
 - Asked for the standalone-Docker commands to be added too -> added a full working recipe (a manually created Docker network standing in for what compose sets up automatically) for both backend and frontend.
 - Asked to revert those additions, since the networking explanation had gotten too complicated for what the doc needed -> reverted both sections back to the simpler build-verification framing.
 
