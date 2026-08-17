@@ -6,6 +6,7 @@ using HotelReservation.Application.Common.Exceptions;
 using HotelReservation.Application.DTOs;
 using HotelReservation.Application.Interfaces;
 using HotelReservation.Domain.Entities;
+using HotelReservation.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 
 namespace HotelReservation.Application.Reservations;
@@ -35,9 +36,12 @@ public class CreateReservation
     public async Task<Guid> ExecuteAsync(
         CreateReservationRequest request)
     {
-        // Validate dates
-        if (request.CheckOut <= request.CheckIn)
-            throw new ValidationException("Check-out must be after check-in.");
+        // Validate dates via DateRange itself rather than a manual comparison, so the
+        // invariant is defined in exactly one place. Constructed up front, before any DB
+        // call, so a request with bad dates still fails fast on this cheap check instead of
+        // surfacing a room/customer lookup failure first. Its ArgumentException is mapped to
+        // 400 by the exception middleware, same as the removed manual ValidationException was.
+        var stay = new DateRange(request.CheckIn, request.CheckOut);
 
         // Ensure room exists, and read its current price to snapshot onto the reservation
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
@@ -74,7 +78,7 @@ public class CreateReservation
             customerId,
             request.CheckIn,
             request.CheckOut,
-            room.PricePerNight);
+            room.PricePerNight.Amount);
 
         await _repository.AddAsync(reservation);
 

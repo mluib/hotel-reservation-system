@@ -34,7 +34,7 @@ public class UploadRoomImage
             Id = room.Id,
             Number = room.Number,
             Type = room.Type,
-            PricePerNight = room.PricePerNight,
+            PricePerNight = room.PricePerNight.Amount,
             HotelId = room.HotelId,
             ImageUrl = room.ImageUrl
         };

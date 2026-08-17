@@ -21,6 +21,6 @@ public class CustomerTests
         c.Update("X","Y","x@y.com");
         c.FirstName.Should().Be("X");
         c.LastName.Should().Be("Y");
-        c.Email.Should().Be("x@y.com");
+        c.Email.Value.Should().Be("x@y.com");
     }
 }

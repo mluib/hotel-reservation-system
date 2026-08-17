@@ -39,10 +39,10 @@ public class RoomRepository : IRoomRepository
             query = query.Where(r => r.Type == filter.Type);
 
         if (filter?.MinPrice != null)
-            query = query.Where(r => r.PricePerNight >= filter.MinPrice);
+            query = query.Where(r => r.PricePerNight.Amount >= filter.MinPrice);
 
         if (filter?.MaxPrice != null)
-            query = query.Where(r => r.PricePerNight <= filter.MaxPrice);
+            query = query.Where(r => r.PricePerNight.Amount <= filter.MaxPrice);
 
         if (filter?.CheckIn != null && filter?.CheckOut != null)
         {
@@ -50,8 +50,8 @@ public class RoomRepository : IRoomRepository
             var checkOut = filter.CheckOut.Value;
             query = query.Where(r => !r.Reservations.Any(res =>
                 res.Status != ReservationStatus.Cancelled &&
-                res.CheckIn < checkOut &&
-                checkIn < res.CheckOut));
+                res.Stay.CheckIn < checkOut &&
+                checkIn < res.Stay.CheckOut));
         }
 
         return await query.ToListAsync();

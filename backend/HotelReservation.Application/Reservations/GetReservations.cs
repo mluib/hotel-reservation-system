@@ -25,10 +25,10 @@ public class GetReservations
                 Id = r.Id,
                 RoomId = r.RoomId,
                 CustomerId = r.CustomerId,
-                CheckIn = r.CheckIn,
-                CheckOut = r.CheckOut,
+                CheckIn = r.Stay.CheckIn,
+                CheckOut = r.Stay.CheckOut,
                 Status = r.Status,
-                PricePerNight = r.PricePerNight
+                PricePerNight = r.PricePerNight.Amount
             });
         }
 

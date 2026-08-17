@@ -31,7 +31,7 @@ public class GetCurrentCustomer
             Id = customer.Id,
             FirstName = customer.FirstName,
             LastName = customer.LastName,
-            Email = customer.Email
+            Email = customer.Email.Value
         };
     }
 }

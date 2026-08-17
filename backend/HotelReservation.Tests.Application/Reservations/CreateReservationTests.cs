@@ -32,7 +32,10 @@ public class CreateReservationTests
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow.AddDays(5), CheckOut = DateTime.UtcNow.AddDays(1) };
 
-        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ValidationException>();
+        // Now thrown by DateRange's own constructor (a Domain-layer ArgumentException, mapped
+        // to 400 by the middleware same as ValidationException was) rather than a manual
+        // Application-layer check.
+        await useCase.Invoking(x => x.ExecuteAsync(req)).Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -131,6 +134,6 @@ public class CreateReservationTests
         await useCase.ExecuteAsync(req);
 
         added.Should().NotBeNull();
-        added!.PricePerNight.Should().Be(199.99m);
+        added!.PricePerNight.Amount.Should().Be(199.99m);
     }
 }

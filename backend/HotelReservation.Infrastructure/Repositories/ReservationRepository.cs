@@ -35,8 +35,8 @@ public class ReservationRepository : IReservationRepository
             .AnyAsync(r =>
                 r.RoomId == roomId &&
                 r.Status != ReservationStatus.Cancelled &&
-                r.CheckIn < checkOut &&
-                r.CheckOut > checkIn);
+                r.Stay.CheckIn < checkOut &&
+                r.Stay.CheckOut > checkIn);
     }
 
     public async Task<bool> RoomExistsAsync(Guid roomId)

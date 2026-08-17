@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using HotelReservation.Domain.Enums;
+using HotelReservation.Domain.ValueObjects;
 
 namespace HotelReservation.Domain.Entities;
 
@@ -15,7 +16,7 @@ public class Room
 
     public RoomType Type { get; private set; }
 
-    public decimal PricePerNight { get; private set; }
+    public Money PricePerNight { get; private set; }
 
     public Guid HotelId { get; private set; }
 
@@ -23,6 +24,11 @@ public class Room
 
     public List<Reservation> Reservations { get; private set; }
 
+    /// <summary>
+    /// EF Core materialization constructor -- see <see cref="Customer"/>'s for why this is
+    /// needed now that PricePerNight is <see cref="Money"/> rather than decimal.
+    /// </summary>
+    private Room() { }
 
     public Room(
         string number,
@@ -33,13 +39,10 @@ public class Room
         if (string.IsNullOrWhiteSpace(number))
             throw new ArgumentException("Room number is required.");
 
-        if (pricePerNight <= 0)
-            throw new ArgumentException("Price must be greater than zero.");
-
         Id = Guid.NewGuid();
         Number = number;
         Type = type;
-        PricePerNight = pricePerNight;
+        PricePerNight = new Money(pricePerNight);
         HotelId = hotelId;
         Reservations = new List<Reservation>();
     }
@@ -49,12 +52,9 @@ public class Room
         if (string.IsNullOrWhiteSpace(number))
             throw new ArgumentException("Room number is required.");
 
-        if (pricePerNight <= 0)
-            throw new ArgumentException("Price must be greater than zero.");
-
         Number = number;
         Type = type;
-        PricePerNight = pricePerNight;
+        PricePerNight = new Money(pricePerNight);
         HotelId = hotelId;
     }
 
