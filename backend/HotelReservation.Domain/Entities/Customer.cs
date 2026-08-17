@@ -19,8 +19,6 @@ public class Customer
 
     public EmailAddress Email { get; private set; }
 
-    public List<Reservation> Reservations { get; private set; }
-
     /// <summary>
     /// EF Core materialization constructor.
     /// </summary>
@@ -43,7 +41,6 @@ public class Customer
         LastName = lastName;
         Email = new EmailAddress(email);
         IdentityUserId = identityUserId;
-        Reservations = new List<Reservation>();
     }
 
     public void Update(string firstName, string lastName, string email)

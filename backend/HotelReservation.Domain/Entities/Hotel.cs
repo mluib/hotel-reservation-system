@@ -29,11 +29,6 @@ public class Hotel
     }
 
 
-    public void AddRoom(Room room)
-    {
-        Rooms.Add(room);
-    }
-
     public void Update(string name, string address)
     {
         if (string.IsNullOrWhiteSpace(name))

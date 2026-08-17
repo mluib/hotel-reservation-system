@@ -25,15 +25,12 @@ public class RoomRepository : IRoomRepository
     public async Task<Room?> GetByIdAsync(Guid id)
     {
         return await _context.Rooms
-            .Include(r => r.Reservations)
             .FirstOrDefaultAsync(r => r.Id == id);
     }
 
     public async Task<IEnumerable<Room>> GetAllAsync(RoomFilterRequest? filter = null)
     {
-        var query = _context.Rooms
-            .Include(r => r.Reservations)
-            .AsQueryable();
+        var query = _context.Rooms.AsQueryable();
 
         if (filter?.Type != null)
             query = query.Where(r => r.Type == filter.Type);
@@ -46,12 +43,20 @@ public class RoomRepository : IRoomRepository
 
         if (filter?.CheckIn != null && filter?.CheckOut != null)
         {
+            // Room no longer has a Reservations navigation (Phase 6 aggregate cleanup), so
+            // this is now a subquery against Reservations directly rather than filtering an
+            // already-loaded collection -- still translates to a single SQL query (a
+            // correlated NOT EXISTS), just expressed differently.
             var checkIn = filter.CheckIn.Value;
             var checkOut = filter.CheckOut.Value;
-            query = query.Where(r => !r.Reservations.Any(res =>
-                res.Status != ReservationStatus.Cancelled &&
-                res.Stay.CheckIn < checkOut &&
-                checkIn < res.Stay.CheckOut));
+            var overlappingRoomIds = _context.Reservations
+                .Where(res =>
+                    res.Status != ReservationStatus.Cancelled &&
+                    res.Stay.CheckIn < checkOut &&
+                    checkIn < res.Stay.CheckOut)
+                .Select(res => res.RoomId);
+
+            query = query.Where(r => !overlappingRoomIds.Contains(r.Id));
         }
 
         return await query.ToListAsync();

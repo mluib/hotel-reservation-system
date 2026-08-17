@@ -32,5 +32,24 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
                 // own empty-string default for a non-nullable column.
                 .HasDefaultValue("EUR");
         });
+
+        // Room/Customer no longer have a Reservations collection navigation (Phase 6
+        // aggregate cleanup: Room, Customer, Reservation are independent aggregate roots,
+        // referencing each other only by id), so EF's convention-based FK inference -- which
+        // relied entirely on those navigations -- no longer applies. Configured explicitly
+        // here instead, on Restrict rather than the previous convention-inferred Cascade:
+        // the application layer already rejects deleting a room/customer with reservations
+        // (ConflictException in DeleteRoom/DeleteCustomer), so this makes the database enforce
+        // the same rule as defense-in-depth, rather than silently cascading reservation
+        // history away if that guard is ever bypassed.
+        builder.HasOne<Domain.Entities.Room>()
+            .WithMany()
+            .HasForeignKey(r => r.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Domain.Entities.Customer>()
+            .WithMany()
+            .HasForeignKey(r => r.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

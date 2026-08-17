@@ -22,8 +22,6 @@ public class Room
 
     public string? ImageUrl { get; private set; }
 
-    public List<Reservation> Reservations { get; private set; }
-
     /// <summary>
     /// EF Core materialization constructor -- see <see cref="Customer"/>'s for why this is
     /// needed now that PricePerNight is <see cref="Money"/> rather than decimal.
@@ -44,7 +42,6 @@ public class Room
         Type = type;
         PricePerNight = new Money(pricePerNight);
         HotelId = hotelId;
-        Reservations = new List<Reservation>();
     }
 
     public void Update(string number, RoomType type, decimal pricePerNight, Guid hotelId)
