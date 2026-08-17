@@ -228,3 +228,35 @@ A second item flagged from the same mockup review; asked to implement it directl
 - Pointed out `CustomersController` still had a plain `//` method comment -> converted to an XML doc comment.
 - Suggested moving the bare-404 checks in the Hotel/Room/Customer/Reservation single-item lookups into the Application layer instead of the controller, matching how every other rejection already worked -> migrated all five (including the current-customer profile lookup) to throw `NotFoundException`, updated the one existing test covering that path, and simplified the controllers to no longer null-check.
 - Pointed out the middleware now logs every rejection at Error level, when some had previously been logged as warnings -> split the logging so the known exception taxonomy logs at Warning and only genuine 500s log at Error; verified live that a 404 now carries a real detail message and is logged as a Warning, not an Error.
+
+## 2026-08-16 — Branch cleanup: moving Phase 6 commits off main (Claude Code)
+
+- Reported that Phase 6 work had been committed directly to `main` without branching first, and asked how to fix it now that commits already existed -> explained the safe fix: since nothing had been pushed to `origin` yet, create a new branch at the current commit to carry the existing commits, then reset local `main` back to match `origin/main`.
+- Reported the fix had been applied (via Visual Studio) and asked for it to be checked -> verified `main` was back in sync with `origin/main` and the new branch held all three commits, pushed and tracked correctly.
+
+## 2026-08-16 — Phase 6 Stage 3: DDD value objects (Claude Code)
+
+- Asked to perform Stage 3 -> built `EmailAddress`, `Money`, and `DateRange` value objects, wired them into `Customer`/`Room`/`Reservation`, and added the project's first EF Fluent configuration (a `ValueConverter` for `EmailAddress`, owned-entity mappings for `Money`/`DateRange`); found and fixed two problems along the way -- EF's constructor-based entity materialization broke once property types stopped matching constructor parameters one-to-one (fixed with private parameterless constructors), and removing the old manual check-in/check-out validation naively would have changed the order a bad request gets rejected in, so it was replaced with an equivalent up-front `DateRange` construction instead of just deleted; generated and reviewed the migration, catching that its Currency-column backfill defaulted to an empty string rather than a real value before applying it.
+- Approved applying the migration to the real dev database -> applied; confirmed clean via the running API.
+
+## 2026-08-17 — Phase 6 Stage 3 follow-up: legacy data, wrap-up (Claude Code)
+
+- Live verification surfaced two legacy reservation rows with a zero price -- a pre-existing artifact from before the PricePerNight column existed, now caught by Money's own validation running on every read, not just writes -- breaking room/reservation listing against the real dev database; developer corrected the two rows' values directly in SSMS -> re-verified live afterward that listing worked correctly again.
+- Asked whether Stage 3 was finished -> confirmed, with a final full build-and-test check.
+- Asked for the new value objects' constructor comments to use XML doc style, and how `EmailAddress` gets set by EF given its type doesn't match the database column -> converted the comments; explained the `ValueConverter` mechanism backing `CustomerConfiguration` (one lambda per read/write direction, conversion happening entirely in EF's materialization pipeline since the database column itself stays a plain string).
+- Asked whether `DateRange.Overlaps()` was actually used anywhere -> confirmed zero call sites currently, by design -- the two repository queries that conceptually need it can't call it directly since EF can't translate an arbitrary instance method into SQL, so it exists to be exercised by Stage 9's own dedicated unit tests instead.
+
+## 2026-08-17 — Phase 6 Stage 4: aggregate boundary cleanup (Claude Code)
+
+- Asked to continue with Stage 4 -> removed the confirmed-dead `Hotel.AddRoom` method and the `Room`/`Customer` "Reservations" navigation properties, formalizing `Room`, `Customer`, and `Reservation` as independent aggregate roots; reconfigured the two `Reservation` foreign keys explicitly (no longer inferrable once those navigations were gone) and switched their delete behavior from the previous convention-inferred cascade to a restrict, so the database enforces the same no-delete-with-reservations rule the application layer already does, as defense-in-depth; the removal also forced through repository-layer cleanup originally scoped for the next stage, since those queries no longer compiled otherwise; migration reviewed (touched only the two foreign keys' delete behavior, as expected) and full suite green.
+- Approved applying the migration to the dev database -> applied; confirmed the new restrict behavior was actually in effect via the database's own constraint metadata, rather than testing it with a live delete attempt against real data.
+
+## 2026-08-17 — Phase 6 Stage 5: repository efficiency (Claude Code)
+
+- Asked to continue with Stage 5 -> most of the originally-planned work had already been forced through in Stage 4; what remained was moving the room-availability overlap query out of the room repository into a proper method on the reservation repository instead of reaching directly into another aggregate's table, dropping an unused eager-load on the hotel repository, and removing two confirmed-dead repository methods; full suite green, and live-verified against real data that availability filtering still correctly excludes rooms with a confirmed overlapping reservation while including ones whose only overlap is cancelled.
+- Asked to confirm the change meant two database queries now where there used to be one -> confirmed, and explained exactly why: materializing the overlap results inside the reservation repository (needed to keep the repository interface returning a plain, already-fetched collection rather than leaking the underlying query-provider abstraction) means the two queries can no longer be folded into a single SQL statement the way the old, less clean version could.
+
+## 2026-08-17 — Phase 6 Stage 6: pagination skipped (Claude Code)
+
+- Asked whether pagination was really necessary for this project -> laid out the real tradeoff: the dev dataset is tiny (2 rooms, a handful of reservations/customers) with no real performance problem to solve, while implementing it would be the one stage requiring a coordinated frontend change across every list-consuming component; recommended skipping it.
+- Confirmed skipping Stage 6, and asked for the missing workflow-log entries for the prior stages to be backfilled -> documented the skip as a deliberate, reasoned non-goal (matching the earlier production-hotel-seeding-path precedent) in both the plan file and this log, then backfilled the entries for Stages 3-5 above.
