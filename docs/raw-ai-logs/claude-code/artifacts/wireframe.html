@@ -1,0 +1,826 @@
+<title>Hotel Reservation — UX Wireframes</title>
+<style>
+  :root{
+    --bg:#eef1f6;
+    --paper:#ffffff;
+    --ink:#1c2430;
+    --ink-soft:#5b6779;
+    --ink-faint:#8794a6;
+    --line:#b7c2d0;
+    --line-strong:#8fa0b5;
+    --accent:#c85a26;
+    --accent-ink:#7a3714;
+    --accent-soft:#f7e2d2;
+    --accent-soft-line:#e3a878;
+    --err:#b3352c;
+    --err-soft:#f8dcd9;
+    --ok:#3d6b4f;
+    --ok-soft:#dcebe1;
+    --grid-line: rgba(140,155,180,0.16);
+    --radius-sm:3px;
+    --radius-md:6px;
+    --font-mono: ui-monospace, "Cascadia Code", "Consolas", "SFMono-Regular", Menlo, monospace;
+    --font-body: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#11151c;
+      --paper:#1a212b;
+      --ink:#e8edf4;
+      --ink-soft:#a3b0c2;
+      --ink-faint:#68758a;
+      --line:#3a4657;
+      --line-strong:#4c5c72;
+      --accent:#ff8a4c;
+      --accent-ink:#ffd2ae;
+      --accent-soft:#3a2a1e;
+      --accent-soft-line:#7a4f2c;
+      --err:#ff7a6e;
+      --err-soft:#3a2320;
+      --ok:#7fd0a0;
+      --ok-soft:#1e332a;
+      --grid-line: rgba(140,155,180,0.08);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11151c; --paper:#1a212b; --ink:#e8edf4; --ink-soft:#a3b0c2; --ink-faint:#68758a;
+    --line:#3a4657; --line-strong:#4c5c72; --accent:#ff8a4c; --accent-ink:#ffd2ae;
+    --accent-soft:#3a2a1e; --accent-soft-line:#7a4f2c; --err:#ff7a6e; --err-soft:#3a2320;
+    --ok:#7fd0a0; --ok-soft:#1e332a; --grid-line: rgba(140,155,180,0.08);
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f6; --paper:#ffffff; --ink:#1c2430; --ink-soft:#5b6779; --ink-faint:#8794a6;
+    --line:#b7c2d0; --line-strong:#8fa0b5; --accent:#c85a26; --accent-ink:#7a3714;
+    --accent-soft:#f7e2d2; --accent-soft-line:#e3a878; --err:#b3352c; --err-soft:#f8dcd9;
+    --ok:#3d6b4f; --ok-soft:#dcebe1; --grid-line: rgba(140,155,180,0.16);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{text-wrap:balance; margin:0;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  .wf-root{max-width:1120px; margin:0 auto; padding:28px 20px 60px;}
+
+  /* header */
+  .top{
+    display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; align-items:flex-end;
+    padding-bottom:20px; margin-bottom:18px; border-bottom:1.5px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink); margin:0 0 8px; font-weight:600;
+  }
+  h1{font-size:28px; font-weight:700; letter-spacing:-.01em;}
+  .sub{color:var(--ink-soft); font-size:14px; margin:8px 0 0; max-width:52ch; line-height:1.5;}
+  .legend{display:flex; flex-direction:column; gap:6px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft);}
+  .legend-item{display:flex; align-items:center; gap:7px;}
+  .legend-mark{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:3px; font-size:10px; flex:none;
+  }
+  .legend-mark.note{border:1.5px solid var(--line-strong); color:var(--ink-soft);}
+  .legend-mark.flag{border:1.5px dashed var(--accent); color:var(--accent-ink); background:var(--accent-soft);}
+
+  /* tabs */
+  .tabs{display:flex; gap:2px; margin-bottom:22px; border-bottom:1.5px solid var(--line); overflow-x:auto;}
+  .tab{
+    appearance:none; border:1.5px solid transparent; border-bottom:none; background:none; cursor:pointer;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); padding:10px 16px; border-radius:5px 5px 0 0; white-space:nowrap;
+  }
+  .tab:hover{color:var(--ink-soft);}
+  .tab.active{color:var(--ink); background:var(--paper); border-color:var(--line); border-bottom:1.5px solid var(--paper); transform:translateY(1.5px);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .panel-head{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .role-chip{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    padding:3px 9px; border:1.5px solid var(--line-strong); border-radius:20px; color:var(--ink-soft);
+  }
+  .panel-title{font-size:15px; font-weight:600; color:var(--ink-faint);}
+
+  /* device frame */
+  .frame{
+    background:var(--paper); border:1.5px solid var(--line); border-radius:var(--radius-md);
+    margin-bottom:18px; overflow:hidden;
+  }
+  .frame-bar{
+    display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1.5px solid var(--line);
+    background:var(--bg);
+  }
+  .frame-dots{display:flex; gap:5px;}
+  .frame-dots span{width:7px; height:7px; border-radius:50%; border:1.5px solid var(--line-strong);}
+  .frame-url{font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); letter-spacing:.02em;}
+  .frame-body{padding:22px;}
+
+  /* generic wireframe primitives */
+  .wf-label{font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); display:block; margin-bottom:5px;}
+  .wf-input{
+    border:1.5px solid var(--line-strong); border-radius:var(--radius-sm); padding:9px 11px;
+    font-size:13.5px; color:var(--ink-faint); background:var(--paper); margin-bottom:12px;
+  }
+  .wf-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .wf-row > .wf-field{flex:1; min-width:140px;}
+  .wf-button{
+    display:inline-block; border-radius:var(--radius-sm); padding:9px 18px; font-size:13px; font-weight:600;
+    cursor:pointer; border:1.5px solid var(--ink); background:var(--ink); color:var(--paper);
+  }
+  .wf-button.ghost{background:none; color:var(--ink); border-color:var(--line-strong); font-weight:500;}
+  .wf-link{font-size:12.5px; color:var(--ink-soft); text-decoration:underline; text-underline-offset:2px;}
+
+  .inner-tabs{display:flex; gap:6px; margin-bottom:18px;}
+  .inner-tab{
+    appearance:none; cursor:pointer; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 12px; border-radius:20px; border:1.5px solid var(--line-strong); background:none; color:var(--ink-soft);
+  }
+  .inner-tab.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .inner-panel{display:none;}
+  .inner-panel.active{display:block;}
+
+  /* notes / flags */
+  .note, .flag{
+    display:flex; gap:9px; align-items:flex-start; padding:10px 12px; border-radius:var(--radius-sm);
+    font-size:12.5px; line-height:1.5; margin-top:10px;
+  }
+  .note{border:1.5px solid var(--line-strong); color:var(--ink-soft);}
+  .flag{border:1.5px dashed var(--accent); background:var(--accent-soft); color:var(--accent-ink);}
+  .note .mark, .flag .mark{
+    font-family:var(--font-mono); font-size:10.5px; font-weight:700; flex:none; margin-top:1px;
+  }
+  .alert{
+    border:1.5px solid var(--err); background:var(--err-soft); color:var(--err);
+    border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; margin-top:12px;
+  }
+  .alert .mark{font-family:var(--font-mono); font-size:10.5px; font-weight:700;}
+
+  /* room grid */
+  .room-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-top:14px;}
+  .room-card{border:1.5px solid var(--line-strong); border-radius:var(--radius-md); padding:14px;}
+  .room-card h4{font-size:14px; margin-bottom:6px;}
+
+  .plate{
+    border:1.5px solid var(--line-strong); border-radius:var(--radius-sm); padding:6px;
+    background:var(--paper); margin-bottom:12px;
+  }
+  .plate-photo{
+    aspect-ratio:4/3; border:1px solid var(--line);
+    background:repeating-linear-gradient(45deg, var(--bg), var(--bg) 7px, var(--paper) 7px, var(--paper) 14px);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:var(--font-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .room-type{
+    display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft); border:1px solid var(--line); border-radius:20px; padding:2px 8px; margin-bottom:8px;
+  }
+  .room-price{font-size:13px; color:var(--ink-soft); margin-bottom:12px;}
+
+  .hotel-bar{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:16px;
+    border:1.5px solid var(--line); border-radius:var(--radius-sm); background:var(--bg);
+  }
+  .hotel-bar .name{font-weight:600; font-size:13.5px;}
+  .hotel-bar .addr{font-size:12px; color:var(--ink-faint);}
+
+  /* tables */
+  .table-wrap{overflow-x:auto; border:1.5px solid var(--line); border-radius:var(--radius-md);}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:13px;}
+  th{
+    text-align:left; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:600; padding:10px 14px; border-bottom:1.5px solid var(--line); background:var(--bg);
+  }
+  td{padding:10px 14px; border-bottom:1px solid var(--line); color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+  tr:last-child td{border-bottom:none;}
+  .status-chip{
+    display:inline-block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em;
+    padding:2px 9px; border-radius:20px;
+  }
+  .status-chip.confirmed{background:var(--ok-soft); color:var(--ok);}
+  .status-chip.cancelled{background:var(--err-soft); color:var(--err);}
+  .row-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .mini-btn{
+    font-size:11.5px; padding:4px 10px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong);
+    background:none; color:var(--ink-soft); cursor:pointer; font-family:inherit;
+  }
+  .mini-btn.warn{border-color:var(--accent); color:var(--accent-ink);}
+  .mini-btn.danger{border-color:var(--err); color:var(--err);}
+  .mini-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  input.wf-input, select.wf-input{width:100%; font-family:inherit; color:var(--ink); appearance:none;}
+  .inline-form{
+    border:1.5px dashed var(--line-strong); border-radius:var(--radius-md); background:var(--bg);
+    padding:16px; margin-top:14px;
+  }
+  .inline-form .form-title{font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-bottom:12px; display:block;}
+  .inline-form .form-actions{display:flex; gap:10px; margin-top:4px;}
+
+  .success{
+    border:1.5px solid var(--ok); background:var(--ok-soft); color:var(--ok);
+    border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; margin-top:12px;
+  }
+  .success .mark{font-family:var(--font-mono); font-size:10.5px; font-weight:700;}
+
+  th.sortable{cursor:pointer; user-select:none;}
+  th.sortable:hover{color:var(--ink-soft);}
+  .sort-arrow{font-size:9px;}
+
+  .link-cell{
+    appearance:none; background:none; border:none; padding:0; font:inherit; cursor:pointer;
+    color:var(--ink-soft); text-decoration:underline dotted; text-underline-offset:3px;
+  }
+  .link-cell:hover{color:var(--ink);}
+
+  @keyframes flashRow{ 0%{background:var(--accent-soft);} 100%{background:transparent;} }
+  tr.flash{animation:flashRow 1.2s ease;}
+
+  .session-bar{
+    display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+    padding-bottom:14px; margin-bottom:16px; border-bottom:1px dashed var(--line);
+    font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint);
+  }
+  .session-bar .wordmark{color:var(--ink-soft); letter-spacing:.04em;}
+  .session-nav{display:flex; gap:14px; align-items:center;}
+  .session-nav a{color:var(--ink-faint); text-decoration:none;}
+  .session-nav .who{color:var(--ink-soft);}
+  .session-nav .wf-button.ghost{padding:4px 12px; font-size:11px;}
+  .session-note{font-size:10.5px; color:var(--ink-faint); font-style:italic;}
+
+  .split{display:grid; grid-template-columns:1.1fr .9fr; gap:20px; align-items:start;}
+  @media (max-width:760px){ .split{grid-template-columns:1fr;} }
+  .summary-card{border:1.5px solid var(--line-strong); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;}
+  .total-line{display:flex; justify-content:space-between; font-size:13px; padding-top:10px; margin-top:10px; border-top:1px dashed var(--line-strong);}
+  .total-line strong{font-variant-numeric:tabular-nums;}
+
+  footer{margin-top:34px; padding-top:16px; border-top:1.5px solid var(--line); font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);}
+</style>
+
+<div class="wf-root">
+
+  <div class="session-bar">
+    <span class="wordmark">Hotel Reservation</span>
+    <nav class="session-nav" id="sessionNav">
+      <a href="https://074a8fa8-2c21-4cc9-b1d8-6fbac21e4a83.frame.claudeusercontent.com/_f/1785779638-9d49/#" data-target="browse">Rooms</a>
+      <a href="https://074a8fa8-2c21-4cc9-b1d8-6fbac21e4a83.frame.claudeusercontent.com/_f/1785779638-9d49/#" data-target="book">My Reservations</a>
+      <a href="https://074a8fa8-2c21-4cc9-b1d8-6fbac21e4a83.frame.claudeusercontent.com/_f/1785779638-9d49/#" data-target="admin">Admin</a>
+      <span class="who">Jane Doe</span>
+      <button class="wf-button ghost">Logout</button>
+    </nav>
+  </div>
+  <p class="session-note">ⓘ Nav/session menu — stub only, full design deferred per your call.</p>
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">Hotel Reservation System — Phase 1</p>
+      <h1>UX Wireframes</h1>
+      <p class="sub">Four core flows, boxed out against the live backend contract — every field and role below exists in the API today unless flagged otherwise.</p>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-mark note">ⓘ</span> current backend behavior, worth knowing</span>
+      <span class="legend-item"><span class="legend-mark flag">⚑</span> UI need — not yet in the API (Phase 2 candidate)</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="mainTabs">
+    <button class="tab active" data-target="auth">01 · Auth</button>
+    <button class="tab" data-target="browse">02 · Browse Rooms</button>
+    <button class="tab" data-target="book">03 · Book &amp; Manage</button>
+    <button class="tab" data-target="admin">04 · Admin</button>
+  </nav>
+
+  <main>
+
+    <!-- 01 AUTH -->
+    <section class="panel active" id="auth">
+      <div class="panel-head"><span class="role-chip">Public</span><span class="panel-title">Sign in / Register</span></div>
+      <div class="frame">
+        <div class="frame-bar"><div class="frame-dots"><span></span><span></span><span></span></div><span class="frame-url">hotel.app/login</span></div>
+        <div class="frame-body">
+          <div class="inner-tabs" id="authTabs">
+            <button class="inner-tab active" data-target="signin">Sign In</button>
+            <button class="inner-tab" data-target="register">Create Account</button>
+          </div>
+
+          <div class="inner-panel active" id="signin">
+            <div class="wf-field"><span class="wf-label">Email</span><div class="wf-input">jane@example.com</div></div>
+            <div class="wf-field"><span class="wf-label">Password</span><div class="wf-input">••••••••••</div></div>
+            <button class="wf-button">Sign In</button>
+            <p class="wf-link" style="margin-top:14px;">No account? Create one →</p>
+          </div>
+
+          <div class="inner-panel" id="register">
+            <div class="wf-row">
+              <div class="wf-field"><span class="wf-label">First name</span><div class="wf-input">Jane</div></div>
+              <div class="wf-field"><span class="wf-label">Last name</span><div class="wf-input">Doe</div></div>
+            </div>
+            <div class="wf-field"><span class="wf-label">Email</span><div class="wf-input">jane@example.com</div></div>
+            <div class="wf-field"><span class="wf-label">Password</span><div class="wf-input">••••••••••</div></div>
+            <button class="wf-button">Create Account</button>
+            <div class="note"><span class="mark">ⓘ</span> Role is always set to <strong>Customer</strong> on registration — there's no role picker, and no self-service path to Admin.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 BROWSE -->
+    <section class="panel" id="browse">
+      <div class="panel-head"><span class="role-chip">Public to view · sign-in to book</span><span class="panel-title">Browse rooms</span></div>
+      <div class="frame">
+        <div class="frame-bar"><div class="frame-dots"><span></span><span></span><span></span></div><span class="frame-url">hotel.app/rooms</span></div>
+        <div class="frame-body">
+          <div class="hotel-bar"><span class="name">Harborview Hotel</span><span class="addr">14 Quayside Row</span></div>
+
+          <span class="wf-label">Filter</span>
+          <div class="wf-row">
+            <div class="wf-field"><span class="wf-label">Check-in</span><div class="wf-input">Aug 12, 2026</div></div>
+            <div class="wf-field"><span class="wf-label">Check-out</span><div class="wf-input">Aug 15, 2026</div></div>
+            <div class="wf-field"><span class="wf-label">Room type</span><div class="wf-input">Any</div></div>
+          </div>
+          <div class="flag"><span class="mark">⚑ 1</span> Decision: filter server-side — <code>GET /rooms</code> to accept <code>checkIn</code>/<code>checkOut</code>/<code>roomType</code> query params, rather than shipping the full list and filtering in the browser. Not built yet — Phase 2 candidate.</div>
+
+          <div class="room-grid">
+            <div class="room-card"><div class="plate"><div class="plate-photo">Photo<br>placeholder</div></div><h4>Room 101</h4><span class="room-type">Single</span><div class="room-price">$85 / night</div><button class="wf-button ghost book-room" data-number="101" data-type="Single" data-price="85">View &amp; Book →</button></div>
+            <div class="room-card"><div class="plate"><div class="plate-photo">Photo<br>placeholder</div></div><h4>Room 204</h4><span class="room-type">Double</span><div class="room-price">$120 / night</div><button class="wf-button ghost book-room" data-number="204" data-type="Double" data-price="120">View &amp; Book →</button></div>
+            <div class="room-card"><div class="plate"><div class="plate-photo">No photo<br>uploaded</div></div><h4>Room 310</h4><span class="room-type">Suite</span><div class="room-price">$225 / night</div><button class="wf-button ghost book-room" data-number="310" data-type="Suite" data-price="225">View &amp; Book →</button></div>
+            <div class="room-card"><div class="plate"><div class="plate-photo">Photo<br>placeholder</div></div><h4>Room 112</h4><span class="room-type">Double</span><div class="room-price">$120 / night</div><button class="wf-button ghost book-room" data-number="112" data-type="Double" data-price="120">View &amp; Book →</button></div>
+          </div>
+          <div class="flag"><span class="mark">⚑ 4</span> Decision: one photo per room, admin-uploaded. Needs a nullable <code>ImageUrl</code> on <code>Room</code>, an admin-only upload endpoint, disk storage (not a DB blob), and a default placeholder for rooms without a photo yet (Room 310, above) — plate-mounted framing shown here is the intended visual treatment. Phase 2 candidate.</div>
+          <div class="note"><span class="mark">ⓘ</span> Single-hotel system — one <code>GET /hotel</code> record, so no hotel picker/list screen is needed anywhere.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 BOOK & MANAGE -->
+    <section class="panel" id="book">
+      <div class="panel-head"><span class="role-chip">Customer</span><span class="panel-title">Book a room &amp; manage reservations</span></div>
+
+      <div class="split">
+        <div class="frame">
+          <div class="frame-bar"><div class="frame-dots"><span></span><span></span><span></span></div><span class="frame-url" id="bookUrl">hotel.app/rooms/204/book</span></div>
+          <div class="frame-body">
+            <div class="summary-card">
+              <h4 style="font-size:14px; margin-bottom:4px;" id="bookRoomTitle">Room 204 · Double</h4>
+              <div class="room-price" style="margin-bottom:0;" id="bookRoomPrice">$120 / night</div>
+            </div>
+            <div class="wf-row">
+              <div class="wf-field"><span class="wf-label">Check-in</span><input class="wf-input" type="date" id="bookCheckin" value="2026-08-12"></div>
+              <div class="wf-field"><span class="wf-label">Check-out</span><input class="wf-input" type="date" id="bookCheckout" value="2026-08-15"></div>
+            </div>
+            <div class="total-line"><span id="bookNightsLabel">3 nights × $120</span><strong id="bookTotal">$360</strong></div>
+            <div class="note"><span class="mark">ⓘ</span> This preview total is computed client-side — fine, it's just an estimate while picking dates.</div>
+            <div class="flag"><span class="mark">⚑ 3</span> Decision: add a <code>price</code> field to Reservation, snapshotted server-side at booking time. Needed so the total shown in "My Reservations" and Admin → Reservations doesn't drift if the room's nightly rate changes later. Phase 2 candidate.</div>
+            <button class="wf-button" id="confirmBookingBtn" style="margin-top:16px;">Confirm Booking</button>
+            <div class="success" id="bookSuccess" hidden=""><span class="mark">✓</span> Booking confirmed — added to My Reservations below.</div>
+            <div class="alert"><span class="mark">⚠</span> "Room unavailable for the selected dates" — surfaces the server's overlap check on submit.</div>
+          </div>
+        </div>
+
+        <div class="frame">
+          <div class="frame-bar"><div class="frame-dots"><span></span><span></span><span></span></div><span class="frame-url">hotel.app/reservations/mine</span></div>
+          <div class="frame-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Room</th><th>Dates</th><th>Price</th><th>Status</th><th></th></tr></thead>
+                <tbody id="myResBody">
+                  <tr><td>204 · Double</td><td>Aug 12–15</td><td>$360</td><td><span class="status-chip confirmed">Confirmed</span></td><td><button class="mini-btn warn my-cancel-btn">Cancel</button></td></tr>
+                  <tr><td>101 · Single</td><td>Jun 03–04</td><td>$85</td><td><span class="status-chip cancelled">Cancelled</span></td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flag"><span class="mark">⚑ 2</span> Decision: add a customer-facing <code>Cancel</code> endpoint (sets status → Cancelled), distinct from the Admin's existing hard <code>DELETE</code>. Not built yet — Phase 2 candidate.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 ADMIN -->
+    <section class="panel" id="admin">
+      <div class="panel-head"><span class="role-chip">Admin</span><span class="panel-title">Back-office management</span></div>
+      <div class="note" style="margin-top:0; margin-bottom:14px;"><span class="mark">ⓘ</span> This whole area is route-guarded for the Admin role — not just hidden by CSS, the nav item and routes don't resolve for other roles.</div>
+      <div class="frame">
+        <div class="frame-bar"><div class="frame-dots"><span></span><span></span><span></span></div><span class="frame-url">hotel.app/admin</span></div>
+        <div class="frame-body">
+          <div class="inner-tabs" id="adminTabs">
+            <button class="inner-tab active" data-target="a-rooms">Rooms</button>
+            <button class="inner-tab" data-target="a-res">Reservations</button>
+            <button class="inner-tab" data-target="a-cust">Customers</button>
+            <button class="inner-tab" data-target="a-hotel">Hotel</button>
+          </div>
+
+          <div class="inner-panel active" id="a-rooms">
+            <div class="table-wrap">
+              <table id="tbl-rooms">
+                <thead><tr>
+                  <th class="sortable" data-sortable="">Number</th>
+                  <th class="sortable" data-sortable="">Type</th>
+                  <th class="sortable" data-sortable="">Price / night</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="roomsBody">
+                  <tr id="room-101"><td data-sort="101">101</td><td>Single</td><td data-sort="85">$85</td><td class="row-actions"><button class="mini-btn room-edit-btn">Edit</button><button class="mini-btn danger room-delete-btn">Delete</button></td></tr>
+                  <tr id="room-204"><td data-sort="204">204</td><td>Double</td><td data-sort="120">$120</td><td class="row-actions"><button class="mini-btn room-edit-btn">Edit</button><button class="mini-btn danger room-delete-btn">Delete</button></td></tr>
+                  <tr id="room-310"><td data-sort="310">310</td><td>Suite</td><td data-sort="225">$225</td><td class="row-actions"><button class="mini-btn room-edit-btn">Edit</button><button class="mini-btn danger room-delete-btn">Delete</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button class="wf-button ghost" id="addRoomBtn" style="margin-top:12px;">+ Add Room</button>
+
+            <div class="inline-form" id="roomForm" hidden="">
+              <span class="form-title" id="roomFormTitle">Add Room</span>
+              <div class="wf-row">
+                <div class="wf-field"><span class="wf-label">Number</span><input class="wf-input" id="roomFormNumber" placeholder="e.g. 205"></div>
+                <div class="wf-field"><span class="wf-label">Type</span>
+                  <select class="wf-input" id="roomFormType"><option>Single</option><option>Double</option><option>Suite</option></select>
+                </div>
+                <div class="wf-field"><span class="wf-label">Price / night</span><input class="wf-input" type="number" id="roomFormPrice" placeholder="e.g. 120"></div>
+              </div>
+              <div class="form-actions">
+                <button class="wf-button" id="roomFormSave">Save</button>
+                <button class="wf-button ghost" id="roomFormCancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="inner-panel" id="a-res">
+            <div class="table-wrap">
+              <table id="tbl-res">
+                <thead><tr>
+                  <th class="sortable" data-sortable="">Customer</th>
+                  <th class="sortable" data-sortable="">Room</th>
+                  <th class="sortable" data-sortable="">Dates</th>
+                  <th class="sortable" data-sortable="">Price</th>
+                  <th class="sortable" data-sortable="">Status</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="resBody">
+                  <tr data-checkin="2026-08-12" data-checkout="2026-08-15">
+                    <td><button class="link-cell" data-jump="cust-jane">Jane Doe</button></td>
+                    <td><button class="link-cell" data-jump="room-204">204 · Double</button></td>
+                    <td data-sort="2026-08-12" class="dates-cell">Aug 12–15</td>
+                    <td data-sort="360">$360</td>
+                    <td data-sort="Confirmed" class="status-cell"><span class="status-chip confirmed">Confirmed</span></td>
+                    <td class="row-actions"><button class="mini-btn res-edit-btn">Edit</button><button class="mini-btn warn res-cancel-btn">Cancel</button><button class="mini-btn danger res-delete-btn">Delete</button></td>
+                  </tr>
+                  <tr data-checkin="2026-09-01" data-checkout="2026-09-04">
+                    <td><button class="link-cell" data-jump="cust-marco">Marco Silva</button></td>
+                    <td><button class="link-cell" data-jump="room-310">310 · Suite</button></td>
+                    <td data-sort="2026-09-01" class="dates-cell">Sep 01–04</td>
+                    <td data-sort="675">$675</td>
+                    <td data-sort="Confirmed" class="status-cell"><span class="status-chip confirmed">Confirmed</span></td>
+                    <td class="row-actions"><button class="mini-btn res-edit-btn">Edit</button><button class="mini-btn warn res-cancel-btn">Cancel</button><button class="mini-btn danger res-delete-btn">Delete</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note"><span class="mark">ⓘ</span> All reservations, all customers. <code>Cancel</code> sets status (customer-visible history stays intact); <code>Delete</code> removes the row entirely. Click a customer or room to jump to it, highlighted, on its own tab.</div>
+
+            <div class="inline-form" id="resForm" hidden="">
+              <span class="form-title">Edit reservation dates</span>
+              <div class="wf-row">
+                <div class="wf-field"><span class="wf-label">Check-in</span><input class="wf-input" type="date" id="resFormCheckin"></div>
+                <div class="wf-field"><span class="wf-label">Check-out</span><input class="wf-input" type="date" id="resFormCheckout"></div>
+              </div>
+              <div class="form-actions">
+                <button class="wf-button" id="resFormSave">Save</button>
+                <button class="wf-button ghost" id="resFormCancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="inner-panel" id="a-cust">
+            <div class="table-wrap">
+              <table id="tbl-cust">
+                <thead><tr>
+                  <th class="sortable" data-sortable="">First name</th>
+                  <th class="sortable" data-sortable="">Last name</th>
+                  <th class="sortable" data-sortable="">Email</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="custBody">
+                  <tr id="cust-jane"><td>Jane</td><td>Doe</td><td>jane@example.com</td><td class="row-actions"><button class="mini-btn cust-edit-btn">Edit</button><button class="mini-btn danger cust-delete-btn">Delete</button></td></tr>
+                  <tr id="cust-marco"><td>Marco</td><td>Silva</td><td>marco@example.com</td><td class="row-actions"><button class="mini-btn cust-edit-btn">Edit</button><button class="mini-btn danger cust-delete-btn">Delete</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note"><span class="mark">ⓘ</span> No "Add Customer" — customers only ever originate via self-registration.</div>
+
+            <div class="inline-form" id="custForm" hidden="">
+              <span class="form-title">Edit customer</span>
+              <div class="wf-row">
+                <div class="wf-field"><span class="wf-label">First name</span><input class="wf-input" id="custFormFirst"></div>
+                <div class="wf-field"><span class="wf-label">Last name</span><input class="wf-input" id="custFormLast"></div>
+                <div class="wf-field"><span class="wf-label">Email</span><input class="wf-input" type="email" id="custFormEmail"></div>
+              </div>
+              <div class="form-actions">
+                <button class="wf-button" id="custFormSave">Save</button>
+                <button class="wf-button ghost" id="custFormCancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="inner-panel" id="a-hotel">
+            <div class="wf-field" style="max-width:360px;"><span class="wf-label">Name</span><input class="wf-input" id="hotelName" value="Harborview Hotel"></div>
+            <div class="wf-field" style="max-width:360px;"><span class="wf-label">Address</span><input class="wf-input" id="hotelAddress" value="14 Quayside Row"></div>
+            <button class="wf-button" id="hotelSaveBtn">Save</button>
+            <div class="success" id="hotelSuccess" hidden="" style="max-width:360px;"><span class="mark">✓</span> Saved.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Wireframes only — structure &amp; flow, not visual design. Feeds Phase 2 (backend contract pass) via the four ⚑ flags above. See docs/ROADMAP.md.</footer>
+</div>
+
+<script>
+  function activateTab(navEl, panelsContainer, panelSelector, targetId){
+    navEl.querySelectorAll('.tab, .inner-tab').forEach(function(t){
+      t.classList.toggle('active', t.getAttribute('data-target') === targetId);
+    });
+    panelsContainer.querySelectorAll(panelSelector).forEach(function(p){
+      p.classList.toggle('active', p.id === targetId);
+    });
+  }
+
+  function setupTabGroup(navEl, panelsContainer, panelSelector){
+    navEl.querySelectorAll('.tab, .inner-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        activateTab(navEl, panelsContainer, panelSelector, tab.getAttribute('data-target'));
+      });
+    });
+  }
+
+  var adminTabsEl = document.getElementById('adminTabs');
+  var adminPanelEl = document.getElementById('admin');
+  var mainTabsEl = document.getElementById('mainTabs');
+  var mainPanelsEl = document.querySelector('main');
+
+  document.querySelectorAll('#sessionNav a').forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      activateTab(mainTabsEl, mainPanelsEl, ':scope > .panel', link.getAttribute('data-target'));
+    });
+  });
+
+  setupTabGroup(mainTabsEl, mainPanelsEl, ':scope > .panel');
+  setupTabGroup(document.getElementById('authTabs'), document.getElementById('auth'), '.inner-panel');
+  setupTabGroup(adminTabsEl, adminPanelEl, '.inner-panel');
+
+  function makeSortable(table){
+    var headers = Array.from(table.querySelectorAll('thead th'));
+    headers.forEach(function(th){
+      if(!th.hasAttribute('data-sortable')) return;
+      th.classList.add('sortable');
+      th.addEventListener('click', function(){
+        var colIndex = headers.indexOf(th);
+        var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
+        headers.forEach(function(h){
+          h.removeAttribute('data-dir');
+          var arrow = h.querySelector('.sort-arrow');
+          if(arrow) arrow.remove();
+        });
+        th.setAttribute('data-dir', dir);
+        var arrow = document.createElement('span');
+        arrow.className = 'sort-arrow';
+        arrow.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+        th.appendChild(arrow);
+
+        var tbody = table.querySelector('tbody');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort(function(a, b){
+          var aCell = a.children[colIndex], bCell = b.children[colIndex];
+          var av = (aCell.getAttribute('data-sort') || aCell.textContent).trim();
+          var bv = (bCell.getAttribute('data-sort') || bCell.textContent).trim();
+          var an = parseFloat(av), bn = parseFloat(bv);
+          var isNumeric = !isNaN(an) && !isNaN(bn) && /^-?\d+(\.\d+)?$/.test(av) && /^-?\d+(\.\d+)?$/.test(bv);
+          var cmp = isNumeric ? (an - bn) : av.localeCompare(bv);
+          return dir === 'asc' ? cmp : -cmp;
+        });
+        rows.forEach(function(r){ tbody.appendChild(r); });
+      });
+    });
+  }
+
+  ['tbl-rooms', 'tbl-res', 'tbl-cust'].forEach(function(id){
+    makeSortable(document.getElementById(id));
+  });
+
+  document.querySelectorAll('.link-cell').forEach(function(el){
+    el.addEventListener('click', function(){
+      var targetId = el.getAttribute('data-jump');
+      var tabId = targetId.indexOf('room-') === 0 ? 'a-rooms' : 'a-cust';
+      activateTab(adminTabsEl, adminPanelEl, '.inner-panel', tabId);
+      var row = document.getElementById(targetId);
+      if(!row) return;
+      row.scrollIntoView({behavior:'smooth', block:'center'});
+      row.classList.remove('flash');
+      void row.offsetWidth;
+      row.classList.add('flash');
+      setTimeout(function(){ row.classList.remove('flash'); }, 1200);
+    });
+  });
+
+  /* ---- Browse -> Book ---- */
+  var currentRoom = { number: '204', type: 'Double', price: 120 };
+
+  function formatDateRange(inStr, outStr){
+    var inD = new Date(inStr + 'T00:00:00');
+    var outD = new Date(outStr + 'T00:00:00');
+    return inD.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
+           outD.toLocaleDateString('en-US', { day: 'numeric' });
+  }
+
+  function computeNights(){
+    var inD = new Date(document.getElementById('bookCheckin').value + 'T00:00:00');
+    var outD = new Date(document.getElementById('bookCheckout').value + 'T00:00:00');
+    var nights = Math.round((outD - inD) / 86400000);
+    return nights > 0 ? nights : 0;
+  }
+
+  function refreshBookTotal(){
+    var nights = computeNights();
+    var total = nights * currentRoom.price;
+    document.getElementById('bookNightsLabel').textContent = nights + (nights === 1 ? ' night × $' : ' nights × $') + currentRoom.price;
+    document.getElementById('bookTotal').textContent = '$' + total;
+    return total;
+  }
+
+  document.getElementById('bookCheckin').addEventListener('change', refreshBookTotal);
+  document.getElementById('bookCheckout').addEventListener('change', refreshBookTotal);
+
+  document.querySelectorAll('.book-room').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      currentRoom = {
+        number: btn.getAttribute('data-number'),
+        type: btn.getAttribute('data-type'),
+        price: parseFloat(btn.getAttribute('data-price'))
+      };
+      document.getElementById('bookRoomTitle').textContent = 'Room ' + currentRoom.number + ' · ' + currentRoom.type;
+      document.getElementById('bookRoomPrice').textContent = '$' + currentRoom.price + ' / night';
+      document.getElementById('bookUrl').textContent = 'hotel.app/rooms/' + currentRoom.number + '/book';
+      document.getElementById('bookSuccess').hidden = true;
+      refreshBookTotal();
+      activateTab(mainTabsEl, mainPanelsEl, ':scope > .panel', 'book');
+    });
+  });
+
+  document.getElementById('confirmBookingBtn').addEventListener('click', function(){
+    var total = refreshBookTotal();
+    var datesLabel = formatDateRange(document.getElementById('bookCheckin').value, document.getElementById('bookCheckout').value);
+    var row = document.createElement('tr');
+    row.innerHTML =
+      '<td>' + currentRoom.number + ' · ' + currentRoom.type + '</td>' +
+      '<td>' + datesLabel + '</td>' +
+      '<td>$' + total + '</td>' +
+      '<td><span class="status-chip confirmed">Confirmed</span></td>' +
+      '<td><button class="mini-btn warn my-cancel-btn">Cancel</button></td>';
+    document.getElementById('myResBody').appendChild(row);
+    document.getElementById('bookSuccess').hidden = false;
+  });
+
+  document.getElementById('myResBody').addEventListener('click', function(e){
+    if(!e.target.classList.contains('my-cancel-btn')) return;
+    var row = e.target.closest('tr');
+    row.children[3].innerHTML = '<span class="status-chip cancelled">Cancelled</span>';
+    row.children[4].innerHTML = '—';
+  });
+
+  /* ---- Admin: Rooms ---- */
+  var roomForm = document.getElementById('roomForm');
+  var roomFormMode = 'create';
+  var roomEditingRow = null;
+
+  document.getElementById('addRoomBtn').addEventListener('click', function(){
+    roomFormMode = 'create';
+    roomEditingRow = null;
+    document.getElementById('roomFormTitle').textContent = 'Add Room';
+    document.getElementById('roomFormNumber').value = '';
+    document.getElementById('roomFormType').value = 'Single';
+    document.getElementById('roomFormPrice').value = '';
+    roomForm.hidden = false;
+  });
+
+  document.getElementById('roomsBody').addEventListener('click', function(e){
+    var row = e.target.closest('tr');
+    if(!row) return;
+    if(e.target.classList.contains('room-edit-btn')){
+      roomFormMode = 'edit';
+      roomEditingRow = row;
+      document.getElementById('roomFormTitle').textContent = 'Edit Room ' + row.children[0].textContent;
+      document.getElementById('roomFormNumber').value = row.children[0].textContent;
+      document.getElementById('roomFormType').value = row.children[1].textContent;
+      document.getElementById('roomFormPrice').value = row.children[2].textContent.replace('$', '');
+      roomForm.hidden = false;
+    } else if(e.target.classList.contains('room-delete-btn')){
+      if(confirm('Delete this room?')) row.remove();
+    }
+  });
+
+  document.getElementById('roomFormCancel').addEventListener('click', function(){ roomForm.hidden = true; });
+
+  document.getElementById('roomFormSave').addEventListener('click', function(){
+    var number = document.getElementById('roomFormNumber').value.trim();
+    var type = document.getElementById('roomFormType').value;
+    var price = document.getElementById('roomFormPrice').value.trim();
+    if(!number || !price) return;
+    if(roomFormMode === 'edit' && roomEditingRow){
+      roomEditingRow.children[0].textContent = number;
+      roomEditingRow.children[0].setAttribute('data-sort', number);
+      roomEditingRow.children[1].textContent = type;
+      roomEditingRow.children[2].textContent = '$' + price;
+      roomEditingRow.children[2].setAttribute('data-sort', price);
+    } else {
+      var newRow = document.createElement('tr');
+      newRow.id = 'room-' + number;
+      newRow.innerHTML =
+        '<td data-sort="' + number + '">' + number + '</td>' +
+        '<td>' + type + '</td>' +
+        '<td data-sort="' + price + '">$' + price + '</td>' +
+        '<td class="row-actions"><button class="mini-btn room-edit-btn">Edit</button><button class="mini-btn danger room-delete-btn">Delete</button></td>';
+      document.getElementById('roomsBody').appendChild(newRow);
+    }
+    roomForm.hidden = true;
+  });
+
+  /* ---- Admin: Reservations ---- */
+  var resForm = document.getElementById('resForm');
+  var resEditingRow = null;
+
+  document.getElementById('resBody').addEventListener('click', function(e){
+    var row = e.target.closest('tr');
+    if(!row) return;
+    if(e.target.classList.contains('res-edit-btn')){
+      resEditingRow = row;
+      document.getElementById('resFormCheckin').value = row.getAttribute('data-checkin');
+      document.getElementById('resFormCheckout').value = row.getAttribute('data-checkout');
+      resForm.hidden = false;
+    } else if(e.target.classList.contains('res-cancel-btn')){
+      var statusCell = row.querySelector('.status-cell');
+      statusCell.innerHTML = '<span class="status-chip cancelled">Cancelled</span>';
+      statusCell.setAttribute('data-sort', 'Cancelled');
+      e.target.disabled = true;
+    } else if(e.target.classList.contains('res-delete-btn')){
+      if(confirm('Delete this reservation?')) row.remove();
+    }
+  });
+
+  document.getElementById('resFormCancel').addEventListener('click', function(){ resForm.hidden = true; });
+
+  document.getElementById('resFormSave').addEventListener('click', function(){
+    if(!resEditingRow) return;
+    var checkin = document.getElementById('resFormCheckin').value;
+    var checkout = document.getElementById('resFormCheckout').value;
+    if(!checkin || !checkout) return;
+    resEditingRow.setAttribute('data-checkin', checkin);
+    resEditingRow.setAttribute('data-checkout', checkout);
+    var datesCell = resEditingRow.querySelector('.dates-cell');
+    datesCell.textContent = formatDateRange(checkin, checkout);
+    datesCell.setAttribute('data-sort', checkin);
+    resForm.hidden = true;
+  });
+
+  /* ---- Admin: Customers ---- */
+  var custForm = document.getElementById('custForm');
+  var custEditingRow = null;
+
+  document.getElementById('custBody').addEventListener('click', function(e){
+    var row = e.target.closest('tr');
+    if(!row) return;
+    if(e.target.classList.contains('cust-edit-btn')){
+      custEditingRow = row;
+      document.getElementById('custFormFirst').value = row.children[0].textContent;
+      document.getElementById('custFormLast').value = row.children[1].textContent;
+      document.getElementById('custFormEmail').value = row.children[2].textContent;
+      custForm.hidden = false;
+    } else if(e.target.classList.contains('cust-delete-btn')){
+      if(confirm('Delete this customer?')) row.remove();
+    }
+  });
+
+  document.getElementById('custFormCancel').addEventListener('click', function(){ custForm.hidden = true; });
+
+  document.getElementById('custFormSave').addEventListener('click', function(){
+    if(!custEditingRow) return;
+    custEditingRow.children[0].textContent = document.getElementById('custFormFirst').value.trim();
+    custEditingRow.children[1].textContent = document.getElementById('custFormLast').value.trim();
+    custEditingRow.children[2].textContent = document.getElementById('custFormEmail').value.trim();
+    custForm.hidden = true;
+  });
+
+  /* ---- Admin: Hotel ---- */
+  document.getElementById('hotelSaveBtn').addEventListener('click', function(){
+    document.getElementById('hotelSuccess').hidden = false;
+  });
+</script>
