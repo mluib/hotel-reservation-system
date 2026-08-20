@@ -24,6 +24,7 @@ docker compose up -d --build
 - **SQL Server:** `localhost,14330` — its own `db` container (named volume `mssql-data`, persists across restarts); connect via SSMS/Azure Data Studio or a connection string, not a browser
 - **Migrations:** auto-applied on backend startup
 - **Seeding:** a dev-only admin login + placeholder hotel, seeded on backend startup (see `SeedDevAdminAsync` in [`Program.cs`](../backend/HotelReservation.Api/Program.cs))
+- **Configuration:** described in the Docker standalone paragraphs below (§2) — same environment variables, just supplied via [`docker-compose.yml`](../docker-compose.yml)/[`.env`](../.env) instead of by hand
 
 ### b) Further commands
 

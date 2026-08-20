@@ -5,7 +5,7 @@ A CV portfolio project: a hotel reservation system built with deliberate, docume
 ## Stack & architecture
 
 - **Backend** (`backend/`): ASP.NET Core Web API on .NET 10, Clean Architecture — `HotelReservation.Domain` (entities/enums, no external deps) → `HotelReservation.Application` (use cases, DTOs, repository interfaces) ← `HotelReservation.Infrastructure` (EF Core, repositories, Identity, JWT) ← `HotelReservation.Api` (thin controllers, DI wiring). Three test projects: `Tests.Domain` (unit), `Tests.Application` (unit, Moq), `Tests.Integration` (`WebApplicationFactory` + SQLite in-memory).
-- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/roadmap.md` and `docs/frontend.md`.
+- **Frontend** (`frontend/`): Angular (standalone components, signals, no NgRx), built against the Claude Design mockup — see `docs/roadmap.md` and `docs/architecture-overview.md`.
 - Auth: ASP.NET Core Identity + JWT Bearer, role-based authorization. `IdentityUser` (auth) and domain `Customer` (business entity) are deliberately separate, linked via `IdentityUserId` — see `docs/raw-ai-logs/chat-gpt/decisions.md` for the full rationale.
 - Full architectural rationale lives in `docs/raw-ai-logs/chat-gpt/{tech-stack,decisions}.md` (written early in the project, still accurate for the backend).
 
