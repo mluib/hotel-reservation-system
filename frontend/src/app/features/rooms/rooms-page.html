@@ -46,11 +46,12 @@
         }
         <div class="room-body">
           <div class="room-header">
-            <span class="room-number">Room {{ room.number }}</span>
+            <span class="room-name">{{ room.name }}</span>
             <span class="badge" style="background: var(--color-chip-bg); color: var(--color-chip-text)">{{
               room.type
             }}</span>
           </div>
+          <div class="room-number">Room {{ room.number }}</div>
           <div class="room-price">
             {{ room.pricePerNight }}&euro;<span class="unit"> / night</span>
           </div>

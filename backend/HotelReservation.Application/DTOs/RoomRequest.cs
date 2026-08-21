@@ -6,6 +6,10 @@ namespace HotelReservation.Application.DTOs;
 public class RoomRequest
 {
     [Required]
+    [MaxLength(60)]
+    public string Name { get; set; }
+
+    [Required]
     [MaxLength(20)]
     public string Number { get; set; }
 

@@ -7,6 +7,7 @@ export const ROOM_TYPES: RoomType[] = ['Single', 'Double', 'Suite'];
 // Mirrors HotelReservation.Application.DTOs.RoomDto.
 export interface Room {
   id: string;
+  name: string;
   number: string;
   type: RoomType;
   pricePerNight: number;
@@ -23,9 +24,9 @@ export interface RoomFilter {
   checkOut?: string | null;
 }
 
-// Mirrors HotelReservation.Application.DTOs.CreateRoomRequest / UpdateRoomRequest
-// (the two happen to have the same shape today).
+// Mirrors HotelReservation.Application.DTOs.RoomRequest (shared by create and update).
 export interface RoomUpsert {
+  name: string;
   number: string;
   type: RoomType;
   pricePerNight: number;

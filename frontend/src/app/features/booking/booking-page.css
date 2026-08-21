@@ -26,10 +26,16 @@ h1 {
   color: var(--color-text-muted);
 }
 
-.room-number {
+.room-name {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 20px;
+  margin-top: 2px;
+}
+
+.room-number {
+  font-size: 13px;
+  color: var(--color-text-muted);
   margin-top: 2px;
 }
 

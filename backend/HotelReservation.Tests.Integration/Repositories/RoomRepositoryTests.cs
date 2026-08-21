@@ -35,8 +35,8 @@ public class RoomRepositoryTests : IClassFixture<CustomWebApplicationFactory>
 
         var hotel = await SeedHotelAsync(db);
         var customer = await SeedCustomerAsync(db);
-        var busyRoom = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
-        var freeRoom = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+        var busyRoom = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+        var freeRoom = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
         db.Rooms.AddRange(busyRoom, freeRoom);
         await db.SaveChangesAsync();
 
@@ -65,7 +65,7 @@ public class RoomRepositoryTests : IClassFixture<CustomWebApplicationFactory>
 
         var hotel = await SeedHotelAsync(db);
         var customer = await SeedCustomerAsync(db);
-        var room = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+        var room = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
 
@@ -95,7 +95,7 @@ public class RoomRepositoryTests : IClassFixture<CustomWebApplicationFactory>
             var db = seedScope.ServiceProvider.GetRequiredService<HotelDbContext>();
             var hotel = await SeedHotelAsync(db);
             var customer = await SeedCustomerAsync(db);
-            var room = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+            var room = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
             db.Rooms.Add(room);
             await db.SaveChangesAsync();
 
@@ -129,7 +129,7 @@ public class RoomRepositoryTests : IClassFixture<CustomWebApplicationFactory>
         var rooms = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
 
         var hotel = await SeedHotelAsync(db);
-        var room = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Double, 219.95m, hotel.Id);
+        var room = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Double, 219.95m, hotel.Id);
 
         await rooms.AddAsync(room);
 

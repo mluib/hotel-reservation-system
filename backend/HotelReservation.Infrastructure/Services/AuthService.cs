@@ -88,10 +88,37 @@ public class AuthService : IAuthService
         }
 
         var roles = await _userManager.GetRolesAsync(user);
+
+        // Every Customer-role Identity user is expected to have a linked domain Customer
+        // (RegisterAsync creates both together). A Customer-role login with no such record
+        // means something removed the Customer row without also removing this login --
+        // e.g. deleting the row directly instead of through DeleteCustomer, or (before this
+        // check existed) DeleteCustomer itself leaving the login behind. Rejecting here,
+        // the same as a wrong password, is safer and clearer than letting the token issue
+        // and having every later "my profile"/"my reservations" call 404 instead.
+        if (roles.Contains("Customer"))
+        {
+            var customer = await _customerRepository.GetByIdentityUserIdAsync(user.Id);
+            if (customer == null)
+            {
+                _logger.LogWarning("Login failed for {Email}: Customer role but no linked customer profile", request.Email);
+                throw new UnauthenticatedException("Invalid credentials.");
+            }
+        }
+
         var token = _jwt.GenerateToken(user.Id, user.UserName ?? string.Empty, roles);
 
         _logger.LogInformation("Login succeeded for {Email}", request.Email);
 
         return new AuthenticationResponse { Token = token };
+    }
+
+    public async Task DeleteUserAsync(string identityUserId)
+    {
+        var user = await _userManager.FindByIdAsync(identityUserId);
+        if (user == null)
+            return;
+
+        await _userManager.DeleteAsync(user);
     }
 }

@@ -4,11 +4,14 @@
       <div class="eyebrow">Welcome</div>
       <h1>{{ hotelService.hotel()?.name || 'Loading…' }}</h1>
       <p class="address">{{ hotelService.hotel()?.address }}</p>
+      <p class="tagline">Enjoy a beautiful time in the heart of Baden-Württemberg.</p>
       <p class="description">
-        Set at the foot of the Bussen — the highest peak in Baden-Württemberg — with the Danube,
-        Lake Constance, and the Swabian Alb all within easy reach for walking or cycling. We'd be
-        pleased to welcome you.
+        Located at the foot of the Bussen, the highest peak in Baden-Württemberg, our lodge is
+        surrounded by the beauty of nature. Take your time to relax, enjoy peaceful walks and
+        scenic cycling tours, or explore the many highlights nearby. The Danube, Lake Constance,
+        and the Swabian Alb are all just a short trip away, waiting to be discovered.
       </p>
+      <p class="closing">We're delighted to have you here and hope you enjoy your stay!</p>
       <a routerLink="/rooms" class="btn btn-primary">View Rooms</a>
     </div>
     @if (heroImageUrl(); as url) {

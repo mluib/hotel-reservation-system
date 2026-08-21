@@ -35,7 +35,7 @@ public class CustomerRepositoryTests : IClassFixture<CustomWebApplicationFactory
                 db.Hotels.Add(hotel);
                 await db.SaveChangesAsync();
             }
-            var room = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+            var room = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
             var customer = new Customer("Jane", "Doe", $"jane-{Guid.NewGuid():N}@example.com");
             db.Rooms.Add(room);
             db.Customers.Add(customer);

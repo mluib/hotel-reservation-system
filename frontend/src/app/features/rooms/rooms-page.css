@@ -62,10 +62,15 @@ h1 {
   gap: 8px;
 }
 
-.room-number {
+.room-name {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 18px;
+}
+
+.room-number {
+  font-size: 13px;
+  color: var(--color-text-muted);
 }
 
 .room-price {

@@ -15,7 +15,7 @@ public class DeleteRoomTests
 {
     private static Room MakeRoom()
     {
-        return new Room("101", RoomType.Single, 100m, Guid.NewGuid());
+        return new Room("Test Room", "101", RoomType.Single, 100m, Guid.NewGuid());
     }
 
     [Fact]

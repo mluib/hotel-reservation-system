@@ -5,6 +5,7 @@
 <table class="data-table">
   <thead>
     <tr>
+      <th><a href="javascript:void(0)" (click)="toggleSort('name')">Name {{ sortArrow('name') }}</a></th>
       <th><a href="javascript:void(0)" (click)="toggleSort('number')">Number {{ sortArrow('number') }}</a></th>
       <th><a href="javascript:void(0)" (click)="toggleSort('type')">Type {{ sortArrow('type') }}</a></th>
       <th>
@@ -18,6 +19,7 @@
   <tbody>
     @for (room of sortedRooms(); track room.id) {
       <tr [class.row-highlight]="highlight.highlightRoomId() === room.id">
+        <td>{{ room.name }}</td>
         <td>{{ room.number }}</td>
         <td>{{ room.type }}</td>
         <td>{{ room.pricePerNight }}&euro;</td>
@@ -38,7 +40,7 @@
 
 @if (pendingDelete(); as room) {
   <app-confirm-dialog
-    [message]="'Delete room ' + room.number + '? This cannot be undone.'"
+    [message]="'Delete ' + room.name + ' (Room ' + room.number + ')? This cannot be undone.'"
     (confirmed)="confirmDelete()"
     (cancelled)="pendingDelete.set(null)"
   ></app-confirm-dialog>

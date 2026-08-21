@@ -12,6 +12,8 @@ public class Room
 {
     public Guid Id { get; private set; }
 
+    public string Name { get; private set; }
+
     public string Number { get; private set; }
 
     public RoomType Type { get; private set; }
@@ -29,26 +31,35 @@ public class Room
     private Room() { }
 
     public Room(
+        string name,
         string number,
         RoomType type,
         decimal pricePerNight,
         Guid hotelId)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Room name is required.");
+
         if (string.IsNullOrWhiteSpace(number))
             throw new ArgumentException("Room number is required.");
 
         Id = Guid.NewGuid();
+        Name = name;
         Number = number;
         Type = type;
         PricePerNight = new Money(pricePerNight);
         HotelId = hotelId;
     }
 
-    public void Update(string number, RoomType type, decimal pricePerNight, Guid hotelId)
+    public void Update(string name, string number, RoomType type, decimal pricePerNight, Guid hotelId)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Room name is required.");
+
         if (string.IsNullOrWhiteSpace(number))
             throw new ArgumentException("Room number is required.");
 
+        Name = name;
         Number = number;
         Type = type;
         PricePerNight = new Money(pricePerNight);

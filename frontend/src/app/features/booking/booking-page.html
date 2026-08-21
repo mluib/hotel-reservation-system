@@ -1,11 +1,12 @@
 @if (room(); as r) {
   <div class="booking-page">
     <a routerLink="/rooms">&larr; Back to rooms</a>
-    <h1>Book Room {{ r.number }}</h1>
+    <h1>Book {{ r.name }}</h1>
 
     <div class="summary-row">
       <div>
         <div class="room-type">{{ r.type }}</div>
+        <div class="room-name">{{ r.name }}</div>
         <div class="room-number">Room {{ r.number }}</div>
       </div>
       <div class="room-price">{{ r.pricePerNight }}&euro;<span class="unit"> /night</span></div>

@@ -15,7 +15,7 @@ public class CreateRoom
 
     public async Task<Guid> ExecuteAsync(RoomRequest request)
     {
-        var room = new Room(request.Number, request.Type, request.PricePerNight, request.HotelId);
+        var room = new Room(request.Name, request.Number, request.Type, request.PricePerNight, request.HotelId);
         await _repository.AddAsync(room);
         return room.Id;
     }

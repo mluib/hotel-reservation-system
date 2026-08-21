@@ -6,6 +6,8 @@ public class RoomDto
 {
     public Guid Id { get; set; }
 
+    public string Name { get; set; }
+
     public string Number { get; set; }
 
     public RoomType Type { get; set; }

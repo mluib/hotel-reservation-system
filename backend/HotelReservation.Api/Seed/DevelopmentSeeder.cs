@@ -83,17 +83,23 @@ public static class DevelopmentSeeder
         var imageStorage = services.GetRequiredService<IImageStorageService>();
         var seedImagesPath = Path.Combine(app.Environment.WebRootPath, "seed-images");
 
-        var hotel = new Hotel("Bussen Lodge", "12 Summit Road, Hillcrest");
+        var hotel = new Hotel("Bussen Lodge", "13 Mountain Road, Hillcrest");
         db.Hotels.Add(hotel);
         await db.SaveChangesAsync();
 
         hotel.SetImage(await SaveSeedImageAsync(imageStorage, seedImagesPath, "hotel.jpg", "hotel", hotel.Id));
 
+        // Named after English common names for flowers that actually grow on the Bussen
+        // itself -- its calcareous grassland/meadow habitat, famous locally for wild
+        // orchids, not high-alpine rock flora (the Bussen is a hill, not a mountain, so
+        // e.g. edelweiss would be the wrong habitat) -- a nicer guest-facing identity than
+        // the bare room number (kept alongside Name for the admin's own operational
+        // reference).
         var rooms = new[]
         {
-            (Room: new Room("101", RoomType.Single, 89m, hotel.Id), Image: "room-single.jpg"),
-            (Room: new Room("102", RoomType.Double, 129m, hotel.Id), Image: "room-double.jpg"),
-            (Room: new Room("103", RoomType.Suite, 219m, hotel.Id), Image: "room-suite.jpg"),
+            (Room: new Room("Cowslip Room", "101", RoomType.Single, 89m, hotel.Id), Image: "room-single.jpg"),
+            (Room: new Room("Gentian Room", "102", RoomType.Double, 129m, hotel.Id), Image: "room-double.jpg"),
+            (Room: new Room("Orchid Suite", "103", RoomType.Suite, 219m, hotel.Id), Image: "room-suite.jpg"),
         };
         db.Rooms.AddRange(rooms.Select(r => r.Room));
         await db.SaveChangesAsync();

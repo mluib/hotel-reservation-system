@@ -21,6 +21,7 @@ public class GetRoomById
         return new RoomDto
         {
             Id = room.Id,
+            Name = room.Name,
             Number = room.Number,
             Type = room.Type,
             PricePerNight = room.PricePerNight.Amount,

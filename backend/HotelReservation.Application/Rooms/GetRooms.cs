@@ -23,6 +23,7 @@ public class GetRooms
             list.Add(new RoomDto
             {
                 Id = r.Id,
+                Name = r.Name,
                 Number = r.Number,
                 Type = r.Type,
                 PricePerNight = r.PricePerNight.Amount,

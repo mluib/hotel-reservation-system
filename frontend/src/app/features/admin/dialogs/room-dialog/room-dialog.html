@@ -3,6 +3,10 @@
     <div class="dialog-title">{{ title }}</div>
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="field">
+        <label for="room-name">Room name</label>
+        <input id="room-name" formControlName="name" placeholder="e.g. Gentian Room" />
+      </div>
+      <div class="field">
         <label for="room-number">Room number</label>
         <input id="room-number" formControlName="number" />
       </div>

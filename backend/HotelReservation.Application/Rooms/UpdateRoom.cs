@@ -20,7 +20,7 @@ public class UpdateRoom
         if (existing == null) throw new NotFoundException("Room not found.");
 
         // Use domain method to update allowed fields and preserve invariants
-        existing.Update(request.Number, request.Type, request.PricePerNight, request.HotelId);
+        existing.Update(request.Name, request.Number, request.Type, request.PricePerNight, request.HotelId);
 
         await _repository.UpdateAsync(existing);
     }

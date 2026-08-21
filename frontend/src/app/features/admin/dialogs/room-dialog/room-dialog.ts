@@ -36,6 +36,7 @@ export class RoomDialog implements OnInit {
   });
 
   protected readonly form = this.fb.nonNullable.group({
+    name: ['', Validators.required],
     number: ['', Validators.required],
     type: this.roomTypes[0],
     pricePerNight: ['', [Validators.required, Validators.min(0.01)]],
@@ -53,6 +54,7 @@ export class RoomDialog implements OnInit {
     const room = this.room();
     if (room) {
       this.form.setValue({
+        name: room.name,
         number: room.number,
         type: room.type,
         pricePerNight: String(room.pricePerNight),
@@ -68,7 +70,7 @@ export class RoomDialog implements OnInit {
   protected save(): void {
     const price = Number(this.form.getRawValue().pricePerNight);
     if (this.form.invalid || !price || price <= 0) {
-      this.error.set('Enter a room number and a valid price.');
+      this.error.set('Enter a room name, number, and a valid price.');
       return;
     }
 
@@ -80,6 +82,7 @@ export class RoomDialog implements OnInit {
     }
 
     const payload = {
+      name: this.form.getRawValue().name,
       number: this.form.getRawValue().number,
       type: this.form.getRawValue().type as Room['type'],
       pricePerNight: price,

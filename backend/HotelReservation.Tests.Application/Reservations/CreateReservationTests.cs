@@ -16,7 +16,7 @@ public class CreateReservationTests
 {
     private static Room MakeRoom(decimal pricePerNight = 100m)
     {
-        return new Room("101", Domain.Enums.RoomType.Single, pricePerNight, Guid.NewGuid());
+        return new Room("Test Room", "101", Domain.Enums.RoomType.Single, pricePerNight, Guid.NewGuid());
     }
 
     [Fact]

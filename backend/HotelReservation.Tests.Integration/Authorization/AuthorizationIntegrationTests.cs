@@ -145,7 +145,7 @@ public class AuthorizationIntegrationTests : IClassFixture<CustomWebApplicationF
             await db.SaveChangesAsync();
         }
 
-        var room = new Room(Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+        var room = new Room("Test Room", Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
 

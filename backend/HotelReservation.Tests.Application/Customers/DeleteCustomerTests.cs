@@ -18,7 +18,7 @@ public class DeleteCustomerTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_NoReservations_DeletesCustomer()
+    public async Task ExecuteAsync_NoReservations_DeletesCustomerAndLinkedUser()
     {
         var customer = MakeCustomer();
 
@@ -29,11 +29,15 @@ public class DeleteCustomerTests
         var reservationRepo = new Mock<IReservationRepository>();
         reservationRepo.Setup(r => r.ExistsForCustomerAsync(customer.Id)).ReturnsAsync(false);
 
-        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object);
+        var authService = new Mock<IAuthService>();
+        authService.Setup(a => a.DeleteUserAsync(customer.IdentityUserId!)).Returns(Task.CompletedTask).Verifiable();
+
+        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object, authService.Object);
 
         await useCase.ExecuteAsync(customer.Id);
 
         customerRepo.Verify(c => c.DeleteAsync(customer), Times.Once);
+        authService.Verify(a => a.DeleteUserAsync(customer.IdentityUserId!), Times.Once);
     }
 
     [Fact]
@@ -47,12 +51,15 @@ public class DeleteCustomerTests
         var reservationRepo = new Mock<IReservationRepository>();
         reservationRepo.Setup(r => r.ExistsForCustomerAsync(customer.Id)).ReturnsAsync(true);
 
-        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object);
+        var authService = new Mock<IAuthService>();
+
+        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object, authService.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(customer.Id))
             .Should().ThrowAsync<ConflictException>().WithMessage("Cannot delete a customer that has reservations.*");
 
         customerRepo.Verify(c => c.DeleteAsync(It.IsAny<Customer>()), Times.Never);
+        authService.Verify(a => a.DeleteUserAsync(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -62,8 +69,9 @@ public class DeleteCustomerTests
         customerRepo.Setup(c => c.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Customer?)null);
 
         var reservationRepo = new Mock<IReservationRepository>();
+        var authService = new Mock<IAuthService>();
 
-        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object);
+        var useCase = new DeleteCustomer(customerRepo.Object, reservationRepo.Object, authService.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(Guid.NewGuid()))
             .Should().ThrowAsync<NotFoundException>().WithMessage("Customer not found.*");

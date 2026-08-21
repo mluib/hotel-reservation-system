@@ -111,7 +111,7 @@ public class ReservationRepositoryTests : IClassFixture<CustomWebApplicationFact
             await db.SaveChangesAsync();
         }
 
-        var room = new Room("R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
+        var room = new Room("Test Room", "R-" + Guid.NewGuid().ToString("N")[..8], RoomType.Single, 100m, hotel.Id);
         var customer = new Customer("Test", "Customer", $"test-{Guid.NewGuid():N}@example.com");
         db.Rooms.Add(room);
         db.Customers.Add(customer);

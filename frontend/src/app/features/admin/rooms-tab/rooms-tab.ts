@@ -7,7 +7,7 @@ import { RoomDialog } from '../dialogs/room-dialog/room-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { ErrorDialog } from '../../../shared/error-dialog/error-dialog';
 
-type SortKey = 'number' | 'type' | 'pricePerNight';
+type SortKey = 'name' | 'number' | 'type' | 'pricePerNight';
 
 @Component({
   selector: 'app-rooms-tab',

@@ -33,10 +33,27 @@ h1 {
   margin: 0 0 8px;
 }
 
+.tagline {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 20px 0 4px;
+}
+
 .description {
   font-size: 16px;
   line-height: 1.7;
-  margin: 16px 0 28px;
+  margin: 16px 0 20px;
+}
+
+.closing {
+  font-size: 16px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--color-accent);
+  margin: 0 0 28px;
 }
 
 .hero-photo {
