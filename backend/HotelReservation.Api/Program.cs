@@ -1,6 +1,7 @@
 
 using System.Text.Json.Serialization;
 using HotelReservation.Api.Middleware;
+using HotelReservation.Api.Seed;
 using HotelReservation.Application.Customers;
 using HotelReservation.Application.Hotels;
 using HotelReservation.Application.Interfaces;
@@ -10,7 +11,6 @@ using HotelReservation.Application.Rooms;
 using HotelReservation.Infrastructure.Persistence;
 using HotelReservation.Infrastructure.Repositories;
 using HotelReservation.Infrastructure.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -287,64 +287,22 @@ namespace HotelReservation.Api
                 app.MapControllers();
             }
 
-            // Dev-only seed: without this there's no way to obtain an Admin account, since
-            // registration always assigns "Customer" and there's no promotion mechanism yet.
-            // Seed:AdminEmail/AdminPassword now come from user-secrets (native dev) or the
-            // committed .env (docker-compose) rather than committed plaintext appsettings --
-            // see Phase 6's secrets-hardening stage. Still explicitly dev-only: no
-            // production-appropriate seeding/promotion path exists, and building one was a
-            // deliberate non-goal for this project (see the workflow log) rather than an
-            // oversight.
+            // Dev-only seed: without this there's no way to obtain an Admin account (since
+            // registration always assigns "Customer" and there's no promotion mechanism yet)
+            // or a populated hotel to browse. Seed:AdminEmail/AdminPassword come from
+            // user-secrets (native dev) or the committed .env (docker-compose) rather than
+            // committed plaintext appsettings -- see Phase 6's secrets-hardening stage.
+            // Still explicitly dev-only: no production-appropriate seeding/promotion path
+            // exists, and building one was a deliberate non-goal for this project (see the
+            // workflow log) rather than an oversight. See HotelReservation.Api/Seed for what
+            // each method does and why the two are kept separate.
             if (app.Environment.IsDevelopment())
             {
-                await SeedDevAdminAsync(app);
+                await DevelopmentSeeder.SeedRolesAndAdminAsync(app);
+                await DevelopmentSeeder.SeedDemoDataAsync(app);
             }
 
             await app.RunAsync();
-        }
-
-        // Ensures the Admin/Customer Identity roles exist and that one admin login is
-        // available to sign in with, sourced from configuration rather than hardcoded.
-        // Development-only (see call site) — not a production seeding strategy.
-        private static async Task SeedDevAdminAsync(WebApplication app)
-        {
-            using var scope = app.Services.CreateScope();
-            var services = scope.ServiceProvider;
-
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            foreach (var role in new[] { "Admin", "Customer" })
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                    await roleManager.CreateAsync(new IdentityRole(role));
-            }
-
-            // The system is designed around exactly one Hotel row always existing (see
-            // UpdateHotel/GetHotel, which look it up with no id — there is no "create hotel"
-            // endpoint at all). A brand-new database therefore has no way to ever get that
-            // first row through the UI. Seed a placeholder here, independent of the admin-user
-            // check below, so it runs on every startup regardless of whether the admin already
-            // exists. Dev-only, same as the rest of this method.
-            var hotelDbContext = services.GetRequiredService<HotelReservation.Infrastructure.Persistence.HotelDbContext>();
-            if (!await hotelDbContext.Hotels.AnyAsync())
-            {
-                hotelDbContext.Hotels.Add(new HotelReservation.Domain.Entities.Hotel("Hotel One", "123 Main St"));
-                await hotelDbContext.SaveChangesAsync();
-            }
-
-            var adminEmail = app.Configuration["Seed:AdminEmail"];
-            var adminPassword = app.Configuration["Seed:AdminPassword"];
-            if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
-                return;
-
-            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-            var existing = await userManager.FindByEmailAsync(adminEmail);
-            if (existing != null)
-                return;
-
-            var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
-            var result = await userManager.CreateAsync(adminUser, adminPassword);
-            if (result.Succeeded)
-                await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

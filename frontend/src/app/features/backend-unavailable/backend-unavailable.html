@@ -1,0 +1,19 @@
+<div class="unavailable-page">
+  <div class="unavailable-card">
+    <div class="unavailable-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.6" />
+        <path d="M12 7.5v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+      </svg>
+    </div>
+    <h1>Can't reach the server</h1>
+    <p class="description">
+      The hotel reservation backend isn't responding right now. If you're running this
+      locally, make sure the API (and its database) are up — e.g. <code>docker compose up</code> —
+      then try again.
+    </p>
+    <button type="button" class="btn btn-primary" (click)="retry()">Retry now</button>
+    <p class="retry-hint">Checking again automatically every few seconds…</p>
+  </div>
+</div>

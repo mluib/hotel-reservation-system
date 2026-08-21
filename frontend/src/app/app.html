@@ -1,6 +1,17 @@
-<app-nav></app-nav>
-<router-outlet></router-outlet>
+@switch (backendStatus.status()) {
+  @case ('available') {
+    <app-nav></app-nav>
+    <router-outlet></router-outlet>
 
-@if (notice.message(); as message) {
-  <app-error-dialog title="Heads up" [message]="message" (closed)="notice.clear()"></app-error-dialog>
+    @if (notice.message(); as message) {
+      <app-error-dialog title="Heads up" [message]="message" (closed)="notice.clear()"></app-error-dialog>
+    }
+  }
+  @case ('unavailable') {
+    <app-backend-unavailable></app-backend-unavailable>
+  }
+  @default {
+    <!-- 'checking': the initial health check is in flight. Nothing to show yet -- it
+         resolves in one round trip, too fast to be worth a loading skeleton. -->
+  }
 }

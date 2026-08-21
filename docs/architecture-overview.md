@@ -64,6 +64,7 @@ Angular (standalone components, signals, no NgRx) — implemented by Claude Code
 
 - **Structure**: `core/` (auth — JWT decode/storage, guards, interceptor; models mirroring the backend's DTOs; HTTP services wrapping each controller) · `shared/` (generic dialogs) · `layout/` (role-aware nav bar) · `features/` (one folder per screen — `home`, `auth`, `rooms`, `booking`, `reservations`, `admin` — routed via `app.routes.ts`)
 - **State**: no state-management library — a handful of injectable services hold shared state (hotel record, logged-in user) as signals; everything else is local component state
+- **Backend reachability**: a startup health check, plus an HTTP interceptor watching every request for connectivity failures, gates the whole app behind a dedicated "backend unavailable" screen (manual + automatic retry) instead of rendering against absent data
 
 ## DevOps
 

@@ -34,6 +34,7 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
 | Framework | Angular, standalone components, signals — no NgRx |
 | Implementation | Fully agentic (Claude Code: planning + code), built under the developer's decisions and the approved mockup |
 | Structure | `core/` (auth, models, HTTP services), `shared/` (dialogs), `layout/` (nav), `features/` (one folder per screen) — see [`docs/architecture-overview.md`](docs/architecture-overview.md) |
+| Resilience | Health check + HTTP interceptor detect an unreachable backend and show a dedicated status screen instead of a broken app |
 
 ### DevOps
 
@@ -52,7 +53,7 @@ docker compose up -d --build
 
 - Frontend: http://localhost:4200
 - Backend / Swagger: http://localhost:5044/swagger
-- A default hotel and an admin login (`admin@hotel.local` / `Admin123!`) are seeded automatically on first run (development only)
+- A demo hotel with three rooms (one per type) and placeholder photos, plus an admin login (`admin@hotel.local` / `Admin123!`), are seeded automatically on first run (development only)
 - Needs ports `4200`, `5044`, and `14330` free on the host — startup fails for whichever service's port is already taken (e.g. a native dev server already running there); `14330` (not SQL Server's default `1433`) is deliberate, since a locally-installed SQL Server commonly already holds that one
 
 ```bash

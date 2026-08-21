@@ -13,7 +13,7 @@ built with. The backend and frontend options can be mixed freely.
 
 ### a) Build & run
 
-Run from the repo root. No setup needed — the committed [`.env`](../.env) (see its own top-of-file comment for why it's committed rather than gitignored here) already supplies everything: the SQL Server SA password, `Jwt:Key`, and the seed admin credentials, wired into [`docker-compose.yml`](../docker-compose.yml) via `${VAR}` substitution.
+Run from the repo root. No setup needed — the committed [`.env`](../.env) (see its own top-of-file comment for why it's committed rather than gitignored here) already supplies everything: the dockerized SQL Server SA password, `Jwt:Key`, and the seed admin credentials, wired into [`docker-compose.yml`](../docker-compose.yml) via `${VAR}` substitution.
 
 ```bash
 docker compose up -d --build
@@ -23,7 +23,7 @@ docker compose up -d --build
 - **Backend/Swagger:** http://localhost:5044/swagger
 - **SQL Server:** `localhost,14330` — its own `db` container (named volume `mssql-data`, persists across restarts); connect via SSMS/Azure Data Studio or a connection string, not a browser
 - **Migrations:** auto-applied on backend startup
-- **Seeding:** a dev-only admin login + placeholder hotel, seeded on backend startup (see `SeedDevAdminAsync` in [`Program.cs`](../backend/HotelReservation.Api/Program.cs))
+- **Seeding:** a dev-only admin login, plus a demo hotel with three rooms (one per type) and placeholder photos, seeded on backend startup (see [`DevelopmentSeeder`](../backend/HotelReservation.Api/Seed/DevelopmentSeeder.cs))
 - **Configuration:** described in the Docker standalone paragraphs below (§2) — same environment variables, just supplied via [`docker-compose.yml`](../docker-compose.yml)/[`.env`](../.env) instead of by hand
 
 ### b) Further commands
@@ -61,7 +61,7 @@ docker run --rm -p 5044:8080 \
 
 - **Database target:** docker-compose's `db` container (`docker compose up -d db` first, if it isn't already running), reached via `host.docker.internal` (Docker Desktop's DNS name for the host machine, the easy way to reach anything on `localhost` from inside a container) on port `14330` (`db`'s published host port)
 - **Jwt Key:** `Jwt:Key` is mandatory (startup fails fast without it, Phase 6 secrets hardening)
-- **Seeding:** `Seed:Admin*` just skips creating a dev admin if omitted
+- **Seeding:** `Seed:Admin*` is optional (skips creating a dev admin if omitted)
 - **Launch configuration:** `ASPNETCORE_ENVIRONMENT=Development` (set above) → `appsettings.Development.json` applies
 - **Port configuration:** `-p 5044:8080` maps host port `5044` to the container's Kestrel port (`ASPNETCORE_URLS=http://+:8080` in the Dockerfile)
 
