@@ -1,6 +1,13 @@
 # Hotel Reservation System
 
+[![CI](https://github.com/mluib/hotel-reservation-system/actions/workflows/ci.yml/badge.svg)](https://github.com/mluib/hotel-reservation-system/actions/workflows/ci.yml)
+
 A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend, Dockerized, tested, with CI — built with the assistance of GitHub Copilot, Claude Code, and Claude Design, as a portfolio project demonstrating real software engineering ability alongside disciplined, directed AI-assisted development.
+
+<p>
+  <img src="docs/images/home.png" alt="Bussen Lodge homepage" width="49%" />
+  <img src="docs/images/rooms.png" alt="Bussen Lodge rooms listing" width="49%" />
+</p>
 
 ## Goals
 

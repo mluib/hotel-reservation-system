@@ -83,7 +83,7 @@ public static class DevelopmentSeeder
         var imageStorage = services.GetRequiredService<IImageStorageService>();
         var seedImagesPath = Path.Combine(app.Environment.WebRootPath, "seed-images");
 
-        var hotel = new Hotel("Bussen Lodge", "13 Mountain Road, Hillcrest");
+        var hotel = new Hotel("Bussen Lodge", "Kapellenweg 6, 88524 Uttenweiler");
         db.Hotels.Add(hotel);
         await db.SaveChangesAsync();
 
