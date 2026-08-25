@@ -33,6 +33,9 @@ public class RoomsController : ControllerBase
         _uploadRoomImage = uploadRoomImage;
     }
 
+    /// <summary>
+    /// Adds a new room to the hotel (admin only).
+    /// </summary>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<RoomDto>(StatusCodes.Status201Created)]
@@ -46,6 +49,11 @@ public class RoomsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = id }, dto);
     }
 
+    /// <summary>
+    /// Lists rooms, optionally filtered by type, price range, or availability over a
+    /// check-in/check-out range. Open to anonymous callers so the public rooms page
+    /// can browse without signing in.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<IEnumerable<RoomDto>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] RoomFilterRequest filter)
@@ -54,6 +62,9 @@ public class RoomsController : ControllerBase
         return Ok(list);
     }
 
+    /// <summary>
+    /// Looks up a single room by id. Open to anonymous callers, same as <see cref="GetAll"/>.
+    /// </summary>
     [HttpGet("{id}")]
     [ProducesResponseType<RoomDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -63,6 +74,9 @@ public class RoomsController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Updates a room's details (admin only).
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -76,6 +90,9 @@ public class RoomsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Removes a room (admin only).
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -89,6 +106,9 @@ public class RoomsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Uploads a new photo for a room, replacing the current one (admin only).
+    /// </summary>
     [HttpPost("{id}/image")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<RoomDto>(StatusCodes.Status200OK)]

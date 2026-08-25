@@ -327,3 +327,10 @@ A second item flagged from the same mockup review; asked to implement it directl
 - Asked for rooms to get real names (flower-themed) instead of numbers -> added a persisted Name field across the stack and migration, correcting the initial seed names for accuracy after feedback.
 - Reported a bug: a deleted customer's account could still log in -> traced to two related gaps and fixed both, with new tests covering it.
 - Two separate reports of room names not showing in the running app -> both traced to stale browser/dev-server state, not real bugs.
+
+## 2026-08-25 — Docker end-to-end smoke test and Swagger doc pass (Claude Code)
+
+- Ran `docker compose up` in a fresh clone as an end-to-end test and reported hotel/room photos not rendering -> traced to nginx proxying `/api` to the backend but not `/uploads` (where the backend serves photo files), so production image requests 404'd against the frontend's own static root; added the missing proxy rule.
+- Reported an unexplained customer record in that same fresh deployment -> confirmed no seeding code creates customers (demo seeding deliberately covers only the hotel/rooms/admin login), then the developer confirmed it was created manually while testing.
+- Asked what a routing comment on the "mine" endpoint meant, and asked whether every API method should get a Swagger description given only one currently had one -> corrected the comment (ASP.NET Core resolves "mine" vs. "{id}" by route-template precedence, not by which method is declared first) and added a summary description to every controller action for consistency.
+- Asked for the login flow's identical "Invalid credentials" responses (no-such-account vs. wrong-password) to be commented -> added a comment explaining the deliberate auth-enumeration-avoidance rationale.

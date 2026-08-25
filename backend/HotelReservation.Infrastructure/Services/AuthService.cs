@@ -73,6 +73,10 @@ public class AuthService : IAuthService
 
     public async Task<AuthenticationResponse> LoginAsync(LoginRequest request)
     {
+        // Auth-enumeration avoidance
+        // "No such account" and "wrong password" both throw the same generic message
+        // below (and get the same logged detail only server-side). Distinguishing them
+        // in the response would let a caller enumerate which emails are registered.
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {

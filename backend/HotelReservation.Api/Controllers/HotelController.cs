@@ -24,6 +24,9 @@ public class HotelController : ControllerBase
         _uploadHotelImage = uploadHotelImage;
     }
 
+    /// <summary>
+    /// Returns the hotel's profile (name, address, photo). There is only ever one.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -33,6 +36,9 @@ public class HotelController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Updates the hotel's name and address (admin only).
+    /// </summary>
     [HttpPut]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -46,6 +52,9 @@ public class HotelController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Uploads a new hotel photo, replacing the current one (admin only).
+    /// </summary>
     [HttpPost("image")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<HotelDto>(StatusCodes.Status200OK)]

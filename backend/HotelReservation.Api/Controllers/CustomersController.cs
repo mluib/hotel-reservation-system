@@ -37,8 +37,9 @@ public class CustomersController : ControllerBase
 
     /// <summary>
     /// Customer-facing profile lookup (e.g. for the frontend nav bar), scoped to the
-    /// caller instead of an admin-only id lookup. Must be routed before "{id}" so
-    /// "mine" isn't parsed as an id.
+    /// caller instead of an admin-only id lookup. The literal "mine" segment always
+    /// takes precedence over "{id}" in ASP.NET Core's route matching, so this doesn't
+    /// depend on its position relative to <see cref="GetById"/> below.
     /// </summary>
     [HttpGet("mine")]
     [Authorize(Roles = "Customer")]
@@ -51,6 +52,9 @@ public class CustomersController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Admin lookup of a single customer by id.
+    /// </summary>
     [HttpGet("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
@@ -63,6 +67,9 @@ public class CustomersController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Lists every registered customer (admin only).
+    /// </summary>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<IEnumerable<CustomerDto>>(StatusCodes.Status200OK)]
@@ -74,6 +81,9 @@ public class CustomersController : ControllerBase
         return Ok(list);
     }
 
+    /// <summary>
+    /// Updates a customer's profile (admin only).
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -87,6 +97,9 @@ public class CustomersController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Removes a customer along with its linked login (admin only).
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

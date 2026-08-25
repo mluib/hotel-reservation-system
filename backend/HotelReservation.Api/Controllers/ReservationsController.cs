@@ -32,6 +32,9 @@ public class ReservationsController : ControllerBase
         _cancelReservation = cancelReservation;
     }
 
+    /// <summary>
+    /// Books a room for the authenticated customer over the given date range.
+    /// </summary>
     [HttpPost]
     [Authorize(Roles = "Customer")]
     [ProducesResponseType<ReservationDto>(StatusCodes.Status201Created)]
@@ -48,6 +51,9 @@ public class ReservationsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = id }, dto);
     }
 
+    /// <summary>
+    /// Lists every reservation across all customers (admin only).
+    /// </summary>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<IEnumerable<ReservationDto>>(StatusCodes.Status200OK)]
@@ -59,6 +65,11 @@ public class ReservationsController : ControllerBase
         return Ok(list);
     }
 
+    /// <summary>
+    /// Lists the authenticated customer's own reservations. The literal "mine" segment
+    /// always takes precedence over "{id}" in ASP.NET Core's route matching, so this
+    /// doesn't depend on its position relative to <see cref="GetById"/> below.
+    /// </summary>
     [HttpGet("mine")]
     [Authorize(Roles = "Customer")]
     [ProducesResponseType<IEnumerable<ReservationDto>>(StatusCodes.Status200OK)]
@@ -69,6 +80,9 @@ public class ReservationsController : ControllerBase
         return Ok(list);
     }
 
+    /// <summary>
+    /// Admin lookup of a single reservation by id.
+    /// </summary>
     [HttpGet("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType<ReservationDto>(StatusCodes.Status200OK)]
@@ -81,6 +95,10 @@ public class ReservationsController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Permanently removes a reservation (admin only). Distinct from <see cref="Cancel"/>,
+    /// which marks a reservation cancelled without deleting it.
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -93,6 +111,9 @@ public class ReservationsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Cancels a reservation. Usable by the owning customer or an admin.
+    /// </summary>
     [HttpPost("{id}/cancel")]
     [Authorize(Roles = "Customer,Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -16,6 +16,10 @@ public class AccountController : ControllerBase
         _auth = auth;
     }
 
+    /// <summary>
+    /// Creates a new Identity login and its linked Customer profile in one step, then
+    /// signs the new account in immediately.
+    /// </summary>
     [HttpPost("register")]
     [AllowAnonymous]
     [ProducesResponseType<AuthenticationResponse>(StatusCodes.Status201Created)]
@@ -27,6 +31,9 @@ public class AccountController : ControllerBase
         return StatusCode(StatusCodes.Status201Created, resp);
     }
 
+    /// <summary>
+    /// Authenticates an existing login and returns a JWT for subsequent requests.
+    /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType<AuthenticationResponse>(StatusCodes.Status200OK)]

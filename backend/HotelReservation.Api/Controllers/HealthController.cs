@@ -12,6 +12,10 @@ namespace HotelReservation.Api.Controllers;
 [Route("api/[controller]")]
 public class HealthController : ControllerBase
 {
+    /// <summary>
+    /// Returns 200 if the backend process is up. No auth, no dependency checks (e.g.
+    /// the database) -- see the class summary for why.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult Get() => Ok(new { status = "ok" });
