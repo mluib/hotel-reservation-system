@@ -22,4 +22,11 @@
     <ProjectReference Include="..\HotelReservation.Domain\HotelReservation.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- SignInManager<TUser> (used by AuthService for login lockout enforcement) lives
+         in the ASP.NET Core shared framework, not the plain Identity.EntityFrameworkCore
+         package above; this project otherwise has no reason to reference it. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
 </Project>

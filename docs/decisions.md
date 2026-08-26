@@ -45,6 +45,13 @@ Lightweight ADR-style record: what was decided, why, and what was rejected inste
 - **Decision:** `Room`, `Customer`, `Reservation` removed their `Reservations` navigation collections; each is its own aggregate root.
 - **Reason:** nothing in the app ever needed to load "a room's reservations" as a graph; the shared navigation was unused coupling. Deleting a `Room`/`Customer` that still has reservations is rejected explicitly (any status — a cancelled reservation is still a historical record), enforced at the application layer *and* a DB-level restrict-delete FK as defense-in-depth.
 
+## Double-booking race: serializable transaction, no deadlock-retry loop
+
+- **Decision:** `CreateReservation` wraps its overlap check and the reservation insert in a single `Serializable`-isolation transaction (via a new `ITransactionRunner` abstraction, so the Application layer still doesn't depend on EF Core directly). A database-level failure to complete that transaction is converted to the same `ConflictException` an application-level "already booked" rejection throws, rather than surfacing as an unhandled 500 or a silent double-booking; it isn't caught and retried automatically.
+- **Reason:** this closes the actual double-booking race — two concurrent requests for the same room/dates can no longer both succeed — with an idiomatic EF Core mechanism and no schema change. Automatic retry-on-deadlock is what a production system under real concurrent load would want, but isn't proportionate to this project's traffic; a concurrency integration test (firing two concurrent create-requests at the same room/dates) proves the property that actually matters: exactly one succeeds, the other gets a clean 409.
+- **Verified, not assumed:** the concurrency test runs against `Tests.Integration`'s SQLite-backed host, which shares one physical connection across every request (see `CustomWebApplicationFactory`) — a different mechanism from SQL Server's row-range locking. Confirmed empirically: a second concurrent transaction fails outright *opening* (not committing) — `Microsoft.Data.Sqlite.SqliteException`, error 1 — because SQLite rejects a nested `BEGIN` on a connection already mid-transaction. `TransactionRunner` treats a failure to even start the transaction the same as a failure to commit it, which is what makes the same code correctly handle both SQLite's connection-level conflict and SQL Server's real serialization-failure/deadlock errors.
+- **Rejected:** a per-room advisory lock (`sp_getapplock`) — ties correctness to raw SQL for no real gain here; a normalized one-row-per-booked-night table with a unique constraint — the strongest guarantee available, but requires a new table plus touching `CancelReservation`/`DeleteReservation` too, disproportionate to this project's scale.
+
 ## Global exception handling + `ProblemDetails`, not per-controller try/catch
 
 - **Decision:** one exception taxonomy, one middleware, RFC 7807 `ProblemDetails` responses.
@@ -61,6 +68,30 @@ Lightweight ADR-style record: what was decided, why, and what was rejected inste
 - **Decision:** `Jwt:Key` has no default — a missing value throws at startup instead of silently signing tokens with a guessable placeholder.
 - **Reason:** a working-but-insecure default is worse than a loud failure; found and fixed a real problem this way (a previously-committed hardcoded key).
 - **Trade-off, stated explicitly:** the repo-root `.env` *is* committed (normally it should be gitignored) — a deliberate, documented exception so `docker compose up` works with zero setup for anyone cloning this portfolio repo. Not how a real production project should handle it.
+
+## Registration reveals a duplicate email; login never reveals account existence
+
+- **Decision:** `POST /api/account/register` returns a distinct 409 Conflict (with Identity's own message) when the email is already registered, while `POST /api/account/login` returns the identical "Invalid credentials." for both an unknown email and a wrong password.
+- **Reason:** the two endpoints' failure modes aren't symmetric. Login's two hidden causes lead to the same corrective action either way (recheck credentials, or go register), so hiding which one it was closes a real enumeration vector for free. Registration's two causes — duplicate email vs. weak password — need genuinely different fixes ("log in instead" vs. "pick a stronger password"), and the enumeration signal here isn't really in the message text anyway: `ConflictException` and `ValidationException` already differ by HTTP status (409 vs. 400) regardless of wording.
+- **Rejected:** collapsing both into one generic response to mirror login's enumeration-avoidance — would remove the weak-password signal a legitimate user needs to fix their submission, for a security benefit that's marginal on a project with no real user base to protect.
+
+## JWT stored in browser `localStorage`, no refresh token
+
+- **Decision:** the Angular frontend stores the JWT in `localStorage` (`auth.service.ts`); there is no refresh-token flow or server-side revocation, and logout only discards the token client-side.
+- **Reason:** standard, widely-used SPA practice, proportionate to this project's scope (no real user data, no production traffic).
+- **Trade-off, stated explicitly:** a future XSS bug would also be a token-theft bug, and a stolen token stays valid for its full lifetime (`Jwt:ExpireMinutes = 60`) with no way to revoke it early. Accepted as-is rather than moving to httpOnly cookies + CSRF or a refresh/revocation store, which would be a real auth-model change (Angular interceptor, CORS/CSRF handling), not a hardening tweak.
+
+## Security response headers added; a real CSP is a deliberate non-goal
+
+- **Decision:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and HSTS (outside Development) are set via a small hand-rolled middleware; the Kestrel `Server` header is suppressed. No Content-Security-Policy is defined.
+- **Reason:** the first set is a handful of static header assignments — cheap and unambiguous, no new dependency needed. A real CSP is different: getting it right requires enumerating the Angular build's actual script/style/font origins, and the payoff is low for a same-origin SPA behind nginx with no third-party scripts.
+- **Rejected:** a security-headers NuGet package (e.g. `NetEscapades.AspNetCore.SecurityHeaders`) — more thorough, but a new dependency for something this small, inconsistent with choosing DataAnnotations over FluentValidation elsewhere.
+
+## Image upload: magic-byte signature check, not a re-encode or a new dependency
+
+- **Decision:** `ImageValidation` checks the first bytes of an uploaded file against known JPEG/PNG/WebP signatures, in addition to the existing Content-Type/size checks — the Content-Type header alone is client-supplied and trivially spoofable.
+- **Reason:** the existing 5MB cap makes buffering the whole upload into memory cheap, so a hand-rolled signature check needs no new dependency. Real-world impact of the previous gap was already low (server-generated filenames, static-file serving, no executable extension reachable), but it's a known anti-pattern worth closing regardless.
+- **Rejected:** a file-type-sniffing package (e.g. `MimeDetective`) — a dependency for three known, stable signatures trivial to hand-check; and a full re-encode via `SixLabors.ImageSharp` — the strongest guarantee available, but a heavier dependency with real CPU cost that changes the stored file's fidelity, disproportionate to the actual risk here.
 
 ## Pagination — deliberately skipped
 

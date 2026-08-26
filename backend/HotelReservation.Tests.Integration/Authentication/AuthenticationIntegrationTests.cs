@@ -105,6 +105,42 @@ public class AuthenticationIntegrationTests : IClassFixture<CustomWebApplication
         loginAfterDelete.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    // Backend-hardening pass: SignInManager.CheckPasswordSignInAsync now enforces
+    // lockout, previously inert since AuthService called UserManager.CheckPasswordAsync
+    // directly (see docs/decisions.md). Asserts lockout actually engages after
+    // MaxFailedAccessAttempts wrong passwords and then rejects even the correct one --
+    // rather than waiting out the real 5-minute DefaultLockoutTimeSpan, which would make
+    // this test unacceptably slow.
+    [Fact]
+    public async Task Login_AfterMaxFailedAttempts_LocksOutAccountEvenWithCorrectPassword()
+    {
+        var email = $"lockout-{Guid.NewGuid()}@example.com";
+        const string password = "P@ssw0rd!";
+
+        var client = _factory.CreateClient();
+        var register = new { Email = email, Password = password, FirstName = "Lock", LastName = "Out" };
+        (await client.PostAsJsonAsync("/api/account/register", register)).EnsureSuccessStatusCode();
+
+        // Program.cs configures MaxFailedAccessAttempts = 5 -- exhaust it.
+        for (var attempt = 1; attempt <= 5; attempt++)
+        {
+            var failed = await client.PostAsJsonAsync("/api/account/login", new { Email = email, Password = "WrongPassword!1" });
+            failed.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var user = await userManager.FindByEmailAsync(email);
+            (await userManager.IsLockedOutAsync(user!)).Should().BeTrue();
+        }
+
+        // Even the correct password is rejected now -- proves lockout is actually
+        // enforced by the login path itself, not just recorded in the database.
+        var correctPasswordAttempt = await client.PostAsJsonAsync("/api/account/login", new { Email = email, Password = password });
+        correctPasswordAttempt.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     // Mirrors AuthorizationIntegrationTests' own helper -- kept local rather than shared
     // since this is the only other test class that needs an Admin token.
     private async Task<HttpClient> SeedAdminAndLoginAsync()

@@ -21,10 +21,10 @@ public class UploadRoomImage
         var room = await _repository.GetByIdAsync(roomId);
         if (room == null) throw new NotFoundException("Room not found.");
 
-        ImageValidation.Validate(request);
+        var content = await ImageValidation.ValidateAsync(request);
 
         var fileName = $"{room.Id}{ImageValidation.GetExtension(request.ContentType)}";
-        var url = await _imageStorage.SaveAsync(request.Content, fileName, "rooms");
+        var url = await _imageStorage.SaveAsync(content, fileName, "rooms");
 
         room.SetImage(url);
         await _repository.UpdateAsync(room);

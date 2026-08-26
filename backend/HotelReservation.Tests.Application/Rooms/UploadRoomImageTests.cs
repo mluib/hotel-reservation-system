@@ -20,14 +20,28 @@ public class UploadRoomImageTests
         return new Room("Test Room", "101", RoomType.Single, 100m, Guid.NewGuid());
     }
 
-    private static ImageUploadRequest MakeRequest(string contentType = "image/png", long length = 1024)
+    private static readonly byte[] PngSignature = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+
+    // Defaults to real PNG magic bytes (padded to `length`), not just zeros -- now that
+    // ImageValidation checks actual content against the declared type, a fake all-zero
+    // buffer would fail every "valid image" test, not only the ones deliberately testing
+    // a mismatch.
+    private static ImageUploadRequest MakeRequest(string contentType = "image/png", long length = 1024, byte[]? content = null)
     {
+        var bytes = content ?? BuildBytesWithSignature(PngSignature, length);
         return new ImageUploadRequest
         {
-            Content = new MemoryStream(new byte[length > 0 ? length : 0]),
+            Content = new MemoryStream(bytes),
             ContentType = contentType,
-            Length = length
+            Length = content?.Length ?? length
         };
+    }
+
+    private static byte[] BuildBytesWithSignature(byte[] signature, long length)
+    {
+        var bytes = new byte[length > 0 ? length : 0];
+        signature.CopyTo(bytes, 0);
+        return bytes;
     }
 
     [Fact]
@@ -81,6 +95,29 @@ public class UploadRoomImageTests
         var useCase = new UploadRoomImage(roomRepo.Object, storage.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(room.Id, MakeRequest(contentType: "application/pdf")))
+            .Should().ThrowAsync<ValidationException>();
+
+        storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        roomRepo.Verify(r => r.UpdateAsync(It.IsAny<Room>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ContentTypeDoesNotMatchActualBytes_Throws()
+    {
+        var room = MakeRoom();
+
+        var roomRepo = new Mock<IRoomRepository>();
+        roomRepo.Setup(r => r.GetByIdAsync(room.Id)).ReturnsAsync(room);
+
+        var storage = new Mock<IImageStorageService>();
+
+        var useCase = new UploadRoomImage(roomRepo.Object, storage.Object);
+
+        // Claims to be a PNG via Content-Type, but the actual bytes are plain text --
+        // exactly the spoofing ImageValidation.ValidateSignatureAsync exists to catch.
+        var spoofed = MakeRequest(contentType: "image/png", content: System.Text.Encoding.UTF8.GetBytes("not actually an image"));
+
+        await useCase.Invoking(x => x.ExecuteAsync(room.Id, spoofed))
             .Should().ThrowAsync<ValidationException>();
 
         storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);

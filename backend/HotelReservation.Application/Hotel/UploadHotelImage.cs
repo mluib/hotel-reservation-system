@@ -21,10 +21,10 @@ public class UploadHotelImage
         var hotel = await _repository.GetAsync();
         if (hotel == null) throw new NotFoundException("Hotel not found.");
 
-        ImageValidation.Validate(request);
+        var content = await ImageValidation.ValidateAsync(request);
 
         var fileName = $"{hotel.Id}{ImageValidation.GetExtension(request.ContentType)}";
-        var url = await _imageStorage.SaveAsync(request.Content, fileName, "hotel");
+        var url = await _imageStorage.SaveAsync(content, fileName, "hotel");
 
         hotel.SetImage(url);
         await _repository.UpdateAsync(hotel);

@@ -10,6 +10,7 @@ namespace HotelReservation.Infrastructure.Services;
 public class AuthService : IAuthService
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IJwtTokenService _jwt;
     private readonly ICustomerRepository _customerRepository;
@@ -17,12 +18,14 @@ public class AuthService : IAuthService
 
     public AuthService(
         UserManager<IdentityUser> userManager,
+        SignInManager<IdentityUser> signInManager,
         RoleManager<IdentityRole> roleManager,
         IJwtTokenService jwt,
         ICustomerRepository customerRepository,
         ILogger<AuthService> logger)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _roleManager = roleManager;
         _jwt = jwt;
         _customerRepository = customerRepository;
@@ -84,10 +87,22 @@ public class AuthService : IAuthService
             throw new UnauthenticatedException("Invalid credentials.");
         }
 
-        var valid = await _userManager.CheckPasswordAsync(user, request.Password);
-        if (!valid)
+        // CheckPasswordSignInAsync (rather than UserManager.CheckPasswordAsync) verifies
+        // the password AND enforces/tracks lockout: refuses outright if the account is
+        // already locked out, increments the failure count on a wrong password, resets
+        // it on success. See docs/decisions.md for why SignInManager was chosen over
+        // hand-rolling this sequencing around CheckPasswordAsync.
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+        if (!signInResult.Succeeded)
         {
-            _logger.LogWarning("Login failed for {Email}: wrong password", request.Email);
+            // Same generic message whether it's a wrong password or the account is now
+            // locked out -- a distinct "account locked" message would let an attacker
+            // confirm the account exists once they've thrown enough attempts at it.
+            _logger.LogWarning(
+                "Login failed for {Email}: {Reason}", request.Email,
+                signInResult.IsLockedOut ? "locked out" : "wrong password");
+
+            // generic message, see Auth-enumeration avoidance above
             throw new UnauthenticatedException("Invalid credentials.");
         }
 

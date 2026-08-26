@@ -51,6 +51,10 @@ namespace HotelReservation.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Suppress the "Server: Kestrel" response header -- a minor info-disclosure
+            // (confirms the stack) with no functional purpose; see docs/decisions.md.
+            builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+
             // Replace the bootstrap logger with the fully configured one now that
             // builder.Configuration (appsettings + env) is available. Built eagerly from
             // Log.Logger rather than via UseSerilog's lazy (context, services, config)
@@ -149,8 +153,15 @@ namespace HotelReservation.Api
 
                 // Authentication & Authorization
                 {
-                    // Identity
-                    builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
+                    // Identity. Lockout options set explicitly rather than left as unused
+                    // implicit defaults -- AuthService.LoginAsync uses SignInManager to
+                    // actually enforce them (UserManager.CheckPasswordAsync alone never
+                    // would have); see docs/decisions.md.
+                    builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>(options =>
+                    {
+                        options.Lockout.MaxFailedAccessAttempts = 5;
+                        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                    })
                     .AddEntityFrameworkStores<HotelDbContext>();
 
                     // JWT Authentication. No fallback defaults here (previously a hardcoded
@@ -199,6 +210,7 @@ namespace HotelReservation.Api
 
                 // Reservation Use-Case
                 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+                builder.Services.AddScoped<Application.Interfaces.ITransactionRunner, Infrastructure.Persistence.TransactionRunner>();
                 builder.Services.AddScoped<CreateReservation>();
                 builder.Services.AddScoped<GetReservations>();
                 builder.Services.AddScoped<GetReservationById>();
@@ -265,6 +277,23 @@ namespace HotelReservation.Api
                 // Catches anything no controller/use case already handles, logs it, and
                 // returns a generic error instead of an unhandled 500 with no trace anywhere.
                 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+                // Baseline security headers on every response. A small hand-rolled set
+                // (no new dependency) -- deliberately not a full Content-Security-Policy,
+                // which would need to enumerate the Angular build's actual script/style/
+                // font origins to be worth doing right; see docs/decisions.md.
+                app.Use(async (context, next) =>
+                {
+                    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+                    context.Response.Headers.Append("X-Frame-Options", "DENY");
+                    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+                    await next();
+                });
+
+                if (!app.Environment.IsDevelopment())
+                {
+                    app.UseHsts();
+                }
 
                 if (app.Environment.IsDevelopment())
                 {

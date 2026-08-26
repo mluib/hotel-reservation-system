@@ -19,6 +19,18 @@ public class CreateReservationTests
         return new Room("Test Room", "101", Domain.Enums.RoomType.Single, pricePerNight, Guid.NewGuid());
     }
 
+    // A pass-through fake: just invokes the delegate directly, no real transaction.
+    // These are unit tests for CreateReservation's own logic, not for
+    // TransactionRunner's atomicity guarantee -- that's covered separately by the
+    // concurrency integration test.
+    private static ITransactionRunner MakeTransactionRunner()
+    {
+        var mock = new Mock<ITransactionRunner>();
+        mock.Setup(t => t.RunSerializableAsync(It.IsAny<Func<Task<Guid>>>()))
+            .Returns<Func<Task<Guid>>>(operation => operation());
+        return mock.Object;
+    }
+
     [Fact]
     public async Task ExecuteAsync_InvalidDates_Throws()
     {
@@ -28,7 +40,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns(Guid.NewGuid().ToString());
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, MakeTransactionRunner(), NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow.AddDays(5), CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -54,7 +66,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id1");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, MakeTransactionRunner(), NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -78,7 +90,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id2");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, MakeTransactionRunner(), NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -99,7 +111,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns(Guid.NewGuid().ToString());
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, MakeTransactionRunner(), NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 
@@ -127,7 +139,7 @@ public class CreateReservationTests
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(c => c.UserId).Returns("id3");
 
-        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, NullLogger<CreateReservation>.Instance);
+        var useCase = new CreateReservation(repoMock.Object, roomRepo.Object, currentUser.Object, customerRepo.Object, MakeTransactionRunner(), NullLogger<CreateReservation>.Instance);
 
         var req = new CreateReservationRequest { RoomId = Guid.NewGuid(), CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow.AddDays(1) };
 

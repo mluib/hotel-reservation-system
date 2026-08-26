@@ -17,6 +17,7 @@ public class CreateReservation
     private readonly IRoomRepository _roomRepository;
     private readonly HotelReservation.Application.Interfaces.ICurrentUserService _currentUser;
     private readonly HotelReservation.Application.Interfaces.ICustomerRepository _customerRepository;
+    private readonly HotelReservation.Application.Interfaces.ITransactionRunner _transactionRunner;
     private readonly ILogger<CreateReservation> _logger;
 
     public CreateReservation(
@@ -24,12 +25,14 @@ public class CreateReservation
         IRoomRepository roomRepository,
         HotelReservation.Application.Interfaces.ICurrentUserService currentUser,
         HotelReservation.Application.Interfaces.ICustomerRepository customerRepository,
+        HotelReservation.Application.Interfaces.ITransactionRunner transactionRunner,
         ILogger<CreateReservation> logger)
     {
         _repository = repository;
         _roomRepository = roomRepository;
         _currentUser = currentUser;
         _customerRepository = customerRepository;
+        _transactionRunner = transactionRunner;
         _logger = logger;
     }
 
@@ -59,33 +62,40 @@ public class CreateReservation
 
         var customerId = customer.Id;
 
-        // Prevent overlapping reservations for the same room
-        var overlapping = await _repository.HasOverlappingReservationAsync(
-            request.RoomId,
-            request.CheckIn,
-            request.CheckOut);
-
-        if (overlapping)
+        // The overlap check and the insert below must happen atomically -- otherwise
+        // two concurrent requests for the same room/dates can both pass the check
+        // before either inserts, double-booking the room. Wrapped in a single
+        // serializable transaction rather than a per-room advisory lock or a DB-level
+        // constraint; see docs/decisions.md for the alternatives considered.
+        return await _transactionRunner.RunSerializableAsync(async () =>
         {
-            _logger.LogWarning(
-                "Reservation rejected: room {RoomId} already booked for {CheckIn:d} - {CheckOut:d}",
-                request.RoomId, request.CheckIn, request.CheckOut);
-            throw new ConflictException("Room is already reserved for this period.");
-        }
+            var overlapping = await _repository.HasOverlappingReservationAsync(
+                request.RoomId,
+                request.CheckIn,
+                request.CheckOut);
 
-        var reservation = new Reservation(
-            request.RoomId,
-            customerId,
-            request.CheckIn,
-            request.CheckOut,
-            room.PricePerNight.Amount);
+            if (overlapping)
+            {
+                _logger.LogWarning(
+                    "Reservation rejected: room {RoomId} already booked for {CheckIn:d} - {CheckOut:d}",
+                    request.RoomId, request.CheckIn, request.CheckOut);
+                throw new ConflictException("Room is already reserved for this period.");
+            }
 
-        await _repository.AddAsync(reservation);
+            var reservation = new Reservation(
+                request.RoomId,
+                customerId,
+                request.CheckIn,
+                request.CheckOut,
+                room.PricePerNight.Amount);
 
-        _logger.LogInformation(
-            "Reservation {ReservationId} created for room {RoomId}, customer {CustomerId}, {CheckIn:d} - {CheckOut:d}",
-            reservation.Id, request.RoomId, customerId, request.CheckIn, request.CheckOut);
+            await _repository.AddAsync(reservation);
 
-        return reservation.Id;
+            _logger.LogInformation(
+                "Reservation {ReservationId} created for room {RoomId}, customer {CustomerId}, {CheckIn:d} - {CheckOut:d}",
+                reservation.Id, request.RoomId, customerId, request.CheckIn, request.CheckOut);
+
+            return reservation.Id;
+        });
     }
 }

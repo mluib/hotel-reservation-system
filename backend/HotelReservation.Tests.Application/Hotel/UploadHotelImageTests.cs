@@ -19,14 +19,28 @@ public class UploadHotelImageTests
         return new Domain.Entities.Hotel("Grand Hotel", "1 Main St");
     }
 
-    private static ImageUploadRequest MakeRequest(string contentType = "image/jpeg", long length = 1024)
+    private static readonly byte[] JpegSignature = { 0xFF, 0xD8, 0xFF };
+
+    // Defaults to real JPEG magic bytes (padded to `length`), not just zeros -- now that
+    // ImageValidation checks actual content against the declared type, a fake all-zero
+    // buffer would fail every "valid image" test, not only the ones deliberately testing
+    // a mismatch.
+    private static ImageUploadRequest MakeRequest(string contentType = "image/jpeg", long length = 1024, byte[]? content = null)
     {
+        var bytes = content ?? BuildBytesWithSignature(JpegSignature, length);
         return new ImageUploadRequest
         {
-            Content = new MemoryStream(new byte[length > 0 ? length : 0]),
+            Content = new MemoryStream(bytes),
             ContentType = contentType,
-            Length = length
+            Length = content?.Length ?? length
         };
+    }
+
+    private static byte[] BuildBytesWithSignature(byte[] signature, long length)
+    {
+        var bytes = new byte[length > 0 ? length : 0];
+        signature.CopyTo(bytes, 0);
+        return bytes;
     }
 
     [Fact]
@@ -80,6 +94,29 @@ public class UploadHotelImageTests
         var useCase = new UploadHotelImage(hotelRepo.Object, storage.Object);
 
         await useCase.Invoking(x => x.ExecuteAsync(MakeRequest(contentType: "application/pdf")))
+            .Should().ThrowAsync<ValidationException>();
+
+        storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        hotelRepo.Verify(r => r.UpdateAsync(It.IsAny<Domain.Entities.Hotel>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ContentTypeDoesNotMatchActualBytes_Throws()
+    {
+        var hotel = MakeHotel();
+
+        var hotelRepo = new Mock<IHotelRepository>();
+        hotelRepo.Setup(r => r.GetAsync()).ReturnsAsync(hotel);
+
+        var storage = new Mock<IImageStorageService>();
+
+        var useCase = new UploadHotelImage(hotelRepo.Object, storage.Object);
+
+        // Claims to be a JPEG via Content-Type, but the actual bytes are plain text --
+        // exactly the spoofing ImageValidation.ValidateSignatureAsync exists to catch.
+        var spoofed = MakeRequest(contentType: "image/jpeg", content: System.Text.Encoding.UTF8.GetBytes("not actually an image"));
+
+        await useCase.Invoking(x => x.ExecuteAsync(spoofed))
             .Should().ThrowAsync<ValidationException>();
 
         storage.Verify(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
