@@ -28,6 +28,12 @@ services:
       Seed__AdminPassword: "${SEED_ADMIN_PASSWORD}"
     ports:
       - "5044:8080"
+    volumes:
+      # Uploaded/seeded room & hotel photos live under wwwroot/uploads inside the
+      # container's own filesystem -- nothing else persists them, so without this they
+      # reset to empty on every container recreation even though the DB (mssql-data)
+      # survives, leaving every ImageUrl in the database pointing at a now-missing file.
+      - uploads-data:/app/wwwroot/uploads
 
   frontend:
     build: ./frontend
@@ -38,3 +44,4 @@ services:
 
 volumes:
   mssql-data:
+  uploads-data:
