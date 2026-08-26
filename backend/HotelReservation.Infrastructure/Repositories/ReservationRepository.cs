@@ -80,6 +80,7 @@ public class ReservationRepository : IReservationRepository
     {
         return await _context.Reservations
             .Where(r => r.CustomerId == customerId)
+            .OrderBy(r => r.Stay.CheckIn)
             .ToListAsync();
     }
 
