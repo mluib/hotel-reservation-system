@@ -8,6 +8,11 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
   <img src="docs/images/home.png" alt="Bussen Lodge homepage" width="49%" />
   <img src="docs/images/rooms.png" alt="Bussen Lodge rooms listing" width="49%" />
 </p>
+<p align="center">
+  <img src="docs/images/admin.png" alt="Admin reservations management" width="70%" />
+</p>
+
+**Frontend pages:** home · rooms (browse & filter by type, price, availability) · booking · sign up / log in · a customer's own reservations · an admin console (rooms, reservations, customers, hotel — full CRUD, photo uploads) · a dedicated screen when the backend is unreachable.
 
 ## Goals
 
