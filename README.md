@@ -90,3 +90,7 @@ See [`docs/running.md`](docs/running.md) for other ways to run this (Docker stan
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
+
+## Author
+
+Manuel Luibrand
