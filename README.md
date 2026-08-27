@@ -16,10 +16,10 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
 
 ## Goals
 
-- **Backend** — Clean Architecture, DDD-inspired modeling, three-tier automated tests, JWT auth. Every architecture decision is the developer's own; AI assisted with the implementation, and every generated change is reviewed, corrected, or rejected before being accepted — never because it merely compiled.
-- **DevOps** — Docker, docker-compose, and CI: every technical decision is the developer's, who personally ran, tested, and debugged the real problems along the way — deliberately asking for a teaching-first plan rather than a done-for-you one. See [`docs/decisions.md`](docs/decisions.md).
+- **Backend** — Clean Architecture, DDD-inspired modeling, three-tier automated tests, JWT auth. Every architecture decision is the developer's own; AI assisted with the implementation, and every generated change is reviewed, corrected, or rejected before being accepted — never because it merely compiled. See [`docs/architecture-overview.md`](docs/architecture-overview.md).
 - **Frontend** — the one deliberate exception: implemented end-to-end, agentically, by Claude Code, using multiple AI tools the developer combined (Claude Code for the wireframe, Claude Design for the mockup built on it, Claude Code again for the build). AI wrote the code; the developer made every decision about what it should do first.
-- **Nothing is committed unreviewed.** The complete, dated trail of prompts, decisions, and corrections is public: [`docs/workflow-log.md`](docs/workflow-log.md).
+- **DevOps** — Docker, docker-compose, and CI: every technical decision is the developer's, who personally ran, tested, and debugged the real problems along the way — deliberately asking for a teaching-first plan rather than a done-for-you one. See [`docs/decisions.md`](docs/decisions.md).
+- **AI-assisted development** — nothing is committed unreviewed; the complete, dated trail of notable prompts, decisions, and corrections is public ([`docs/workflow-log.md`](docs/workflow-log.md)). See [`docs/ai-assisted-development.md`](docs/ai-assisted-development.md).
 
 ## Tech stack
 
@@ -63,9 +63,10 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
 docker compose up -d --build
 ```
 
+- The least-effort way to see it working — zero setup, no local .NET/Node/SQL Server install needed
 - Frontend: http://localhost:4200
 - Backend / Swagger: http://localhost:5044/swagger
-- A demo hotel with three rooms (one per type) and placeholder photos, plus an admin login (`admin@hotel.local` / `Admin123!`), are seeded automatically on first run (development only)
+- A demo hotel with three rooms (one per type) and placeholder photos, plus an admin login (`admin@hotel.local` / `Admin123!`), are seeded automatically on first run
 - Needs ports `4200`, `5044`, and `14330` free on the host — startup fails for whichever service's port is already taken (e.g. a native dev server already running there); `14330` (not SQL Server's default `1433`) is deliberate, since a locally-installed SQL Server commonly already holds that one
 
 ```bash
@@ -82,7 +83,7 @@ See [`docs/running.md`](docs/running.md) for other ways to run this (Docker stan
 | [`docs/architecture-overview.md`](docs/architecture-overview.md) | Layers, request flow, auth flow, domain model, testing, frontend, DevOps |
 | [`docs/decisions.md`](docs/decisions.md) | Why things are built the way they are, including rejected alternatives |
 | [`docs/ai-assisted-development.md`](docs/ai-assisted-development.md) | Tool-by-tool attribution, methodology, concrete review/correction examples |
-| [`docs/workflow-log.md`](docs/workflow-log.md) | The complete, dated log of every prompt, decision, and correction |
+| [`docs/workflow-log.md`](docs/workflow-log.md) | The complete, dated log of every notable prompt, decision, and correction |
 | [`docs/roadmap.md`](docs/roadmap.md) | Phase-by-phase project plan |
 | [`docs/running.md`](docs/running.md) | Every way to run the stack, in detail |
 | [`docs/raw-ai-logs/`](docs/raw-ai-logs/) | Frozen original AI chat exports and design artifacts |

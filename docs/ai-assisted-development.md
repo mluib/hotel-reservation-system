@@ -1,4 +1,4 @@
-# AI-Assisted Development
+# AI-assisted Development
 
 AI tools assisted throughout: planning, design, code generation, code review, refactoring, test generation, bug-fixing, database migrations, and this documentation — always directed and reviewed, never unsupervised. This file is the short, curated version of how and where; [`workflow-log.md`](workflow-log.md) is the complete dated record of the actual conversations (one bullet per notable interaction, `[developer input] -> [what resulted]`). [`raw-ai-logs/`](raw-ai-logs/) holds original transcripts for *some* of these tools — not a complete archive of every AI session: Claude Code's own conversations aren't exported there, only its saved plans and artifacts.
 
