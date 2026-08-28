@@ -59,6 +59,8 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
 
 ## Running with Docker
 
+Run from the repo root:
+
 ```bash
 docker compose up -d --build
 ```
