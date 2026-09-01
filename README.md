@@ -53,7 +53,7 @@ A full-stack hotel reservation system — ASP.NET Core backend, Angular frontend
 | Area | Details |
 |---|---|
 | Docker | Multi-stage builds — [`backend/Dockerfile`](backend/Dockerfile) (SDK → ASP.NET runtime), [`frontend/Dockerfile`](frontend/Dockerfile) (Node → nginx) |
-| docker-compose | Full stack incl. SQL Server, auto-migration + dev seed on startup — [`docker-compose.yml`](docker-compose.yml), [`.env`](.env) |
+| Docker Compose | Full stack incl. SQL Server, auto-migration + dev seed on startup — [`docker-compose.yml`](docker-compose.yml), [`.env`](.env) |
 | CI | GitHub Actions — build+test backend, build+lint frontend, on every push/PR to `main` — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 | Secrets | Committed demo-only [`.env`](.env) for docker-compose, `dotnet user-secrets` for native dev — see [`docs/decisions.md`](docs/decisions.md) |
 
